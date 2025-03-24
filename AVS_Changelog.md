@@ -1,3 +1,8 @@
+---
+title: Test Changelog
+layout: default
+---
+
 ## Patch 1.4.1
 ```
 -New: 'GetIsSteerableWheel' for vehicle wheels
