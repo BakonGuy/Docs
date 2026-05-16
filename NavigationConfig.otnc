@@ -1,7 +1,8 @@
-﻿[asset "Advanced Vehicle System"]
+[asset "Advanced Vehicle System"]
 id = AVS
 dir = AdvancedVehicleSystem
 order = 10
+default = README.md
 
 file "Home" -> README.md
 link "FAB Listing" -> https://www.fab.com/listings/e1457ad1-297b-4a70-aecb-5c6716d9494f
@@ -14,3 +15,9 @@ dir "General" -> general recursive
 dir "Components" -> components recursive
 dir "Tutorials" -> tutorials recursive
 dir "Skeletal Mesh" -> tutorials/skeletal-mesh recursive
+
+[asset "Traffic Control System"]
+id = TCS
+dir = TrafficControlSystem
+default = Home.md
+file "Home" -> Home.md
