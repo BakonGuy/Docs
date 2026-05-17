@@ -1,7 +1,6 @@
 [asset "Advanced Vehicle System"]
 id = AVS
 dir = AdvancedVehicleSystem
-order = 10
 default = README.md
 
 file "Home" -> README.md
