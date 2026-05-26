@@ -5,9 +5,6 @@ default = README.md
 
 file "Home" -> README.md
 link "FAB Listing" -> https://www.fab.com/listings/e1457ad1-297b-4a70-aecb-5c6716d9494f
-file "Changelog" -> changelog.md
-file "Download Demo" -> download-demo.md
-file "Compilation Instructions" -> compilation-instructions.md
 link "Vehicle Quick Reference" -> https://docs.google.com/spreadsheets/d/1pkKlGzj8sBwvM5CaRuJEFr3M6ok60kjFWUP30DUFpR8
 
 dir "General" -> general recursive
