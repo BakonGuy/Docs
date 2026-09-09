@@ -16,16 +16,16 @@ A simple template is available here. It is still recommended to follow the tutor
 - **Own the Advanced Vehicle System Plugin**
 - **A basic understanding of Unreal Engine, some steps in this tutorial will expect you to know how to create or set up things without guidance**
 
-**[If you are using a version of Unreal older than 5.2, click here for the legacy documentation](https://overtorque-creations.com/Dev/Docs/#AVS/tutorials/Quick_Start_Pre_UE5.2.md)**
+**[If you are using a version of Unreal older than 5.2, click here for the legacy documentation](https://overtorque-creations.com/Dev/Docs/#AVS/Tutorials/Quick_Start_Pre_UE5.2.md)**
 
 ## Step 0: Optional - Configure Project Settings
 
-Consider making the recommended changes from the [Project Settings page](https://overtorque-creations.com/Dev/Docs/#AVS/general/Project_Settings.md), they will dramatically increase physics stability, and top speed in the physics wheel mode.
+Consider making the recommended changes from the [Project Settings page](https://overtorque-creations.com/Dev/Docs/#AVS/General/Project_Settings.md), they will dramatically increase physics stability, and top speed in the physics wheel mode.
 
 ## Step 1: Configure your Inputs
 
 <!-- side-by-side:41 -->
-![Unreal input settings with Handbrake, ShifterUp and ShifterDown action mappings, plus VehicleForward, VehicleBrake and VehicleSteering axis mappings](../assets/images/tutorials-Creating-Vehicles-01.png "Action and axis mappings used throughout this guide")
+![Unreal input settings with Handbrake, ShifterUp and ShifterDown action mappings, plus VehicleForward, VehicleBrake and VehicleSteering axis mappings](../Assets/Images/tutorials-Creating-Vehicles-01.png "Action and axis mappings used throughout this guide")
 <!-- split -->
 Before we can setup the vehicle, we need to know what our inputs are. So head into your Project Settings > Input and set up something similar to this image.
 <!-- /side-by-side -->
@@ -33,7 +33,7 @@ Before we can setup the vehicle, we need to know what our inputs are. So head in
 ## Step 2: Create the Base Vehicle
 
 <!-- side-by-side:50 -->
-![Pick Parent Class dialog filtered to AVS_, with AVS_Vehicle selected under Pawn > VehicleSystemBase](../assets/images/tutorials-Creating-Vehicles-02.png "AVS_Vehicle lives under Pawn → VehicleSystemBase")
+![Pick Parent Class dialog filtered to AVS_, with AVS_Vehicle selected under Pawn > VehicleSystemBase](../Assets/Images/tutorials-Creating-Vehicles-02.png "AVS_Vehicle lives under Pawn → VehicleSystemBase")
 <!-- split -->
 **2A**
 
@@ -56,7 +56,7 @@ Open the Event Graph.
 
 By default, the vehicle is not running and in park. For simplicity, we will start the engine and shift into drive on BeginPlay so the vehicle is ready to drive later when we press play.
 <!-- split -->
-![Event BeginPlay wired through Parent BeginPlay into Start Engine and Set Shifter Position set to Drive](../assets/images/tutorials-Creating-Vehicles-03.png "Don't forget the call to Parent: BeginPlay")
+![Event BeginPlay wired through Parent BeginPlay into Start Engine and Set Shifter Position set to Drive](../Assets/Images/tutorials-Creating-Vehicles-03.png "Don't forget the call to Parent: BeginPlay")
 <!-- /side-by-side -->
 
 <!-- side-by-side:48 -->
@@ -64,13 +64,13 @@ By default, the vehicle is not running and in park. For simplicity, we will star
 
 While we are in the event graph, we'll also setup the vehicle inputs.
 <!-- split -->
-![Blueprint graph grouped into Shifter, Brakes and Throttle/Steering sections, wiring input events into Move Shifter Position, Set Brake Input, Set Handbrake Input, Set Throttle Input and Set Steering Input](../assets/images/tutorials-Creating-Vehicles-04.png "The full input graph, grouped by function")
+![Blueprint graph grouped into Shifter, Brakes and Throttle/Steering sections, wiring input events into Move Shifter Position, Set Brake Input, Set Handbrake Input, Set Throttle Input and Set Steering Input](../Assets/Images/tutorials-Creating-Vehicles-04.png "The full input graph, grouped by function")
 <!-- /side-by-side -->
 
 ### (Optional) Set up Automatic Shifting
 
 <!-- side-by-side:50 -->
-![Vehicle - Transmission category with Automatic Shifter Position enabled alongside Automatic Transmission](../assets/images/tutorials-Creating-Vehicles-05.png "Enable Automatic Shifter Position on the vehicle")
+![Vehicle - Transmission category with Automatic Shifter Position enabled alongside Automatic Transmission](../Assets/Images/tutorials-Creating-Vehicles-05.png "Enable Automatic Shifter Position on the vehicle")
 <!-- split -->
 AVS 1.2.5 added an additional option for automatic shifter positions. If you would like to use this feature you will need to slightly change the configuration above.
 <!-- /side-by-side -->
@@ -78,19 +78,19 @@ AVS 1.2.5 added an additional option for automatic shifter positions. If you wou
 <!-- side-by-side:46 -->
 - Open your project input settings and remove the VehicleBrake input. Open your VehicleForward input and add your brake keys with a value of ( -1.0 )
 <!-- split -->
-![Input axis mapping named VehicleThrottle with W and gamepad right trigger at 1.0, and S and left trigger at -1.0](../assets/images/tutorials-Creating-Vehicles-06.png "One axis carrying both throttle and brake")
+![Input axis mapping named VehicleThrottle with W and gamepad right trigger at 1.0, and S and left trigger at -1.0](../Assets/Images/tutorials-Creating-Vehicles-06.png "One axis carrying both throttle and brake")
 <!-- /side-by-side -->
 
 <!-- side-by-side:46 -->
 - In your event graph from step 2, remove the old brake input. Replace the 'SetThrottleInput' node with the new 'SetThrottleAndBrakeInput' node. This node is required for Automatic Shifting to function correctly.
 <!-- split -->
-![InputAxis VehicleThrottle wired into a Set Throttle and Brake Input node](../assets/images/tutorials-Creating-Vehicles-07.png)
+![InputAxis VehicleThrottle wired into a Set Throttle and Brake Input node](../Assets/Images/tutorials-Creating-Vehicles-07.png)
 <!-- /side-by-side -->
 
 ## Step 3: Creating a Vehicle
 
 <!-- side-by-side:32 -->
-![Blueprint context menu with Create Child Blueprint Class highlighted](../assets/images/tutorials-Creating-Vehicles-08.png)
+![Blueprint context menu with Create Child Blueprint Class highlighted](../Assets/Images/tutorials-Creating-Vehicles-08.png)
 <!-- split -->
 **3A**
 
@@ -112,7 +112,7 @@ You'll need to add one for each wheel you need on the vehicle. Then reposition e
 
 For better productivity and organization, it is advisable to name the components based on their specific locations on the vehicle.
 <!-- split -->
-![Components list with WheelFrontPassenger, WheelFrontDriver, WheelRearPassenger and WheelRearDriver, and four wheel gizmos positioned under the chassis in the viewport](../assets/images/tutorials-Creating-Vehicles-09.png "One component per wheel, named by position")
+![Components list with WheelFrontPassenger, WheelFrontDriver, WheelRearPassenger and WheelRearDriver, and four wheel gizmos positioned under the chassis in the viewport](../Assets/Images/tutorials-Creating-Vehicles-09.png "One component per wheel, named by position")
 <!-- /side-by-side -->
 
 <!-- side-by-side:57 -->
@@ -136,7 +136,7 @@ Open the "Wheel Config" section.
 - Keep in mind that torque may need to be inverted for wheels that are flipped 180 degrees.
 - For steering wheels located at the rear of the vehicle, you might need to invert the steering configuration.
 <!-- split -->
-![Vehicle Wheel - Config panel showing Wheel Mode Raycast, wheel mass and tire friction, plus the Drive/Steer, Brakes and Suspension sections](../assets/images/tutorials-Creating-Vehicles-10.png "Every wheel carries its own full configuration")
+![Vehicle Wheel - Config panel showing Wheel Mode Raycast, wheel mass and tire friction, plus the Drive/Steer, Brakes and Suspension sections](../Assets/Images/tutorials-Creating-Vehicles-10.png "Every wheel carries its own full configuration")
 <!-- /side-by-side -->
 
 ## Step 4: Configure your Vehicle
@@ -152,7 +152,7 @@ In the "Gears" section you will see there are 2 gears by default. Gear 0 will al
 
 Add 2 more gears, then configure them similar to the following image.
 <!-- split -->
-![Gears array with four elements expanded, showing the end speed, start speed, shift points, RPM and torque values from the table below](../assets/images/tutorials-Creating-Vehicles-11.png "The same four gears in the details panel")
+![Gears array with four elements expanded, showing the end speed, start speed, shift points, RPM and torque values from the table below](../Assets/Images/tutorials-Creating-Vehicles-11.png "The same four gears in the details panel")
 <!-- /side-by-side -->
 
 | | Gear 0 (reverse) | Gear 1 | Gear 2 | Gear 3 |
@@ -187,7 +187,7 @@ _The plugin includes a basic HUD to assist in the creation of vehicles. This ste
 
 Create both a player controller blueprint and a game mode blueprint.
 <!-- split -->
-![Pick Parent Class dialog with Player Controller and Game Mode Base circled](../assets/images/tutorials-Creating-Vehicles-12.png)
+![Pick Parent Class dialog with Player Controller and Game Mode Base circled](../Assets/Images/tutorials-Creating-Vehicles-12.png)
 <!-- /side-by-side -->
 
 <!-- side-by-side:48 -->
@@ -197,13 +197,13 @@ Open the new player controller, drag off the execution pin on Event Begin Play. 
 
 _Note: (If the plugin is installed to the engine) you'll have to check "Show Engine Content" in the content drawer in order to view the plugin content. (If the plugin is installed to the project) you'll have to check "Show Plugin Content" in the content drawer in order to view the plugin content._
 <!-- split -->
-![Animated walkthrough of creating the Vehicle Setup HUD widget and adding it to the viewport on BeginPlay](../assets/images/tutorials-Creating-Vehicles-13.gif)
+![Animated walkthrough of creating the Vehicle Setup HUD widget and adding it to the viewport on BeginPlay](../Assets/Images/tutorials-Creating-Vehicles-13.gif)
 <!-- /side-by-side -->
 
 <!-- side-by-side:40 -->
 If you need multiplayer, add a check to see if we are on the local controller.
 <!-- split -->
-![Event BeginPlay branching on Is Local Player Controller before creating the Vehicle Setup HUD widget and adding it to viewport](../assets/images/tutorials-Creating-Vehicles-14.png "Gate the HUD behind Is Local Player Controller")
+![Event BeginPlay branching on Is Local Player Controller before creating the Vehicle Setup HUD widget and adding it to viewport](../Assets/Images/tutorials-Creating-Vehicles-14.png "Gate the HUD behind Is Local Player Controller")
 <!-- /side-by-side -->
 
 <!-- side-by-side:40 -->
@@ -211,7 +211,7 @@ If you need multiplayer, add a check to see if we are on the local controller.
 
 Now open your level, and click the blueprints button. You need to set your gamemode to the one you created, and then set your PlayerController within that game mode.
 <!-- split -->
-![Two-part screenshot: selecting the Tutorial_GameMode class, then selecting Tutorial_PlayerController inside it](../assets/images/tutorials-Creating-Vehicles-15.png "Set the game mode first, then the player controller inside it")
+![Two-part screenshot: selecting the Tutorial_GameMode class, then selecting Tutorial_PlayerController inside it](../Assets/Images/tutorials-Creating-Vehicles-15.png "Set the game mode first, then the player controller inside it")
 <!-- /side-by-side -->
 
 ## Step 6: Test what you have so far
@@ -222,4 +222,4 @@ Once you are in the game, you can use your ShiftUp and ShiftDown inputs to move 
 
 If you want to use the buttons and sliders, press **'SHIFT + F1'** to bring your mouse cursor up. You can also use the HUD to play with different values for your springs and find the best values. The new springs values will be applied to every wheel, overriding whatever you had set before.
 
-![In-game buggy with the vehicle setup HUD showing air speed, shifter position, current gear, torque and live spring sliders](../assets/images/tutorials-Creating-Vehicles-16.png "The config assist HUD running in game")
+![In-game buggy with the vehicle setup HUD showing air speed, shifter position, current gear, torque and live spring sliders](../Assets/Images/tutorials-Creating-Vehicles-16.png "The config assist HUD running in game")

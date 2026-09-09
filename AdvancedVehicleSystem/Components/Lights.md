@@ -7,7 +7,7 @@ Lights in the Vehicle System are controlled by multiple _Vehicle_LightController
 ## Looking at an Example
 
 <!-- side-by-side:50 -->
-![Muscle car blueprint with BrakeLights, BlinkerLeft, BlinkerRight and HeadLights controllers, and a Light Controller Config listing HeadLights at intensity 10 and BlinkerLeft at intensity 50](../assets/images/components-LightController-01.png "The BlinkerLeft controller defines two relations: HeadLights at 10, BlinkerLeft at 50")
+![Muscle car blueprint with BrakeLights, BlinkerLeft, BlinkerRight and HeadLights controllers, and a Light Controller Config listing HeadLights at intensity 10 and BlinkerLeft at intensity 50](../Assets/Images/components-LightController-01.png "The BlinkerLeft controller defines two relations: HeadLights at 10, BlinkerLeft at 50")
 <!-- split -->
 This is the muscle car from the demo project.
 
@@ -21,7 +21,7 @@ Now imagine you have some code that clicks the blinker on and off, by toggling t
 ## Controlling Light Groups
 
 <!-- side-by-side:41 -->
-![Toggle Lights Active, Set Lights Active and Get Lights Active nodes with Light Group set to BlinkerLeft and BlinkerRight](../assets/images/components-LightController-02.png)
+![Toggle Lights Active, Set Lights Active and Get Lights Active nodes with Light Group set to BlinkerLeft and BlinkerRight](../Assets/Images/components-LightController-02.png)
 <!-- split -->
 Controlling the Light Groups is super easy. You can activate and deactivate groups with the following blueprint nodes within the Vehicle.
 
@@ -36,7 +36,7 @@ Controlling the Light Groups is super easy. You can activate and deactivate grou
 ## Vehicle Decorations, driven by lights
 
 <!-- side-by-side:50 -->
-![Event Update Light Decorations wired through a Sequence node into Set Brake Material, Set Headlight Mat and Set Blinkers Mat collapsed graphs](../assets/images/components-LightController-03.png "One event per light controller, fanned out to per-material handlers")
+![Event Update Light Decorations wired through a Sequence node into Set Brake Material, Set Headlight Mat and Set Blinkers Mat collapsed graphs](../Assets/Images/components-LightController-03.png "One event per light controller, fanned out to per-material handlers")
 <!-- split -->
 When your Vehicle Lights are updating, the **UpdateLightDecorations** event is called once per Light Controller. This is meant to be used for extra effects you want to apply to the vehicle, such as updating materials on the vehicle mesh or playing sounds. You can also just override the **UpdateLights** function if you want to update everything at once instead, just be sure to call the parent function.
 
@@ -45,4 +45,4 @@ The Light Controllers have 2 functions you can use to determine how to update yo
 **GetItensity**, and **HasActiveLights**
 <!-- /side-by-side -->
 
-![Graph using Has Active Lights and Get Intensity on a controller to branch between the tail lights high, low and off materials](../assets/images/components-LightController-04.png "Brake light materials chosen from the controller's active state and intensity")
+![Graph using Has Active Lights and Get Intensity on a controller to branch between the tail lights high, low and off materials](../Assets/Images/components-LightController-04.png "Brake light materials chosen from the controller's active state and intensity")

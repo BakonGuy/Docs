@@ -3,7 +3,7 @@
 ## Min/Max Contact Settings
 
 <!-- side-by-side:41 -->
-![Engine - Physics settings with Contact Offset Multiplier 0.001, Min Contact Offset 0.0001 and Max Contact Offset 0.001](../assets/images/general-project-settings-01.png "Contact offsets dropped to Unreal's minimums")
+![Engine - Physics settings with Contact Offset Multiplier 0.001, Min Contact Offset 0.0001 and Max Contact Offset 0.001](../Assets/Images/general-project-settings-01.png "Contact offsets dropped to Unreal's minimums")
 <!-- split -->
 When using **Physics Wheels** (not Raycast Wheels), it's strongly recommended to lower the engine's **Physics Contact Offset** values to the minimum values Unreal allows.
 
@@ -19,7 +19,7 @@ Reducing both the **Min Contact Offset** and **Max Contact Offset** values in th
 ## Max Terminal and Angular Velocities
 
 <!-- side-by-side:41 -->
-![Engine - Physics settings with Default Terminal Velocity 7600 and Max Angular Velocity 10000](../assets/images/general-project-settings-02.png)
+![Engine - Physics settings with Default Terminal Velocity 7600 and Max Angular Velocity 10000](../Assets/Images/general-project-settings-02.png)
 <!-- split -->
 Unreal Engine applies limits to how fast physics objects can move and spin. These defaults are too low for realistic vehicles, and may prevent wheels from reaching the speeds they're physically capable of.
 
@@ -52,7 +52,7 @@ It is highly recommended to choose one of the options below. These options help 
 ### Option 1: Substepping
 
 <!-- side-by-side:41 -->
-![Engine - Physics framerate settings with Substepping enabled, Max Substep Delta Time 0.016667 and Max Substeps 6](../assets/images/general-project-settings-03.png "The 60 FPS physics configuration from the table below")
+![Engine - Physics framerate settings with Substepping enabled, Max Substep Delta Time 0.016667 and Max Substeps 6](../Assets/Images/general-project-settings-03.png "The 60 FPS physics configuration from the table below")
 <!-- split -->
 Substepping divides a single game frame into multiple physics ticks. This means that physics will tick multiple times per frame to reach its target FPS. This is a great option if you want your physics to match the game's FPS in most cases but still stabilize at lower frame rates.
 
@@ -74,7 +74,7 @@ Async physics completely decouples physics from the FPS. Physics are calculated 
 >
 > Note 2: Async Physics in Unreal 5.3 is broken, stick with substepping
 <!-- split -->
-![Tick Physics Async enabled with Async Fixed Time Step Size 0.011111, with an on-screen readout of 91 physics FPS against 60 game FPS](../assets/images/general-project-settings-04.png "Physics running at 90 while the game renders at 60")
+![Tick Physics Async enabled with Async Fixed Time Step Size 0.011111, with an on-screen readout of 91 physics FPS against 60 game FPS](../Assets/Images/general-project-settings-04.png "Physics running at 90 while the game renders at 60")
 <!-- /side-by-side -->
 
 | Async Fixed Time Step Size | Physics |

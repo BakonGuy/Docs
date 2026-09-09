@@ -1,6 +1,6 @@
 # Local cache/artifacts from migration tooling
-assets/page-cache/
-assets/images/.download-cache.json
+Assets/page-cache/
+Assets/Images/.download-cache.json
 
 # OS/editor noise
 .DS_Store

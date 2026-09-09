@@ -6,11 +6,11 @@ If you're looking for what AVS is and what it does, that's on the [asset page](h
 
 ## Where to start
 
-If this is your first vehicle, work through the [Quick Start guide](https://overtorque-creations.com/Dev/Docs/#AVS/tutorials/Quick_Start.md). It takes you from an empty project to something you can drive, and most of the other pages assume you've been through it.
+If this is your first vehicle, work through the [Quick Start guide](https://overtorque-creations.com/Dev/Docs/#AVS/Tutorials/Quick_Start.md). It takes you from an empty project to something you can drive, and most of the other pages assume you've been through it.
 
-Before you get too far, read [Important Information](https://overtorque-creations.com/Dev/Docs/#AVS/general/Important_Information.md). It covers a handful of behaviors that are easy to trip over and miserable to debug afterwards — wheel collision shapes, parent function calls, and a couple of skeletal mesh quirks.
+Before you get too far, read [Important Information](https://overtorque-creations.com/Dev/Docs/#AVS/General/Important_Information.md). It covers a handful of behaviors that are easy to trip over and miserable to debug afterwards — wheel collision shapes, parent function calls, and a couple of skeletal mesh quirks.
 
-Then take a look at the [recommended project settings](https://overtorque-creations.com/Dev/Docs/#AVS/general/Project_Settings.md). None of it is required, but physics wheel mode is noticeably more stable with those changes made.
+Then take a look at the [recommended project settings](https://overtorque-creations.com/Dev/Docs/#AVS/General/Project_Settings.md). None of it is required, but physics wheel mode is noticeably more stable with those changes made.
 
 ## How these pages are organized
 
@@ -22,8 +22,8 @@ Then take a look at the [recommended project settings](https://overtorque-creati
 
 **Skeletal Mesh** has two pages, and picking the right one matters:
 
-- [Skeletal Wheels](https://overtorque-creations.com/Dev/Docs/#AVS/tutorials/skeletal-mesh/Skeletal_Wheels.md) if your wheels live inside the skeletal mesh and you're using the "Connect to Bone" feature with physics wheels.
-- [Skeletal Animation](https://overtorque-creations.com/Dev/Docs/#AVS/tutorials/skeletal-mesh/Skeletal_Animation.md) if you have separated wheel meshes, which is what raycast wheels require.
+- [Skeletal Wheels](https://overtorque-creations.com/Dev/Docs/#AVS/Tutorials/Skeletal_Mesh/Skeletal_Wheels.md) if your wheels live inside the skeletal mesh and you're using the "Connect to Bone" feature with physics wheels.
+- [Skeletal Animation](https://overtorque-creations.com/Dev/Docs/#AVS/Tutorials/Skeletal_Mesh/Skeletal_Animation.md) if you have separated wheel meshes, which is what raycast wheels require.
 
 ## Elsewhere
 
