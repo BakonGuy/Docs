@@ -1,25 +1,25 @@
 # Important Information
 
-Read this page before you build a vehicle. Everything here covers behavior that is easy to trip over and hard to diagnose after the fact.
-
 ## Wheel Mesh Collisions
 
 <!-- side-by-side:48 -->
-When using **Physics Wheels** (not Raycast Wheels), pay careful attention to the collision shape on your wheel mesh. AVS supports any collision shape, but for best results — especially at high speeds — use a simple sphere collision.
+When using **Physics Wheels** (not Raycast Wheels), you must pay careful attention to the shape of the collision on your wheel mesh. AVS supports any collision shape, but **for best results—especially at high speeds—you should use a simple sphere collision.**
 
-Unreal Engine does not support true cylinder collisions in Chaos. Faking a cylinder with convex collision may _look_ correct, but it will not behave correctly: the approximated shape is not perfectly round, so the wheels bounce or behave erratically when driving fast.
+Unreal Engine does **not** support true cylinder collisions in Chaos.
 
-Unconventional setups are allowed, but a sphere is the most stable and recommended option for typical vehicles using physics-based wheels.
+Faking a cylinder using convex collision may _look_ correct, but it will not behave correctly—these approximated shapes are not perfectly round, and they will cause the wheels to bounce or behave erratically when driving fast.
 
-> **Raycast Wheels are not affected by this limitation.** You can use any collision shape for them, since the collision shape does not influence their simulation behavior.
+While unconventional setups are allowed, **a sphere is the most stable and recommended option** for typical vehicles using physics-based wheels.
+
+**Raycast Wheels are not affected by this limitation**. You can use any collision shape for them, since the collision shape does not influence their simulation behavior.
 <!-- split -->
 ![Wheel with convex collision bouncing erratically at speed compared to a sphere collision](../assets/images/general-important-information-01.gif)
 <!-- /side-by-side -->
 
-## Blueprint Events
+## Blueprint events
 
 <!-- side-by-side:57 -->
-To ensure proper functionality, you must call the parent function for the following Blueprint events. Right click the event and select **Add Call to Parent Function**.
+In order to ensure proper functionality, you must call the "parent" function for the following blueprint events. You can do so by right clicking the event, and selecting "Add Call to Parent Function".
 
 - Construction Script
 - Event BeginPlay
@@ -33,11 +33,11 @@ To ensure proper functionality, you must call the parent function for the follow
 ## Skeletal Mesh Collisions Are Disabled by Default
 
 <!-- side-by-side:57 -->
-When you attach a **Skeletal Mesh** to the `VehicleMesh` component, AVS automatically disables its collisions during construction. This is intentional.
+When you attach a **Skeletal Mesh** to the VehicleMesh component, **AVS will automatically disable its collisions** during construction. This is intentional.
 
-Skeletal meshes cannot weld to the root physics body, and leaving their collisions enabled can lead to unexpected or unstable physics behavior. Since skeletal meshes are typically used for visual and cosmetic purposes only, disabling their collision prevents these issues and improves performance.
+Skeletal meshes cannot weld to the root physics body, and leaving their collisions enabled can lead to unexpected or unstable physics behavior. Since skeletal meshes are typically used for **visual/cosmetic purposes only**, disabling their collision helps prevent these issues and improves performance.
 
-If you _do_ want a specific skeletal mesh to keep its collisions active, add the `KeepCollision` tag to that mesh in the editor. AVS skips disabling collision for any mesh carrying that tag.
+If you **do** want a specific skeletal mesh to keep its collisions active, just add the **KeepCollision** tag to that mesh in the editor. AVS will skip disabling collision for any mesh with that tag.
 <!-- split -->
 ![Details panel showing a Component Tags array with a single KeepCollision entry](../assets/images/general-important-information-03.png "Add KeepCollision to Component Tags to opt a mesh out")
 <!-- /side-by-side -->
@@ -45,15 +45,15 @@ If you _do_ want a specific skeletal mesh to keep its collisions active, add the
 ## Avoid Physics Constraints in Skeletal Mesh Physics Assets
 
 <!-- side-by-side:48 -->
-If you are using a **Skeletal Mesh** as part of your vehicle setup and need physics constraints, do **not** place those constraints inside the mesh's Physics Asset — especially if they rely on the skeletal mesh's root body.
+If you're using a **Skeletal Mesh** as part of your vehicle setup and need to add **physics constraints**, do **not** place those constraints inside the mesh's Physics Asset—especially if they rely on the skeletal mesh's root body.
 
-Instead, create all such constraints directly in the vehicle Blueprint and connect them to the `VehicleMesh` component (the AVS root). This avoids a class of difficult-to-debug issues where constraints behave erratically, typically showing up as stuttery or jittery motion in the parts that are meant to simulate.
+Instead, create all such constraints **directly in the vehicle blueprint**, and connect them to the **VehicleMesh** component (the AVS root). This avoids a class of difficult-to-debug issues where constraints behave erratically—typically showing stuttery or jittery motion in parts of the mesh that are meant to simulate.
 
-The cause is how Unreal updates transforms for components that aren't welded to the root. Constraints defined inside skeletal mesh assets may receive outdated transform data, especially when mixing simulated and non-simulated bodies. The result is inconsistent, unstable physics, usually visible as violent jittering of constrained parts.
+This behavior stems from how Unreal updates transforms for components that aren't welded to the root. Constraints defined inside skeletal mesh assets may receive outdated transform data, especially when mixing simulated and non-simulated bodies. The result is **inconsistent, unstable physics behavior**, usually visible as violent jittering of constrained parts.
 
-Set up all physics constraints externally in your vehicle Blueprint, where they can reference the true root of the simulation.
+To prevent this entirely, set up all physics constraints externally in your vehicle blueprint where they can reference the true root of the simulation.
 
-A demonstration of the problem can be seen in the video to the right.
+A demonstration of this issue can be seen in the video to the right.
 <!-- split -->
 ![Constraint component in a vehicle Blueprint with Component Name 1 set to SK_Mesh and Component Name 2 set to VehicleMesh](../assets/images/general-important-information-05.png "Constraints live in the vehicle Blueprint and reference VehicleMesh directly")
 

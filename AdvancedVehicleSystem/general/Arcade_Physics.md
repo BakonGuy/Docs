@@ -1,46 +1,49 @@
 # Tuning AVS for Arcade-Style Vehicles
 
-AVS is built for realistic vehicle physics, but with the right tuning it can be pushed toward an arcade feel. These are the adjustments that get you snappier, more forgiving handling.
+AVS is designed for realistic vehicle physics, but with the right tuning, it can be adapted to feel more arcade-like. Below are some common adjustments to help achieve snappier, more forgiving vehicle behavior.
 
 ## Increase Tire Friction
 
-Use a higher friction value on your wheels. More grip gives you:
+Use a **higher friction** value on your wheels. This gives the vehicle more grip, which:
 
-- more responsive acceleration
-- sharper, more immediate turning
+- Increases acceleration responsiveness
+- Makes turning sharper and more immediate
 
-Where you set it depends on your wheel mode:
-
-- **Physics Wheels** — set it in your Physics Material.
-- **Raycast Wheels** — set the `TireFriction` variable (X = longitudinal, Y = lateral).
+> _Note:_ When using Physics Wheels, this is done in your Physics Material. When using Raycast Wheels, this is done by setting the "TireFriction" variable ( X = Longitudinal, Y = Lateral )
 
 ## Adjust Steering Responsiveness
 
-Arcade handling benefits from faster, more exaggerated steering.
+Arcade-style handling benefits from faster, more exaggerated steering.
 
-- **Steering Curve** — a mapping from air speed to max steering input. Raise the curve values to allow stronger steering input at higher speeds.
-- **Steering Speed** — how quickly the vehicle responds to steering changes. Raise it for snappier response.
-- **Steering Recenter Speed** — how fast steering returns to center with no input. Raising it makes the steering feel tighter and more controlled.
+**Steering Curve**
+
+This is a mapping from Air Speed → Max Steering Input. Increase the curve values to allow stronger steering input at higher speeds.
+
+**Steering Speed**
+
+Controls how quickly the vehicle responds to steering changes. Increase this for snappier response.
+
+**Steering Recenter Speed**
+
+Controls how fast the steering returns to center when no input is given. Raising this can make the steering feel tighter and more controlled.
 
 ## Lower the Center of Mass
 
-Use the included **Center of Mass** component to shift the vehicle's center of gravity downward.
+Use the included **Center of Mass** component to shift the vehicle's center of gravity downward:
 
-- A center of mass slightly above wheel height gives a stable but responsive feel.
-- Placing it below the wheels reduces flipping, but the vehicle may lean the wrong way when turning.
+- A center of mass just slightly above wheel height provides a stable but responsive feel.
+- Placing the center below the wheels can reduce flipping, but may cause the vehicle to lean in the wrong direction when turning.
 
 ## Boost Engine Power
 
-Raise the **Max Torque** values for each gear for more aggressive acceleration. Arcade vehicles usually benefit from immediate throttle response.
-
-> With physics wheels it is possible to set Max Torque too high. There's no single correct number — play with it until it feels right.
+- Raise the **Max Torque** values for each gear to deliver more aggressive acceleration. Arcade-style vehicles typically benefit from immediate throttle response.
+- _It is possible to raise the MaxTorque too high when using physics wheels. You will have to find the value that is right for you by playing around._
 
 ## Reduce Vehicle Mass
 
-Lower the **Mass** value on the `VehicleMesh` component to make the vehicle feel lighter and more nimble. This amplifies acceleration and makes turning more responsive.
-
-> Going too low affects traction and makes the vehicle slide.
+- Lower the Mass value on the VehicleMesh component to make the vehicle feel lighter and more nimble. This can amplify acceleration and make turning more responsive.
+- _Going too low will effect traction and make your vehicle slide_
 
 ## Add Drifty Handling
 
-When using raycast wheels, reduce lateral friction in the wheel config to allow more sliding through turns.
+When using raycast wheels, you can reduce lateral friction in the wheel config to allow more sliding during turns

@@ -1,12 +1,8 @@
-# Vehicle Lights
+# Creating Lights for your Vehicle
 
 ## Understanding the Basics
 
-Lights in AVS are controlled by `Vehicle_LightController` components placed on your vehicle. Every vehicle has a list of **groups** that the light controllers read to determine the correct intensity. Think of groups as booleans — they are either on or off.
-
-Lights placed as subcomponents of a light controller have their **Intensity** driven automatically, using the relationship settings defined on their controller. When a group is activated, each light controller containing that group loops through its relationships and sets its lights to the intensity of the highest active group in the hierarchy.
-
-That's what lets you build complex setups where every light on the vehicle can be driven by any number of variables.
+Lights in the Vehicle System are controlled by multiple _Vehicle_LightController_ components within your vehicle. Every vehicle has a list of _Groups_ that the Light Controllers use to determine the correct intensity. These groups can be thought of as Booleans, they are either on or off. Lights placed as subcomponents of the light controllers will have their Intensity setting driven automatically using the relationship settings defined within their respective controller. When a group is activated, each light controller containing that group will loop through its relationships, setting all of its lights intensities to the highest active group on the hierarchy. This effectively allows us to create complex setups where every light on the vehicle can be driven by any amount of variables.
 
 ## Looking at an Example
 
@@ -15,11 +11,11 @@ That's what lets you build complex setups where every light on the vehicle can b
 <!-- split -->
 This is the muscle car from the demo project.
 
-When you turn on the headlights in a real car, the blinker lights usually come on too, at a low intensity. The muscle car recreates this by defining a relationship with the `HeadLights` group that sets the light's intensity to 10 when that group is active.
+When you turn your headlights on in a real car usually the blinker lights will turn on as well, but at a low intensity. The muscle car is recreating this by defining a relationship with the _HeadLights_ group, setting the intensity of the light to 10 if that group is active.
 
-So when the headlights are on, the blinker lights up as well — but since it's lowest in the hierarchy, the `BlinkerLeft` group overrides it whenever that group is also active.
+This means that when the head lights are on, the blinker will also activate, but since its the lowest on the hierarchy, the _BlinkerLeft_ group will override it when it is also active.
 
-Now imagine code that clicks the blinker on and off by toggling the `BlinkerLeft` group. With the group inactive the blinker drops to 0, or to 10 if the headlights are on. That mimics a real blinker exactly.
+Now imagine you have some code that clicks the blinker on and off, by toggling the _BlinkerLeft_ group. When the blinker group is inactive the blinker will set itself to 0, but if the headlights are on, it would set it to 10. Therefore mimicking a real blinker perfectly.
 <!-- /side-by-side -->
 
 ## Controlling Light Groups
@@ -27,29 +23,26 @@ Now imagine code that clicks the blinker on and off by toggling the `BlinkerLeft
 <!-- side-by-side:41 -->
 ![Toggle Lights Active, Set Lights Active and Get Lights Active nodes with Light Group set to BlinkerLeft and BlinkerRight](../assets/images/components-LightController-02.png)
 <!-- split -->
-Activate and deactivate groups with these Blueprint nodes on the vehicle:
+Controlling the Light Groups is super easy. You can activate and deactivate groups with the following blueprint nodes within the Vehicle.
 
-- `ToggleLightsActive`
-- `SetLightsActive`
-- `GetLightsActive`
-- `UpdateLights` — applies your changed light groups
+- **ToggleLightsActive**
+- **SetLightsActive**
+- **GetLightsActive**
+- **UpdateLights** (Applies your changed Light Groups)
 
-> You must call `UpdateLights` after changing light groups. This is for performance — you'll often want to change several groups at once and apply them together.
+> _Note:_ You will need to call the **UpdateLights** function after changing your Light Groups, this is for performance reasons as you might want to change multiple light groups at once.
 <!-- /side-by-side -->
 
-## Vehicle Decorations, Driven by Lights
+## Vehicle Decorations, driven by lights
 
 <!-- side-by-side:50 -->
 ![Event Update Light Decorations wired through a Sequence node into Set Brake Material, Set Headlight Mat and Set Blinkers Mat collapsed graphs](../assets/images/components-LightController-03.png "One event per light controller, fanned out to per-material handlers")
 <!-- split -->
-When your vehicle lights update, the `UpdateLightDecorations` event fires once per light controller. Use it for extra effects tied to the lights, such as updating materials on the vehicle mesh or playing sounds.
+When your Vehicle Lights are updating, the **UpdateLightDecorations** event is called once per Light Controller. This is meant to be used for extra effects you want to apply to the vehicle, such as updating materials on the vehicle mesh or playing sounds. You can also just override the **UpdateLights** function if you want to update everything at once instead, just be sure to call the parent function.
 
-You can also override `UpdateLights` instead if you'd rather handle everything in one pass — just remember to call the parent function.
+The Light Controllers have 2 functions you can use to determine how to update your decorations:
 
-Light controllers expose two functions for deciding how to update your decorations:
-
-- `GetIntensity`
-- `HasActiveLights`
+**GetItensity**, and **HasActiveLights**
 <!-- /side-by-side -->
 
 ![Graph using Has Active Lights and Get Intensity on a controller to branch between the tail lights high, low and off materials](../assets/images/components-LightController-04.png "Brake light materials chosen from the controller's active state and intensity")
