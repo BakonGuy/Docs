@@ -2,6 +2,10 @@
 
 This is the documentation for AVS — setup guides, component references, and the settings that matter.
 
+> **This documentation covers AVS 1.5 and newer.**
+>
+> If you are on **1.4 or earlier**, use the [Legacy documentation](https://overtorque-creations.com/Dev/Docs/#AVS_Legacy/README.md) instead. You can also switch between them with the asset selector in the sidebar.
+
 If you're looking for what AVS is and what it does, that's on the [asset page](https://overtorque-creations.com/Dev/AdvancedVehicleSystem/). These pages assume you already have the plugin and want to build something with it.
 
 ## Where to start

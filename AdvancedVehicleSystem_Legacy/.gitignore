@@ -1,0 +1,12 @@
+# Local cache/artifacts from migration tooling
+Assets/page-cache/
+Assets/Images/.download-cache.json
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Logs
+*.log
