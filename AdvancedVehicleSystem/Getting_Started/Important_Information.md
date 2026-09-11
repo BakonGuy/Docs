@@ -1,5 +1,7 @@
 # Important Information
 
+
+
 ## Wheel Mesh Collisions
 
 <!-- side-by-side:48 -->
@@ -16,19 +18,19 @@ While unconventional setups are allowed, **a sphere is the most stable and recom
 ![Wheel with convex collision bouncing erratically at speed compared to a sphere collision](../Assets/Images/general-important-information-01.gif)
 <!-- /side-by-side -->
 
-## Blueprint events
 
-<!-- side-by-side:57 -->
-In order to ensure proper functionality, you must call the "parent" function for the following blueprint events. You can do so by right clicking the event, and selecting "Add Call to Parent Function".
 
-- Construction Script
-- Event BeginPlay
-- Event Destroyed
-- Event OnPossessed
-- Event Unpossessed
-<!-- split -->
-![Blueprint graph showing BeginPlay, Destroyed, Possessed and Unpossessed events each wired to their Parent node](../Assets/Images/general-important-information-02.png "Each event wired straight into its Add Call to Parent Function node")
-<!-- /side-by-side -->
+## Blueprint Events No Longer Need a Parent Call
+
+If you used AVS 1.4 or earlier, you had to right click certain Blueprint events and add a call to the parent function, or the vehicle would not work correctly.
+
+**That is no longer necessary.** As of 1.5 the entire plugin is native C++, and Unreal calls the native implementation for you before your Blueprint event runs. Construction Script, BeginPlay, Destroyed, OnPossessed, and Unpossessed all work without any extra wiring.
+
+Parent calls carried over from an older project are harmless and do not need to be removed. New vehicles do not need them at all.
+
+> This is the largest difference when following older tutorials or community posts. If a guide tells you to add a call to the parent function, it was written for 1.4 or earlier.
+
+
 
 ## Skeletal Mesh Collisions Are Disabled by Default
 
@@ -38,9 +40,13 @@ When you attach a **Skeletal Mesh** to the VehicleMesh component, **AVS will aut
 Skeletal meshes cannot weld to the root physics body, and leaving their collisions enabled can lead to unexpected or unstable physics behavior. Since skeletal meshes are typically used for **visual/cosmetic purposes only**, disabling their collision helps prevent these issues and improves performance.
 
 If you **do** want a specific skeletal mesh to keep its collisions active, just add the **KeepCollision** tag to that mesh in the editor. AVS will skip disabling collision for any mesh with that tag.
+
+To turn the behavior off entirely, set **Disable Skeletal Collisions** to false under _Advanced Vehicle System → Physics_.
 <!-- split -->
 ![Details panel showing a Component Tags array with a single KeepCollision entry](../Assets/Images/general-important-information-03.png "Add KeepCollision to Component Tags to opt a mesh out")
 <!-- /side-by-side -->
+
+
 
 ## Avoid Physics Constraints in Skeletal Mesh Physics Assets
 
@@ -51,7 +57,7 @@ Instead, create all such constraints **directly in the vehicle blueprint**, and 
 
 This behavior stems from how Unreal updates transforms for components that aren't welded to the root. Constraints defined inside skeletal mesh assets may receive outdated transform data, especially when mixing simulated and non-simulated bodies. The result is **inconsistent, unstable physics behavior**, usually visible as violent jittering of constrained parts.
 
-To prevent this entirely, set up all physics constraints externally in your vehicle blueprint where they can reference the true root of the simulation.
+To prevent this entirely, set up all physics constraints externally in your vehicle blueprint where they can reference the true root of the simulation. The [AVS Constraint component](https://overtorque-creations.com/Dev/Docs/#AVS/Components/Constraint.md) is a convenient place to do that.
 
 A demonstration of this issue can be seen in the video to the right.
 <!-- split -->
@@ -59,3 +65,15 @@ A demonstration of this issue can be seen in the video to the right.
 
 [Video: constraint jitter caused by constraints defined inside the Physics Asset](https://drive.google.com/file/d/1qQbSTNSwgUVjdT_krVEZ9wILCqH5RnGQ/preview)
 <!-- /side-by-side -->
+
+
+
+## Passive Mode and the Tick Event
+
+By default a vehicle enters **passive mode** once it comes to rest. This is a low resource mode that massively improves performance when you have a lot of parked or idle vehicles in a level, and it is why a hundred stationary vehicles cost far less than a hundred moving ones.
+
+The catch is that passive mode gatekeeps the standard Tick event. If you have Blueprint logic on Tick that needs to keep running while the vehicle sits still, it will stop running.
+
+Use **AVS_AlwaysTick** for logic that must run no matter what, or **AVS_PassiveTick** for logic that only matters while resting. Both are covered on the [Tick and Performance](https://overtorque-creations.com/Dev/Docs/#AVS/Advanced/Tick_And_Performance.md) page.
+
+> Possessed vehicles are already covered: a vehicle controlled by a player or an AI controller never goes passive. The case to watch is a vehicle moved **without** being possessed, such as by a sequencer or your own movement code. For those, set **Allow Passive Mode** to false or override **Determine Passive State**.

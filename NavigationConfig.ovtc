@@ -7,10 +7,13 @@ file "Home" -> README.md
 link "FAB Listing" -> https://www.fab.com/listings/e1457ad1-297b-4a70-aecb-5c6716d9494f
 link "Vehicle Quick Reference" -> https://docs.google.com/spreadsheets/d/1pkKlGzj8sBwvM5CaRuJEFr3M6ok60kjFWUP30DUFpR8
 
-dir "General" -> General recursive
+dir "Getting Started" -> Getting_Started recursive
+dir "Configuration" -> Configuration recursive
 dir "Components" -> Components recursive
-dir "Tutorials" -> Tutorials recursive
-dir "Skeletal Mesh" -> Tutorials/Skeletal_Mesh recursive
+dir "Wheel Effects" -> Wheel_Effects recursive
+dir "Skeletal Mesh" -> Skeletal_Mesh recursive
+dir "Guides" -> Guides recursive
+dir "Advanced" -> Advanced recursive
 
 [asset "Advanced Vehicle System (Legacy)"]
 id = AVS_Legacy

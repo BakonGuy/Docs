@@ -1,10 +1,14 @@
 # Creating Lights for your Vehicle
 
-## Understanding the Basics
 
-Lights in the Vehicle System are controlled by multiple _Vehicle_LightController_ components within your vehicle. Every vehicle has a list of _Groups_ that the Light Controllers use to determine the correct intensity. These groups can be thought of as Booleans, they are either on or off. Lights placed as subcomponents of the light controllers will have their Intensity setting driven automatically using the relationship settings defined within their respective controller. When a group is activated, each light controller containing that group will loop through its relationships, setting all of its lights intensities to the highest active group on the hierarchy. This effectively allows us to create complex setups where every light on the vehicle can be driven by any amount of variables.
 
-## Looking at an Example
+## Light Groups and Relations
+
+Lights in the Vehicle System are controlled by multiple `AVS_LightController` components within your vehicle. Every vehicle has a list of _Groups_ that the Light Controllers use to determine the correct intensity. These groups can be thought of as Booleans, they are either on or off. Lights placed as subcomponents of the light controllers will have their Intensity setting driven automatically using the relationship settings defined within their respective controller. When a group is activated, each light controller containing that group will loop through its relationships, setting all of its lights intensities to the highest active group on the hierarchy. This effectively allows us to create complex setups where every light on the vehicle can be driven by any amount of variables.
+
+
+
+## Light Group Example: Headlights and Blinkers
 
 <!-- side-by-side:50 -->
 ![Muscle car blueprint with BrakeLights, BlinkerLeft, BlinkerRight and HeadLights controllers, and a Light Controller Config listing HeadLights at intensity 10 and BlinkerLeft at intensity 50](../Assets/Images/components-LightController-01.png "The BlinkerLeft controller defines two relations: HeadLights at 10, BlinkerLeft at 50")
@@ -17,6 +21,8 @@ This means that when the head lights are on, the blinker will also activate, but
 
 Now imagine you have some code that clicks the blinker on and off, by toggling the _BlinkerLeft_ group. When the blinker group is inactive the blinker will set itself to 0, but if the headlights are on, it would set it to 10. Therefore mimicking a real blinker perfectly.
 <!-- /side-by-side -->
+
+
 
 ## Controlling Light Groups
 
@@ -33,7 +39,9 @@ Controlling the Light Groups is super easy. You can activate and deactivate grou
 > _Note:_ You will need to call the **UpdateLights** function after changing your Light Groups, this is for performance reasons as you might want to change multiple light groups at once.
 <!-- /side-by-side -->
 
-## Vehicle Decorations, driven by lights
+
+
+## UpdateLightDecorations Event
 
 <!-- side-by-side:50 -->
 ![Event Update Light Decorations wired through a Sequence node into Set Brake Material, Set Headlight Mat and Set Blinkers Mat collapsed graphs](../Assets/Images/components-LightController-03.png "One event per light controller, fanned out to per-material handlers")
@@ -42,7 +50,7 @@ When your Vehicle Lights are updating, the **UpdateLightDecorations** event is c
 
 The Light Controllers have 2 functions you can use to determine how to update your decorations:
 
-**GetItensity**, and **HasActiveLights**
+**GetIntensity**, and **HasActiveLights**
 <!-- /side-by-side -->
 
 ![Graph using Has Active Lights and Get Intensity on a controller to branch between the tail lights high, low and off materials](../Assets/Images/components-LightController-04.png "Brake light materials chosen from the controller's active state and intensity")

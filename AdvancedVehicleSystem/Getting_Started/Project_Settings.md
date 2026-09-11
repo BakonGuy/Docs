@@ -1,5 +1,9 @@
 # Recommended Project Settings
 
+None of this is required, but physics wheel mode in particular is noticeably more stable with these changes made.
+
+
+
 ## Min/Max Contact Settings
 
 <!-- side-by-side:41 -->
@@ -12,9 +16,9 @@ By default, Unreal applies a small invisible gap between physics bodies during c
 Reducing both the **Min Contact Offset** and **Max Contact Offset** values in the Physics settings (under _Project Settings → Physics_) significantly reduces or eliminates this behavior.
 
 > Note: This issue only applies to **Physics Wheel mode**. **Raycast Wheels are unaffected** by contact offset settings.
->
-> The fix was confirmed on UE4. UE5 behavior may differ and hasn't been extensively tested, so verify and adjust as needed.
 <!-- /side-by-side -->
+
+
 
 ## Max Terminal and Angular Velocities
 
@@ -30,12 +34,12 @@ A wheel with a **35 cm radius** spinning at **10000 degrees per second** reaches
 This means if your wheels need to push past that speed, you'll need to increase this value further.
 <!-- /side-by-side -->
 
-Update these under _Project Settings → Physics_:
+Update these settings in Project Settings → Physics:
 
-| Setting | Recommended value | Roughly |
-|---|---|---|
-| Default Terminal Velocity | `7600` cm/s | ≈ 170 MPH |
-| Max Angular Velocity | `10000` deg/s | ≈ 136 MPH at a 35 cm wheel radius |
+| Setting | Value |
+|---|---|
+| **Default Terminal Velocity** | 7600 cm/s (≈ 170 MPH) |
+| **Max Angular Velocity** | 10000 deg/s |
 
 To calculate:
 
@@ -45,9 +49,13 @@ Linear Speed (cm/s) = (Angular Velocity in deg/s × (π / 180)) × Radius in cm
 
 Set your value high enough that wheels never hit the ceiling under normal operation.
 
+> The vehicle itself also has its own **Vehicle Max Angular Velocity** setting (default 700 deg/s) which limits how fast the body can spin. That one is separate from the engine limit above, and is covered on the [Physics](https://overtorque-creations.com/Dev/Docs/#AVS/Configuration/Physics.md) page.
+
+
+
 ## Physics Tick Settings
 
-It is highly recommended to choose one of the options below. These options help ensure the physics run at a consistent and stable frame rate. This dramatically reduces physics errors and keeps vehicles stable at low frame rates.
+It is highly recommended to choose one of the options below. These options help ensure the physics run at a consistent and stable frame rate. This will dramatically decrease physics errors and allow vehicles to be stable at low frame rates.
 
 ### Option 1: Substepping
 
@@ -69,10 +77,6 @@ When using substepping, physics will always be locked to your game's FPS when it
 
 <!-- side-by-side:48 -->
 Async physics completely decouples physics from the FPS. Physics are calculated on a separate thread, sent back to the game thread, then interpolated for visual smoothness. If you need the best absolute consistency, this is the option to choose.
-
-> Note 1: Do not use this option in AVS 1.3 (UE5.0 - 5.1)
->
-> Note 2: Async Physics in Unreal 5.3 is broken, stick with substepping
 <!-- split -->
 ![Tick Physics Async enabled with Async Fixed Time Step Size 0.011111, with an on-screen readout of 91 physics FPS against 60 game FPS](../Assets/Images/general-project-settings-04.png "Physics running at 90 while the game renders at 60")
 <!-- /side-by-side -->
@@ -83,3 +87,11 @@ Async physics completely decouples physics from the FPS. Physics are calculated 
 | `0.016667` | 60 FPS |
 | `0.011111` | 90 FPS |
 | `0.008333` | 120 FPS |
+
+
+
+## Niagara
+
+AVS requires the **Niagara** plugin, which is enabled by default in Unreal. Wheel effects use Niagara systems for particles, so if you have disabled it in your project you will need to turn it back on.
+
+That should be it! The Vehicle System should internally take care of any other settings where possible.
