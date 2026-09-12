@@ -55,6 +55,16 @@ Enable this **after** recording a cinematic, not before. When on, it prevents ci
 
 Leave it off while driving or recording, or you will be fighting it instead.
 
+`IsCinematic` returns true only while **Cinematic Playback** is on **and** the vehicle is not player controlled, so a vehicle a player takes over behaves normally again.
+
+
+
+## Recording a Vehicle with Take Recorder
+
+Wheel meshes have to exist as real components to be recorded, and AVS creates them at runtime by default.
+
+Add your wheel meshes manually as children of the wheel components before recording, then record the vehicle with Take Recorder as normal.
+
 
 
 ## Related Settings in Other Categories
@@ -64,3 +74,17 @@ A few vehicle-wide behaviors live in other categories:
 - **Allow Passive Mode** and **Passive Tick Gatekeeping** (Tick) — see [Tick and Performance](https://overtorque-creations.com/Dev/Docs/#AVS/Advanced/Tick_And_Performance.md)
 - **Upside Down Angle Threshold** (Physics, Advanced) and the **OnVehicleFlipped** event — see [Physics](https://overtorque-creations.com/Dev/Docs/#AVS/Configuration/Physics.md)
 - **Disable Skeletal Collisions** (Physics) — see [Important Information](https://overtorque-creations.com/Dev/Docs/#AVS/Getting_Started/Important_Information.md)
+
+
+
+## Driving One Vehicle from Another with Input Host
+
+`SetInputHost(OtherVehicle)` makes a vehicle copy its inputs from another AVS vehicle, on the 25 TPS tick.
+
+Throttle, brake, steering and handbrake are all taken from the host. The follower still runs its own physics, its own gears and its own wheels — it is only the driver input that is shared.
+
+This is the supported way to build a vehicle that is really several AVS vehicles moving as one: an articulated bus, a road train, a powered trailer that has to brake with the truck.
+
+Pass `nullptr` (or an empty reference in Blueprint) to release it and return the vehicle to its own input.
+
+> The host relationship is one way. Setting a host on a vehicle does not make the host follow it back.

@@ -57,7 +57,7 @@ Instead, create all such constraints **directly in the vehicle blueprint**, and 
 
 This behavior stems from how Unreal updates transforms for components that aren't welded to the root. Constraints defined inside skeletal mesh assets may receive outdated transform data, especially when mixing simulated and non-simulated bodies. The result is **inconsistent, unstable physics behavior**, usually visible as violent jittering of constrained parts.
 
-To prevent this entirely, set up all physics constraints externally in your vehicle blueprint where they can reference the true root of the simulation. The [AVS Constraint component](https://overtorque-creations.com/Dev/Docs/#AVS/Components/Constraint.md) is a convenient place to do that.
+To prevent this entirely, set up all physics constraints externally in your vehicle blueprint where they can reference the true root of the simulation.
 
 A demonstration of this issue can be seen in the video to the right.
 <!-- split -->
@@ -77,3 +77,26 @@ The catch is that passive mode gatekeeps the standard Tick event. If you have Bl
 Use **AVS_AlwaysTick** for logic that must run no matter what, or **AVS_PassiveTick** for logic that only matters while resting. Both are covered on the [Tick and Performance](https://overtorque-creations.com/Dev/Docs/#AVS/Advanced/Tick_And_Performance.md) page.
 
 > Possessed vehicles are already covered: a vehicle controlled by a player or an AI controller never goes passive. The case to watch is a vehicle moved **without** being possessed, such as by a sequencer or your own movement code. For those, set **Allow Passive Mode** to false or override **Determine Passive State**.
+
+
+
+## Platform Support
+
+AVS supports every platform Unreal supports.
+
+The plugin's `PlatformDenyList` names **VisionOS**, but that is a packaging requirement rather than a limitation. FAB submission requires a non-empty deny list — without one the block is stripped when the plugin is packaged, and verification fails. VisionOS is listed because it is the least used platform.
+
+Remove it from `VehicleSystemPlugin.uplugin` if you are targeting VisionOS.
+
+> Older guidance said iOS had to be added to a whitelist by hand. That is no longer true — the plugin denies specific platforms rather than allowing specific ones, and iOS needs no edit.
+
+
+
+## Installing the Plugin to a Project Instead of the Engine
+
+AVS installs to the engine through the launcher. To have it live inside a project instead — which is what you want for source control, or for a team without the launcher install:
+
+1. Install AVS to a launcher build of the engine as normal.
+2. Copy `...\UE_5.x\Engine\Plugins\Marketplace\VehicleSystemPlugin` to `YourProject\Plugins\VehicleSystemPlugin`.
+
+It behaves the same as the engine install, except the project will likely recompile the plugin the first time it opens.

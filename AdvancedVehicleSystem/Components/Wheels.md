@@ -40,6 +40,18 @@ This mode typically requires a simple sphere collision on your wheel mesh to rem
 
 
 
+## Switching Wheel Mode at Runtime
+
+`SetWheelMode(NewMode)` changes a single wheel between `Raycast` and `Physics` while the game runs.
+
+To switch the whole vehicle, loop `GetWheels` and call it on each one.
+
+One use for this is collision. A physics wheel's collision is part of the simulation and cannot simply be turned off, but raycast wheels ignore wheel mesh collision entirely — so switching a vehicle to raycast mode is how you let it drive with wheel collision effectively disabled, then switch back.
+
+![Blueprint looping every wheel and calling Set Wheel Mode, one key setting Raycast and another setting Physics](../Assets/Images/components-Wheels-ModeSwitch-01.png "Loop the wheels and call Set Wheel Mode on each")
+
+
+
 ## Adding and Configuring a Wheel
 
 <!-- side-by-side:57 -->
@@ -48,6 +60,10 @@ This mode typically requires a simple sphere collision on your wheel mesh to rem
 The component's location is the **center of wheel travel**, not where the wheel rests at ride height.
 
 **2. Set the wheel mesh.** With **Auto Wheel Radius** on, the radius comes from the mesh bounds and you can leave **Wheel Radius** alone. With no mesh assigned, AVS falls back to a sphere at the configured radius, which is fine for prototyping.
+
+**Auto Wheel Radius** measures the wheel mesh's bounds in both wheel modes. Setting the radius by hand means the radius of the whole **tire**, not just the rim.
+
+In physics mode the wheel's contact comes from the mesh's collision rather than from the radius value, so make sure the collision covers the tire and not just the rim.
 
 **3. Set the wheel mode**, per the decision above.
 
@@ -100,14 +116,25 @@ Front wheel drive swaps the driving wheels. All wheel drive enables driving on a
 
 Tune the two values independently:
 
-| Want | Do |
-|---|---|
-| More responsive acceleration | Raise X |
-| Sharper turn-in | Raise Y |
-| A car that drifts | Lower Y, leave X alone |
-| A car that spins its wheels | Lower X, or raise gear torque |
+Raise X for more responsive acceleration, or lower it for a car that spins its wheels up.
+
+Raise Y for sharper turn-in, or lower it — leaving X alone — for a car that drifts.
 
 > This applies to **raycast wheels**. Physics wheels take friction from the Physics Material instead, so set it there.
+
+
+
+## Driving Tire Friction at Runtime
+
+Changing tire friction while the game runs is supported. Write to `WheelConfig.TireFriction` on the wheel, usually from a curve driven by speed.
+
+This does not need replicating. Every client calculates the same value from the same inputs, so as long as the calculation matches, the wheels agree.
+
+Physics wheels do not use **Tire Friction**, so the equivalent there is swapping the wheel's **Physics Material** at runtime with `SetPhysMaterialOverride` on the wheel mesh. Each wheel has its own **Physics Material** property, defaulting to the plugin's `Tire` material.
+
+![Blueprint showing both paths: a physics wheel using Get Wheel Mesh into Set Physical Material Override, and a raycast wheel setting Tire Friction on the wheel's Wheel Config struct](../Assets/Images/components-Wheels-RuntimeFriction-01.png "Physics wheels swap the physical material; raycast wheels set Tire Friction on the config")
+
+> Friction set far above the default causes jittering. If a vehicle shakes at rest or under load, put friction back to default before looking anywhere else.
 
 
 
@@ -123,9 +150,19 @@ Turn it off for physically correct behavior, which requires more care with the c
 
 **Wheel Spin Enabled** lets the wheel spin up when the drivetrain asks for more than the surface can deliver.
 
-In 1.5 that spin feeds back into vehicle behavior, so burnouts actually work.
+In 1.4.6 this was purely cosmetic. In 1.5 spin is calculated from the excess torque past the tire's friction breaking point and feeds back into vehicle behavior, so burnouts and sliding on ice behave properly.
 
 Disable it per wheel if you want a wheel that stays planted no matter what.
+
+
+
+## Rolling Resistance
+
+**Rolling Resistance** (`0.01`) is a constant drag applied to the wheel, in the range 0 to 1. It sits with the brake settings because it works like a permanent, very light brake.
+
+Raise it for a vehicle that should slow noticeably when the player lifts off the throttle, such as a heavy machine or something running on soft ground.
+
+`GetRollingResistance` reads the current value.
 
 
 
@@ -138,10 +175,22 @@ Do this last, and do it in game rather than in the details panel.
 
 **2. Drive it with the config assist HUD.** The HUD's spring sliders apply to every wheel live while you drive. This is far faster than editing components and pressing play repeatedly. Press **Shift + F1** to get the cursor.
 
-**3. Copy the values back.** HUD values override every wheel and are not saved. Once it feels right, put the numbers into the components, then set per wheel differences — softer rear, stiffer front — from that baseline.
+**3. Aim for about half compression at rest.** A vehicle sitting on fully compressed springs has no travel left to absorb anything. If the wheels look jammed into the arches when the vehicle settles, **Spring Strength** is too low for the vehicle's mass.
+
+**4. Copy the values back.** HUD values override every wheel and are not saved. Once it feels right, put the numbers into the components, then set per wheel differences — softer rear, stiffer front — from that baseline.
 <!-- split -->
 ![Wheel with Editor Preview enabled, drawing suspension travel in the viewport](../Assets/Images/_placeholder.png "Editor Preview shows whether spring length actually fits the wheel well")
 <!-- /side-by-side -->
+
+
+
+## Reading the Editor Preview
+
+The red outline drawn by **Editor Preview** is where the wheel sits when the spring is **fully compressed**, assuming the wheel radius is correct.
+
+> Once a raycast wheel reaches that point, additional load pushes the wheel into the ground. That is a limitation of raycast suspension, and the reason spring length and strength need to leave headroom.
+
+Spring and damper values use `N/mm` and `kNs/m`. They behave the way Hooke's law and critical damping describe, so if you want to reason about them numerically rather than by feel, that is the background to read.
 
 
 
@@ -155,6 +204,24 @@ Do this last, and do it in game rather than in the details panel.
 
 
 
+## Wheel Mass
+
+**Wheel Mass** (`15` kg) is the combined rim and tire mass used in the wheel simulation. It does not change the actual mass of the wheel mesh.
+
+Raising it makes a wheel harder to spin up and harder to stop.
+
+
+
+## Override Weight
+
+**Override Weight** replaces the wheel mesh component's mass with **Override Weight Kg**.
+
+This is separate from **Wheel Mass**, which feeds the wheel simulation. Override Weight changes the mass of the actual physics body, so it only matters in physics wheel mode or for a detached wheel.
+
+Raising it is also the practical workaround for wheels behaving erratically at high load in physics mode.
+
+
+
 ## Physics Mode Suspension Settings
 
 Physics wheel mode adds three more settings:
@@ -162,6 +229,28 @@ Physics wheel mode adds three more settings:
 - **Has Spring** — whether the wheel is sprung at all.
 - **Spring Hard Lock** — stop dead at the travel limit instead of damping past it.
 - **Physics Downforce** — a constant force down the wheel's local -Z, `50` N by default.
+
+
+
+## Changing a Wheel Mesh at Runtime
+
+`ChangeStaticMesh(NewMesh)` swaps the wheel's mesh on a constructed wheel. Before construction it simply sets **Wheel Static Mesh**.
+
+Use it for wheel swapping in a configurator, or for a damaged tire.
+
+`ChangeStaticMesh` also clears the wheel mesh's material overrides, and re-attaches the wheel afterwards.
+
+> With **Wheel Reprojection** enabled, update the projected mesh separately. `ChangeStaticMesh` only touches the wheel mesh, and the projected mesh is the one being displayed.
+
+
+
+## Disabling a Wheel Without Removing It
+
+There is no disable flag. `Detach()` is the closest thing, and it already does most of the work.
+
+Detach the wheel, then disable physics, collision and visibility on its wheel mesh. The wheel stops participating in the simulation but the component and its configuration survive.
+
+`Attach()` reverses the detach side of that, so re-enabling is a matter of restoring the mesh.
 
 
 
@@ -308,3 +397,80 @@ Contact detection uses a trace in both wheel modes, and suspension rides on the 
 **Trace Channel** picks what the trace tests against. If your wheels are dropping through something they should touch, this is the first thing to check.
 
 `AddWheelTraceIgnoreActor` adds an actor to the wheel's ignore list at runtime. Use it when a vehicle carries or tows something the wheels should not trace against.
+
+
+
+## Wheel Reprojection
+
+> **Experimental.** Under **Advanced Vehicle System → Experimental** on the vehicle. It is not tightly integrated with every other AVS feature.
+
+Physics can leave a wheel visually tilted, most noticeably in high friction or high weight situations. **Wheel Reprojection** fixes the appearance without changing the simulation.
+
+With it enabled, AVS hides the real wheel mesh and creates a **projected mesh** attached to the vehicle root, then aligns that mesh to the wheel's controller every frame. What the player sees is the projected mesh.
+
+**Reprojection Smooth Alpha** (`0.25`) controls how quickly the projected mesh follows.
+
+The projected mesh being the visible one has one consequence worth knowing: `ChangeStaticMesh` updates the wheel mesh only, so the projected mesh has to be updated separately.
+
+Detaching is handled for you. `Detach` swaps visibility back to the real wheel mesh, so a wheel that comes off is the one you see leaving the vehicle.
+
+`GetProjectedMesh` and `SetProjectedMesh` give you access to it.
+
+
+
+## Wheel Reprojection Camber
+
+**Wheel Reprojection Camber** adds cosmetic camber on top of reprojection.
+
+Camber is driven by suspension compression. **Camber Compressed** and **Camber Decompressed** are each a pair of `(height, angle)` values, and AVS maps the wheel's current height between them to get the camber angle.
+
+The defaults lean the wheel `-20` degrees when fully compressed and `20` degrees when fully extended.
+
+This is visual only. It does not change the contact patch or the way the wheel simulates.
+
+
+
+## Wheel Runtime Functions
+
+Beyond the state getters above, each wheel exposes a set of runtime controls.
+
+| Function | Does |
+|---|---|
+| `LockWheel(bool)` | Locks or releases the wheel. Raycast mode sets the lock directly; physics mode rebuilds the turn constraint, and only while attached. |
+| `SetWheelPosition(Location, Rotation)` | Moves the wheel. This is how you drive a wheel from your own code — an articulated frame that positions its wheels every frame, for example. |
+| `ResetPosition()` | Returns the wheel to its configured position. |
+| `ResetSteering()` | Clears the wheel's current steering. |
+| `ResetWheelCollisions()` | Rebuilds the wheel's collision setup. |
+| `SetIsSimulatingSuspension(bool)` | Turns this wheel's suspension simulation on or off. `GetIsSimulatingSuspension` reads it. |
+| `SetSpringDownforce(float)` | Sets physics mode downforce at runtime. |
+| `SetWheelTorque(Override, TargetSpeed, Torque, Reverse)` | Drives this wheel directly. `Override` makes it ignore the vehicle's drivetrain torque, `TargetSpeed` is the linear speed the wheel aims for, and `Reverse` flips direction. |
+| `ChangeStaticMesh(Mesh)` | Swaps the wheel mesh. |
+| `ClearAllEffects()` | Stops this wheel's effects and resolves its effect configuration again next tick. |
+| `GetLastTouch()` | The wheel's last trace result, as a full `FHitResult`. |
+| `GetWheelAngVelInRadians()` | Wheel angular velocity in rad/s. |
+| `AddWheelTraceIgnoreActor(Actor)` | Adds an actor to this wheel's trace ignore list. |
+
+`SetWheelPosition` is the one worth knowing about. For a vehicle whose wheels are not in fixed positions — an articulated tractor, a transforming vehicle — the supported approach is one AVS vehicle with every wheel attached to the chassis, positioned each frame rather than split across two vehicles.
+
+
+
+## Controlling Torque Per Wheel
+
+The gear table applies the same torque to every driving wheel. `SetWheelTorque` on the wheel replaces that for one wheel.
+
+```cpp
+// Drive this wheel alone, ignoring the vehicle's drivetrain torque.
+// TargetSpeed is linear speed; the wheel converts it using its own radius.
+Wheel->SetWheelTorque(/*OverrideVehicle*/ true, /*TargetSpeed*/ 2000.0f, /*Torque*/ 30.0f, /*Reverse*/ false);
+```
+
+With `OverrideVehicle` false, the value sits alongside the vehicle's own torque rather than replacing it.
+
+This is the path for anything the single gear table cannot express — a tank steering by driving its two sides at different speeds, a vehicle with an independently powered wheel, or a torque split you want to control yourself without overriding the whole drivetrain.
+
+![Blueprint with two examples: a throttle axis looping every wheel into Set Wheel Torque with Override Vehicle enabled, and a key press calling Lock Wheel on the two right hand wheels](../Assets/Images/components-Wheels-PerWheelControl-01.png "Driving torque per wheel, and locking individual wheels")
+
+The same approach covers `LockWheel`. Locking the wheels down one side while driving the other is how a tank-style turn is built.
+
+`GetWheelTorque` reads the current value back.
+

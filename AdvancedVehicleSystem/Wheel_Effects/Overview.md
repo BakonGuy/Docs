@@ -123,29 +123,57 @@ A wheel on a surface without one falls back to **Effects For Default Surface**.
 
 That is why **Effects For Default Surface** is its own slot. Configure the default there, and treat `Default` as "unassigned" when adding map entries.
 
+A `Default` key in the map is not just discouraged, it is ignored — the default surface is resolved from its own slot before the map is ever consulted.
+
 
 
 ## Per-Wheel Effect Overrides
 
-Wheels inherit from the vehicle and override only what they need.
+Wheels inherit their effects from the vehicle. An override lets one wheel differ — a spare wheel that should be quiet, a steel wheel with its own surface sound, heavier smoke on the driven axle.
 
-| Override | Replaces |
-|---|---|
-| **Override Global Effects** | The vehicle's global effects for this wheel |
-| **Effects For Default Surface Override** | The default surface entry |
-| **Surface Effect Overrides** | The vehicle's entry for one specific surface |
+There are three overrides, one for each slot on the vehicle:
 
-Overrides **replace, they do not merge**. Overriding the Dirt surface on a wheel means the vehicle's Dirt effects no longer apply to it at all — not that yours are added on top.
+- **Override Global Effects** — replaces the vehicle's global effects
+- **Surface Effect Overrides** — replaces the vehicle's entry for one specific surface
+- **Effects For Default Surface Override** — replaces the vehicle's default surface entry
 
-Useful cases: a spare wheel that should not make noise, a steel wheel with a different surface sound, or heavier smoke on the driven axle only.
+An override **replaces, it does not merge**. Overriding the Dirt surface on a wheel means the vehicle's Dirt effects no longer apply to it at all, rather than yours being added on top.
 
 
 
-## Silencing a Single Wheel
+## How a Wheel Resolves Its Effects
 
-Enable **Override Global Effects** on that wheel and leave the array empty.
+For its global effects, a wheel checks one thing:
 
-An empty override disables the effects rather than inheriting them.
+1. **Override Global Effects** is on → use the wheel's **Global Effects Override**.
+2. Otherwise → use the vehicle's **Global Wheel Effects**.
+
+For the surface it is driving on, it works down this list until something matches:
+
+1. The wheel's **Surface Effect Overrides** has an entry for that surface.
+2. The vehicle's **Surface Effects** has an entry for that surface.
+3. Neither does → fall back to the default surface, which resolves as below.
+
+For the default surface:
+
+1. The wheel's **Effects For Default Surface Override** is **not empty** → use it.
+2. Otherwise → use the vehicle's **Effects For Default Surface**.
+
+
+
+## Silencing a Wheel with an Empty Override
+
+An empty override is meaningful. It means "this wheel has no effects here", not "fall back to the vehicle".
+
+**To silence a wheel's global effects:** enable **Override Global Effects** and leave the array empty.
+
+**To silence a wheel on one surface:** add that surface to **Surface Effect Overrides** and leave its array empty. The entry existing is what counts, so an empty one is still an override.
+
+> **This does not work for the default surface.** An empty **Effects For Default Surface Override** falls back to the vehicle's effects instead of silencing them, because there is no separate flag marking the override as set — emptiness is what AVS uses to decide whether it was configured at all.
+>
+> There is also no way round it through the map: a `Default` key added to **Surface Effect Overrides** is never read, because the default surface is resolved before the map is consulted.
+>
+> If you need a wheel that is silent on the default surface, put its effects in **Override Global Effects** instead of the default surface slot, so the empty-override rule is available to you.
 
 
 

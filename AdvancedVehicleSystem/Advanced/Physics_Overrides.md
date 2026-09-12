@@ -26,7 +26,7 @@ Both override points run on the physics thread, not the game thread. Before writ
 - Do not touch actors, components, Blueprints, or anything game-thread.
 - Do not allocate or log heavily. This runs per substep.
 
-> Reading a UPROPERTY set on the game thread is the most common mistake. It appears to work, then produces torn values under load. Cache what you need into the physics input instead.
+> Reading a UPROPERTY set on the game thread appears to work, then produces torn values under load. Cache what you need into the physics input instead.
 
 
 

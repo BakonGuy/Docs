@@ -90,6 +90,24 @@ Regardless of what you choose, you will need to be mindful of how you call these
 
 
 
+## Driving a Trailer's Inputs with Input Host
+
+A trailer is a full AVS vehicle, so it has its own throttle, brakes and steering that nothing is driving by default.
+
+`SetInputHost(TowingVehicle)` on the trailer makes it copy throttle, brake, steering and handbrake from the towing vehicle, on the 25 TPS tick. This is what Input Host was built for.
+
+The trailer still runs its own physics, its own gears and its own wheels. Only the driver input is shared.
+
+Useful for:
+
+- **A trailer that brakes with the truck.** Mark its wheels as braking wheels and the trailer brakes when the cab does.
+- **A powered trailer or dolly**, where the trailer's own driving wheels should pull under the same throttle.
+- **A steerable rear trailer axle** that follows the cab's steering input.
+
+Set the host when the hitch connects and clear it when it releases, which is what the **Hitched** and **Unhitched** events are for.
+
+
+
 ## Events
 
 The hitch component broadcasts three events you can bind to:

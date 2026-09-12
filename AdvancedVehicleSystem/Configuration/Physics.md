@@ -8,7 +8,7 @@ Before tuning anything here, apply the [recommended project settings](https://ov
 
 ## Basic Understanding
 
-Center of mass placement affects handling more than any other single setting, and it is worth checking first when a vehicle handles badly for no obvious reason.
+Center of mass placement affects handling more than any other single setting, and it is worth checking when a vehicle handles badly for no obvious reason.
 
 Everything else on this page falls into two groups. **Body limits** — angular velocity, rest threshold, flip threshold — control what the physics body is allowed to do. **Movement functions** — teleporting, repositioning, toggling simulation — are how you move a vehicle without breaking its physics state.
 
@@ -34,11 +34,7 @@ Everything else on this page falls into two groups. **Body limits** — angular 
 
 Height is a trade, not a value to minimise.
 
-| Placement | Result |
-|---|---|
-| Too high | Rolls over in corners |
-| Slightly above wheel height | Stable but responsive — the usual target |
-| Below the wheels | Resists flipping, but leans the wrong way through corners |
+Too high and the vehicle rolls over in corners. Slightly above wheel height is stable but responsive, which is the usual target. Below the wheels it resists flipping, but leans the wrong way through a corner.
 
 A vehicle that leans outward through a corner looks wrong even when it drives correctly, so placing the center of mass as low as possible is not automatically better.
 
@@ -61,6 +57,20 @@ Three sources, in order of precedence:
 `SetCenterOfMassOffset` adds a further offset on top of whichever base applies.
 
 It **sets rather than accumulates**, so calling it repeatedly will not drift. This is what you want for shifting mass with cargo load.
+
+
+
+## Vehicle Mass
+
+Mass is set on the vehicle mesh component, in Unreal's own physics settings, rather than by AVS. AVS does not modify it — it applies forces to the body you give it.
+
+Use realistic figures. A vehicle under `1000` kg is very light, and is the usual cause of a car that feels skittish or gets shoved around by other physics objects.
+
+A compact car starts around `1100` kg, a midsize sedan around `1500`, and a pickup or van around `2000`.
+
+Set mass before tuning tire friction. Friction values that feel right on a 900 kg car will not suit the same car at 1500 kg, so tuning grip first means doing it twice.
+
+A light vehicle is a legitimate choice for arcade handling. It is only a problem when it is unintentional.
 
 
 
@@ -108,9 +118,9 @@ Lower it if vehicles sleep while they should still be rolling.
 
 **Upside Down Angle Threshold** (`90` deg) sets when the vehicle counts as flipped. `0` is upright, `180` fully inverted, and the default counts a vehicle on its side.
 
-`GetIsUpsideDown` reads it, and **OnVehicleFlipped** fires when it changes.
+`GetIsUpsideDown` reads it, and **OnVehicleFlipped** fires when it changes, with `bIsNowUpsideDown` telling you which way.
 
-That event is where a "press R to recover" prompt belongs.
+AVS detects the state and tells you about it. What happens next is yours to write — there is no built-in righting function. **OnVehicleFlipped** is where a "press R to recover" prompt belongs.
 
 
 

@@ -68,3 +68,12 @@ When using raycast wheels, you can reduce lateral friction in the wheel config t
 - [Wheels](https://overtorque-creations.com/Dev/Docs/#AVS/Components/Wheels.md) — tire friction, arcade wheel friction, and brakes
 - [Engine and Transmission](https://overtorque-creations.com/Dev/Docs/#AVS/Configuration/Engine_And_Transmission.md) — gear torque values
 - [Physics](https://overtorque-creations.com/Dev/Docs/#AVS/Configuration/Physics.md) — center of mass and body limits
+
+
+
+## Scaled Down Vehicles
+
+A vehicle scaled down — an RC car, a toy, a miniature — is still simulated as real physics, so it behaves like a small heavy object rather than a small car.
+
+It has to be tuned at the size it will be played at. Mass, torque, suspension and friction all need revisiting after a scale change; the values from the full size version will not transfer.
+

@@ -128,3 +128,24 @@ Now that you have your variables saved from the Event Graph, your Anim Graph can
 This AnimBP is included in the demo project as part of the Unreal Buggy Vehicle. I highly recommend digging into that content if you have issues.
 
 This AnimBP is named _VH_BuggyAnimBP_VS_
+
+
+
+## What Connect to Bone Actually Does
+
+**Connect to Bone** on the wheel component tells that bone to simulate physics, then creates a locked constraint between the bone and the wheel's position.
+
+The bone follows the wheel directly, with no AnimBP in between.
+
+That is the reason to prefer it where it fits: an AnimBP reads the wheel's transform after the fact, so it can show the wheel a frame behind. A constraint does not have that delay.
+
+
+
+## Scaled Bones Break Skeletal Wheels
+
+Unreal does not handle scaled bones well, and a wheel bone with a scale other than `1.0` produces wheels that sit or size incorrectly.
+
+Apply the scale in your modeling software and re-export, so Unreal sees every bone at `1.0` scale.
+
+This is the usual cause when a skeletal setup looks correct but the wheels are visibly the wrong size or in the wrong place.
+

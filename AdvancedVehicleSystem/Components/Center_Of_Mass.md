@@ -32,11 +32,7 @@ It is not the only thing that can set the center of mass — a code override bea
 
 Lower is not automatically better:
 
-| Placement | Result |
-|---|---|
-| Too high | Rolls over in corners |
-| Slightly above wheel height | Stable but responsive — the usual target |
-| Below the wheels | Resists flipping, but leans the wrong way through corners |
+Too high and the vehicle rolls over in corners. Slightly above wheel height is stable but responsive, which is the usual target. Below the wheels it resists flipping, but leans the wrong way through a corner.
 
 A vehicle leaning outward through a corner looks wrong even when it drives correctly. If you need a vehicle that cannot flip, keep the center of mass in a normal position and adjust suspension and grip instead.
 

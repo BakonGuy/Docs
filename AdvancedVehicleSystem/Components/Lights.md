@@ -54,3 +54,23 @@ The Light Controllers have 2 functions you can use to determine how to update yo
 <!-- /side-by-side -->
 
 ![Graph using Has Active Lights and Get Intensity on a controller to branch between the tail lights high, low and off materials](../Assets/Images/components-LightController-04.png "Brake light materials chosen from the controller's active state and intensity")
+
+
+
+## Light Relation Settings
+
+Each entry in a light controller's **Relations** array is one rule: when a group is active, set this controller's lights to this intensity.
+
+**When Group Active** is the light group name the rule watches, and **Set Intensity** is the intensity to apply while that group is active.
+
+A controller with several relations uses the **highest** intensity among the rules whose groups are currently active, which is what produces the blinker-over-headlights behavior described above.
+
+
+
+## Setting Light Intensity Directly
+
+`Illuminate(NewIntensity)` sets a controller's intensity without going through the group system.
+
+`GetIntensity` reads the current value, and `HasActiveLights` is true whenever intensity is above zero.
+
+Use `Illuminate` for lights that are not a simple on/off group — a dimmer, a light that fades with damage, or an emergency beacon driven by its own curve.

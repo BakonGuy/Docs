@@ -59,11 +59,33 @@ This keeps setup to a table of numbers, and is enough to drive audio, HUDs, and 
 
 
 
+## When a Vehicle Never Reaches its End Speed
+
+**End Speed** is the speed at which a gear's torque has fallen to its **Min Torque** value. It is a target, not a guarantee.
+
+If Min Torque is too low to keep the vehicle accelerating against drag, the vehicle stops short and never reaches End Speed. Raising Min Torque on that gear is the fix.
+
+The range `Start Speed → End Speed` maps directly onto `Max Torque → Min Torque`, so widening a gear's speed range without raising its torque spreads the same power over more speed.
+
+
+
 ## Gear 0 is Always Reverse
 
 The first entry in the Gears array is the reverse gear. Everything after it is a forward gear.
 
 A four gear car therefore has five entries: gear 0 for reverse, then gears 1 to 4.
+
+
+
+## Torque is Applied Per Driving Wheel
+
+**Max Torque** and **Min Torque** are not engine or drivetrain torque. They are the torque applied at **each driving wheel**.
+
+Enabling **Is Driving Wheel** on another wheel adds that much torque again. A four wheel drive vehicle built from the same gear table as a rear wheel drive one has roughly twice the total drive torque, not the same amount split four ways.
+
+For most vehicles this is fine — tune the numbers until the vehicle drives the way you want, with the wheels it has.
+
+It matters when the driving wheel count changes, or when you want to author the table as total drivetrain torque. See [Distributing Gear Torque Across Driving Wheels](https://overtorque-creations.com/Dev/Docs/#AVS/Guides/Torque_Distribution.md).
 
 
 
@@ -98,18 +120,20 @@ A working four gear starting point, with reverse in gear 0.
 | Max Torque | 30.0 | 30.0 | 30.0 | 30.0 |
 | Min Torque | 5.0 | 5.0 | 5.0 | 5.0 |
 
-Reverse uses an Up Shift of `100.0` so the automatic transmission never tries to shift out of it.
+Gear 0's **Up Shift** and **Down Shift** are never read. The automatic transmission only picks gear 0 when the shifter is in Reverse, and its upshift and downshift searches both skip index 0, so those two values on the reverse gear do nothing.
+
+The `100.0` above is simply the default every gear is created with.
 
 
 
 ## Shifter Position vs Current Gear
 
-These are two separate things, and confusing them is the most common source of "my vehicle won't move".
+These are two separate things, and confusing them accounts for a lot of "my vehicle won't move".
 
 <!-- side-by-side:50 -->
 **The shifter** is the PRND position — Park, Reverse, Neutral, Drive. It is what the player controls.
 
-`SetShifterInput` sets it directly. `MoveShifterInput(bMoveUp)` steps through positions, which is what you bind to shift up and shift down keys.
+`SetShifterInput` sets it directly. `MoveShifterInput(MoveUp)` steps one position up or down and returns the new position, which is what you bind to shift up and shift down keys.
 
 A vehicle spawns in **Park**. It will not move until something shifts it into Drive.
 <!-- split -->
@@ -213,7 +237,13 @@ These are where shift audio, dash indicators, and transmission animation belong 
 
 Useful for a vehicle that gets an upgrade, or a configurator swapping transmissions.
 
-Both take effect immediately, so avoid replacing the table mid-shift.
+Both refresh the gear the vehicle is currently in, so a change to that gear applies straight away. Neither forces a shift.
+
+They also clamp the selected and current gear to the new array's bounds, so shrinking the table cannot leave the vehicle in a gear that no longer exists. `SetGearItem` grows the array if you pass an index past the end.
+
+> **Editing the `Gears` array directly does not take effect until the next shift.** AVS keeps a cached copy of the active gear and does its torque and speed maths against that copy, not against the array. `SetGearArray` and `SetGearItem` refresh the cache; writing to the array does not.
+
+Changing the table during a shift is safe. The cache refresh is skipped while a shift is in progress, and the shift completes by reading the new table.
 
 ```cpp
 TArray<FVehicleGear> NewGears;

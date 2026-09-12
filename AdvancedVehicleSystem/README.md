@@ -33,13 +33,31 @@ Back up your project before updating and give the upgrade a real test before com
 
 
 
+## Migrating a Vehicle Between Projects
+
+> **Enable the AVS plugin in the destination project before migrating anything into it.**
+
+If the plugin is not enabled first, Unreal shows a series of popups about missing classes, and accepting them **corrupts the assets being migrated**. There is no repair for it afterwards — you migrate again into a correctly prepared project.
+
+With the plugin enabled first, a migration from the demo project should produce exactly one error, in `HUD_Demo`, about a "Project Version" node that cannot be migrated. That one is expected and harmless.
+
+
+
+## Getting a Version FAB Does Not Have Yet
+
+New AVS releases reach FAB for the newest engine version first, to limit the impact on established projects while the release settles.
+
+The GitHub repository usually carries builds for other engine versions before FAB does. Access is arranged through the Discord server.
+
+
+
 ## Documentation Structure
 
 **Getting Started** is the Quick Start guide plus the two pages to read before going far into a project.
 
 **Configuration** covers the vehicle level settings — general options, engine and transmission, steering, and physics.
 
-**Components** is the reference for everything you add to a vehicle: wheels, the camera pivot, engine audio, lights, exhaust, the hitch and trailer system, center of mass, and constraints.
+**Components** is the reference for everything you add to a vehicle: wheels, the camera pivot, engine audio, lights, exhaust, the hitch and trailer system, center of mass, and constraints. It also covers attaching your own objects to a vehicle.
 
 **Wheel Effects** covers the effects system, both configuring the built-in effects and writing your own.
 
@@ -48,9 +66,9 @@ Back up your project before updating and give the upgrade a real test before com
 - [Skeletal Wheels](https://overtorque-creations.com/Dev/Docs/#AVS/Skeletal_Mesh/Skeletal_Wheels.md) if your wheels live inside the skeletal mesh and you're using the "Connect to Bone" feature with physics wheels.
 - [Skeletal Animation](https://overtorque-creations.com/Dev/Docs/#AVS/Skeletal_Mesh/Skeletal_Animation.md) if you have separated wheel meshes, which is what raycast wheels require.
 
-**Guides** holds tuning walkthroughs, starting with arcade handling.
+**Guides** holds tuning walkthroughs — arcade handling, and dividing gear torque across driving wheels.
 
-**Advanced** is networking, the tick model and performance, debugging, and the C++ override points for custom drivetrain and physics logic.
+**Advanced** is networking, the tick model and performance, debugging, the shared Blueprint function library, and the C++ override points for custom drivetrain and physics logic.
 
 
 
