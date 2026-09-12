@@ -4,19 +4,47 @@ Steering happens in two places: the vehicle decides how much input to allow and 
 
 
 
-## Steering Setup Order
+## Basic Understanding
+
+Steering input travels through three stages before it reaches a wheel.
+
+**Smoothing.** The vehicle moves its steering value toward your input at a rate set by the smoothing mode, rather than snapping to it.
+
+**Falloff.** A curve scales the maximum input the player can ask for, based on speed. This is what stops a vehicle from being undriveable on a straight.
+
+**The wheel.** Each steerable wheel turns up to its own **Max Steering Angle**, which is the physical limit everything else scales within.
+
+
+
+## Step 1: Set up the Steerable Wheels
 
 <!-- side-by-side:57 -->
-**1. Set the wheels up first.** Mark your front wheels **Is Steerable Wheel** and set **Max Steering Angle** — `30` degrees is a sensible car. This is the physical limit; everything else scales within it.
+Mark your front wheels **Is Steerable Wheel** and set **Max Steering Angle** — `30` degrees is a sensible car.
 
-**2. Pick a smoothing mode.** `Ease` is the default and suits most vehicles.
-
-**3. Tune Steering Speed and Recenter Speed** at low speed, where the falloff curve is not interfering. Get turn-in feeling right standing still before worrying about anything else.
-
-**4. Shape the falloff curve last**, driving at speed. This is what stops the car from being twitchy on a straight.
+This is the physical limit. Everything else scales within it.
 <!-- split -->
 ![Advanced Vehicle System - Steering settings showing the smoothing mode, steering speed, recenter speed and falloff curve](../Assets/Images/_placeholder.png "Vehicle-level steering settings")
 <!-- /side-by-side -->
+
+
+
+## Step 2: Pick a Smoothing Mode
+
+`Ease` is the default and suits most vehicles. The modes are covered below.
+
+
+
+## Step 3: Tune Steering Speed and Recenter Speed
+
+Tune these at low speed, where the falloff curve is not interfering.
+
+Get turn-in feeling right standing still before worrying about anything else.
+
+
+
+## Step 4: Shape the Falloff Curve
+
+Shape the curve last, driving at speed. This is what stops the car from being twitchy on a straight.
 
 
 
@@ -34,7 +62,13 @@ Suits arcade handling where responsiveness matters more than realism, or when yo
 With `Instant` selected, the speed settings hide themselves — nothing uses them.
 <!-- /side-by-side -->
 
-**Steering Speed** is how quickly the vehicle responds to a change. **Steering Recenter Speed** is a separate rate used when steering returns to center from zero input.
+
+
+## Steering Speed and Steering Recenter Speed
+
+**Steering Speed** is how quickly the vehicle responds to a change in input.
+
+**Steering Recenter Speed** is a separate rate, used when steering returns to center from zero input.
 
 Real vehicles self-center faster than a driver turns in. Setting recenter faster than turn-in removes a lot of floatiness without changing grip.
 
@@ -50,11 +84,11 @@ At low speed you want full lock available, so the curve starts at or near `1.0`.
 The curve does not change the physical **Max Steering Angle**. It scales how much of that angle the player can ask for, so a shallow curve at speed means the wheels simply do not turn as far.
 
 Raising the curve's values across the board allows stronger steering at speed, which is one of the main levers for arcade handling. See [Arcade Physics](https://overtorque-creations.com/Dev/Docs/#AVS/Guides/Arcade_Physics.md).
-
-`GetMaxSteeringInputAtSpeed` evaluates the curve at any speed, which is useful for a HUD showing available grip.
 <!-- split -->
 ![Steering falloff curve editor with speed on the X axis and maximum steering input on the Y axis](../Assets/Images/_placeholder.png "Full lock when slow, progressively less as speed climbs")
 <!-- /side-by-side -->
+
+`GetMaxSteeringInputAtSpeed` evaluates the curve at any speed, which is useful for a HUD showing available grip.
 
 > If a vehicle darts unpredictably at speed, the falloff curve is the first thing to look at — before touching tire friction.
 
@@ -70,15 +104,21 @@ On each `AVS_Wheel`, under **Wheel Dynamics → Steering**:
 | **Max Steering Angle** | `30.0` deg | Maximum angle this wheel steers to |
 | **Invert Steering** | `false` | Reverses steering direction for this wheel |
 
-### Four Wheel Steering
+
+
+## Four Wheel Steering
 
 Enable **Is Steerable Wheel** on the rear wheels, turn **Invert Steering** on for them, and give them a **smaller** max angle than the front — something like 30 front and 10 rear.
 
-Matching the front angle makes the vehicle crab-walk sideways. Keep the rear angle small.
+> Matching the front angle makes the vehicle crab-walk sideways. Keep the rear angle small.
 
-### Manual Wheel Steering Control
 
-A wheel that is not marked steerable can still be driven directly with `SetSteeringInput` on the wheel component. That is the path for anything unusual — crab steering, independently controlled wheels, or a turret-style vehicle where steering does not come from a single axis.
+
+## Manual Wheel Steering Control
+
+A wheel that is not marked steerable can still be driven directly with `SetSteeringInput` on the wheel component.
+
+That is the path for anything unusual — crab steering, independently controlled wheels, or a turret-style vehicle where steering does not come from a single axis.
 
 
 

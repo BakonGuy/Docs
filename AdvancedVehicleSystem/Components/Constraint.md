@@ -2,7 +2,13 @@
 
 `AVS_Constraint` is a thin wrapper around Unreal's Physics Constraint component. It behaves the same way, with the constraint categories kept visible and the irrelevant ones hidden, plus one convenience function.
 
+
+
+## Basic Understanding
+
 Use it for what you would use any physics constraint for — doors, hoods, tailgates, suspension arms, tow ropes. Anything that should move under physics while staying attached to the vehicle.
+
+The reason to use this component rather than Unreal's own is placement. Constraints belong in the vehicle Blueprint, constrained against `VehicleMesh`, and not inside a skeletal mesh's Physics Asset.
 
 
 

@@ -6,6 +6,16 @@ This page covers configuring them, tuning them, and changing them at runtime. Fo
 
 
 
+## Basic Understanding
+
+A vehicle's wheel set is built from the `AVS_Wheel` components parented under the vehicle mesh. There is no wheel array to fill in and no axle setup — adding a component in the right place is what adds a wheel.
+
+Because each wheel carries its own configuration, there is no concept of a "front axle" or a "rear axle" in AVS. A wheel steers because its own **Is Steerable Wheel** flag is on, not because of where it sits.
+
+Each wheel runs in one of two modes, raycast or physics, and can switch between them at runtime.
+
+
+
 ## Wheel Modes: Raycast and Physics
 
 AVS has two wheel modes, and has been designed so you can seamlessly switch between them at runtime depending on your needs.
@@ -66,6 +76,10 @@ A wheel does nothing on its own. Four independent flags decide what it participa
 ![Wheel Dynamics section showing the Powertrain, Steering and Brakes groups with their flags](../Assets/Images/_placeholder.png "Four independent roles — a wheel can have any combination")
 <!-- /side-by-side -->
 
+
+
+## Wheel Role Combinations
+
 A conventional rear wheel drive car ends up as:
 
 | | Front wheels | Rear wheels |
@@ -80,7 +94,7 @@ Front wheel drive swaps the driving wheels. All wheel drive enables driving on a
 
 
 
-## Tire Friction and Grip
+## Tire Friction
 
 **Tire Friction** is a coefficient pair: **X is longitudinal** (accelerating and braking), **Y is lateral** (cornering). Both default to `1.4`.
 
@@ -95,13 +109,27 @@ Tune the two values independently:
 
 > This applies to **raycast wheels**. Physics wheels take friction from the Physics Material instead, so set it there.
 
-**Arcade Wheel Friction** (raycast only, on by default) applies friction at the wheel center instead of the contact point. This resists tipping. Turn it off for physically correct behavior, which requires more care with the center of mass.
-
-**Wheel Spin Enabled** lets the wheel spin up when the drivetrain asks for more than the surface can deliver. In 1.5 that spin feeds back into vehicle behavior, so burnouts actually work. Disable it per wheel if you want a wheel that stays planted no matter what.
 
 
+## Arcade Wheel Friction
 
-## Suspension Settings
+**Arcade Wheel Friction** (raycast only, on by default) applies friction at the wheel center instead of the contact point. This resists tipping.
+
+Turn it off for physically correct behavior, which requires more care with the center of mass.
+
+
+
+## Wheel Spin Enabled
+
+**Wheel Spin Enabled** lets the wheel spin up when the drivetrain asks for more than the surface can deliver.
+
+In 1.5 that spin feeds back into vehicle behavior, so burnouts actually work.
+
+Disable it per wheel if you want a wheel that stays planted no matter what.
+
+
+
+## Tuning Suspension
 
 Do this last, and do it in game rather than in the details panel.
 
@@ -115,13 +143,25 @@ Do this last, and do it in game rather than in the details panel.
 ![Wheel with Editor Preview enabled, drawing suspension travel in the viewport](../Assets/Images/_placeholder.png "Editor Preview shows whether spring length actually fits the wheel well")
 <!-- /side-by-side -->
 
+
+
+## Suspension Settings Reference
+
 | Setting | Default | Unit | Raise it to |
 |---|---|---|---|
 | **Spring Length** | `25` | cm | Allow more travel |
 | **Spring Strength** | `25` | N/mm | Hold more weight, less body roll |
 | **Spring Damping** | `1.0` | kNs/m | Settle faster, bounce less |
 
-Physics wheel mode adds **Has Spring**, **Spring Hard Lock** (stop dead at the travel limit instead of damping past it), and **Physics Downforce** (a constant force down the wheel's local -Z, `50` N by default).
+
+
+## Physics Mode Suspension Settings
+
+Physics wheel mode adds three more settings:
+
+- **Has Spring** — whether the wheel is sprung at all.
+- **Spring Hard Lock** — stop dead at the travel limit instead of damping past it.
+- **Physics Downforce** — a constant force down the wheel's local -Z, `50` N by default.
 
 
 
@@ -151,20 +191,14 @@ This is for modular vehicles: Such as a truck gaining a third axle, or a configu
 
 If you only want the wheel to come off, use Detach. Use Add/Remove only when the vehicle has a different number of wheels than it did before.
 
-### Detaching and Attaching Wheels at Runtime
+
+
+## Detaching and Attaching Wheels at Runtime
 
 For the whole-vehicle case there are two convenience calls on the vehicle:
 
 - `DetachAllWheels()` — every wheel comes off at once. This is your explosion.
 - `ResetAllWheels()` — snaps every wheel back to position and re-attaches any that were detached. This is your respawn.
-
-**Collide When Detached** decides whether a loose wheel collides with its own vehicle body. Leave it off unless you want wheels bouncing off the car they came from.
-
-Raycast wheels normally ignore the wheel mesh collision, but a detached wheel is a real physics body. If you plan to detach raycast wheels, give the mesh proper collision or it will fall through the world.
-
-Detaching also clears that wheel's effects and refreshes contact modification, so you do not need to clean up after it.
-
-Blowing all four wheels off a wrecked vehicle, then putting it back together on respawn:
 
 ```cpp
 // Destroy: every wheel comes off and simulates as a loose body.
@@ -186,7 +220,19 @@ if( UAVS_Wheel* Wheel = Vehicle->GetWheels()[WheelIndex] )
 }
 ```
 
-### Adding and Removing Wheels at Runtime
+Detaching also clears that wheel's effects and refreshes contact modification, so you do not need to clean up after it.
+
+
+
+## Collide When Detached
+
+**Collide When Detached** decides whether a loose wheel collides with its own vehicle body. Leave it off unless you want wheels bouncing off the car they came from.
+
+> Raycast wheels normally ignore the wheel mesh collision, but a detached wheel is a real physics body. If you plan to detach raycast wheels, give the mesh proper collision or it will fall through the world.
+
+
+
+## Adding and Removing Wheels at Runtime
 
 `AddWheel` and `RemoveWheel` are **protected**, so call them from inside your vehicle Blueprint or a C++ subclass, not from an outside actor.
 
@@ -197,10 +243,6 @@ Order matters when adding:
 3. Call `AddWheel`. It runs the normal construct and initialize path, creates the wheel's mesh, refreshes the wheel set, and reapplies the vehicle's current physics state.
 
 `RemoveWheel` handles the teardown itself: it detaches the wheel, destroys the wheel mesh, cleans up, drops it from the arrays, and destroys the component. Do not destroy the component yourself first.
-
-> Changing the wheel set while driving is allowed, the change is immediate. Removing a driving wheel redistributes torque instantly, and removing a loaded wheel drops that corner of the vehicle.
-
-Adding a wheel from inside the vehicle class:
 
 ```cpp
 void AMyVehicle::AddSpareAxle()
@@ -230,6 +272,8 @@ void AMyVehicle::DropSpareAxle(UAVS_Wheel* Wheel)
 	RemoveWheel(Wheel);
 }
 ```
+
+> Changing the wheel set while driving is allowed, the change is immediate. Removing a driving wheel redistributes torque instantly, and removing a loaded wheel drops that corner of the vehicle.
 
 
 

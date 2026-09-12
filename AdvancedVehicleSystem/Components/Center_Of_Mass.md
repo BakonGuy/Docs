@@ -2,7 +2,13 @@
 
 `AVS_CenterOfMass` is a marker component with no settings. You add it, drag it where the mass should sit, and AVS uses its location.
 
-It exists so you can place the center of mass visually instead of entering coordinates.
+
+
+## Basic Understanding
+
+The component is a position and nothing else. It exists so you can place the center of mass visually instead of entering coordinates.
+
+It is not the only thing that can set the center of mass — a code override beats it, and an additional offset can be applied on top. The precedence is listed at the bottom of this page.
 
 
 
@@ -44,8 +50,14 @@ Three things can set the center of mass:
 2. **This component's location.**
 3. The vehicle mesh pivot, when neither exists.
 
-`SetCenterOfMassOffset` adds a further offset on top of whichever base applies, and sets rather than accumulates. That makes it safe to call repeatedly — shifting mass as cargo loads, or as a fuel tank empties, without drift.
-
 `GetExactCenterOfMass` returns the real value with a validity flag. It is invalid until a physics body exists, so do not call it during construction.
 
 > Both the component and the visualizer were fixed in 1.5.2. If either seems to do nothing, check your plugin version first.
+
+
+
+## SetCenterOfMassOffset
+
+`SetCenterOfMassOffset` adds a further offset on top of whichever base applies, and **sets rather than accumulates**.
+
+That makes it safe to call repeatedly — shifting mass as cargo loads, or as a fuel tank empties, without drift.

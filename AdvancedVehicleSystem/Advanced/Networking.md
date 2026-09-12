@@ -4,25 +4,35 @@ AVS vehicles replicate out of the box and the defaults work for most projects. Y
 
 
 
-## Network Types: History Interpolation and Client Prediction
+## Basic Understanding
 
 Physics vehicles are difficult to replicate because the server and clients never simulate identically. Instead of keeping every simulation in step, AVS replicates vehicle state and has clients follow it.
 
-<!-- side-by-side:50 -->
-**History Interpolation** (the default)
+Two things follow from that, and they cover most of this page:
+
+**The vehicle's network type** decides how a client follows the server — buffered and smooth, or predicted and immediate.
+
+**Input functions only work from the owning client or the server.** Calling them anywhere else does nothing and reports no error.
+
+
+
+## Network Type: History Interpolation
+
+This is the default.
 
 Clients buffer incoming states and play them back slightly behind the server. Smooth, stable, and forgiving of jitter.
 
 The cost is latency, since remote vehicles are always a little behind reality.
 
-This is the default and suits most projects.
-<!-- split -->
-**Client Prediction**
 
-Clients simulate ahead and correct against server state. More immediate, at the cost of correction artifacts when a prediction turns out wrong.
+
+## Network Type: Client Prediction
+
+Clients simulate ahead and correct against server state.
+
+More immediate, at the cost of correction artifacts when a prediction turns out wrong.
 
 Use it when remote vehicle responsiveness matters more than smoothness.
-<!-- /side-by-side -->
 
 
 
@@ -36,8 +46,6 @@ Input functions are replicated, but **where you call them matters**. In single p
 Calling `SetThrottleInput` on a non-owning client does nothing, and produces no error.
 
 `isOwningClient` is the check to make before calling input functions from anything that might run elsewhere.
-
-The same applies to hitching: `Hitch` and `HitchToOverlapped` must come from the owning client or the server.
 
 `SetLocalEngineRunning` is the deliberate exception, for local-only cosmetic changes.
 <!-- split -->
@@ -54,11 +62,13 @@ void AMyVehicle::ApplyThrottle(float Value)
 }
 ```
 
+The same applies to hitching. `Hitch` and `HitchToOverlapped` must come from the owning client or the server.
 
 
-## Network Configuration Settings
 
-Settings under **Advanced Vehicle System → Network**. The core three are usually left alone:
+## Core Network Settings
+
+Settings under **Advanced Vehicle System → Network**. These three are usually left alone.
 
 | Setting | Default | What it does |
 |---|---|---|
@@ -66,7 +76,9 @@ Settings under **Advanced Vehicle System → Network**. The core three are usual
 | **Sync Location** | `true` | Replicate position |
 | **Sync Rotation** | `true` | Replicate rotation |
 
-The advanced set is where you tune:
+
+
+## Advanced Network Settings
 
 | Setting | Default | Raise it to | Lower it to |
 |---|---|---|---|
@@ -76,9 +88,23 @@ The advanced set is where you tune:
 | **Net Position Tolerance** | `0.1` | Ignore small differences | Correct more precisely |
 | **Net Smoothing** | `10.0` | Correct faster, more visibly | Correct gently |
 
-**Net Time Behind** is the main trade. More absorbs packet loss and jitter at the cost of remote vehicles lagging further behind reality; less is tighter but makes bad connections obvious.
 
-Do not lower **Net Send Rate** without measuring. With many vehicles it is the setting most likely to cost you real bandwidth.
+
+## Net Time Behind
+
+**Net Time Behind** is the main trade on this page.
+
+More absorbs packet loss and jitter, at the cost of remote vehicles lagging further behind reality.
+
+Less is tighter, but makes bad connections obvious.
+
+
+
+## Net Send Rate
+
+Do not lower **Net Send Rate** without measuring.
+
+With many vehicles it is the setting most likely to cost you real bandwidth.
 
 
 
@@ -86,7 +112,9 @@ Do not lower **Net Send Rate** without measuring. With many vehicles it is the s
 
 Vehicles that come to a stop stop sending updates, rather than repeatedly sending an unchanged position.
 
-**Rest Velocity Threshold** under **Advanced Vehicle System → Physics** decides when that kicks in, and it is the same threshold passive mode uses. If parked vehicles are drifting out of sync on clients, that threshold is too high.
+**Rest Velocity Threshold** under **Advanced Vehicle System → Physics** decides when that kicks in, and it is the same threshold passive mode uses.
+
+> If parked vehicles are drifting out of sync on clients, that threshold is too high.
 
 
 
@@ -100,7 +128,9 @@ The current implementation supports a single tow hitch and trailer hitch pair. H
 
 ## Disabling Movement Replication
 
-`SetMovementReplicationEnabled` disables replication temporarily.
+`SetMovementReplicationEnabled` disables replication temporarily. 
 It does not change the configured **Movement Replication** setting.
 
-Use it when something else takes over the vehicle's movement — a cinematic, attaching it to another actor, or your own movement code. Turning it off for the duration stops AVS and your system fighting over the transform, and re-enabling restores normal behavior.
+Use it when something else takes over the vehicle's movement — a cinematic, attaching it to another actor, or your own movement code.
+
+Turning it off for the duration stops AVS and your system fighting over the transform, and re-enabling restores normal behavior.

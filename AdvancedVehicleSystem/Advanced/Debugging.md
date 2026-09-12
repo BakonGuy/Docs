@@ -4,6 +4,18 @@ Tools for diagnosing a vehicle that is not behaving correctly, in the order to t
 
 
 
+## Basic Understanding
+
+There are three tools, and they answer different questions.
+
+**The config assist HUD** shows live vehicle state while you drive, and lets you change spring values without leaving the game.
+
+**The debug visualizers** draw things you cannot otherwise see — the real center of mass, suspension traces.
+
+**`stat AVS`** reports what the plugin is costing, and how many vehicles are actually awake.
+
+
+
 ## Config Assist HUD
 
 The plugin includes a HUD for building and tuning vehicles. It shows live vehicle state and lets you change spring values while driving, which is much faster than editing components and pressing play again.
@@ -13,10 +25,17 @@ Setup is covered in step 5 of the [Quick Start guide](https://overtorque-creatio
 
 Read the state panel before changing anything. Air speed, shifter position, current gear, torque, engine status and wheel count answer most questions immediately. A vehicle in Park with the engine off is a different problem from one in Drive producing no torque.
 
-Spring values from the HUD apply to **every wheel**, overriding your per-wheel configuration, and are not saved. That is what makes it fast for finding a baseline, and why you copy the numbers back into the components when you are done.
 <!-- split -->
 ![In-game vehicle with the setup HUD showing air speed, shifter position, current gear, torque and live spring sliders](../Assets/Images/tutorials-Creating-Vehicles-16.png "The config assist HUD running in game")
 <!-- /side-by-side -->
+
+
+
+## Config Assist HUD Spring Sliders
+
+Spring values from the HUD apply to **every wheel**, overriding your per-wheel configuration, and are not saved.
+
+That is what makes it fast for finding a baseline, and why you copy the numbers back into the components when you are done.
 
 
 
@@ -32,7 +51,13 @@ Under **Advanced Vehicle System → Debug**:
 
 Enable **Visualize Center of Mass** first when a vehicle handles strangely with no obvious cause. A center of mass in an unexpected position explains a large share of handling problems, and it cannot be confirmed by looking at the vehicle.
 
-On the wheel side, **Editor Preview** under Suspension Dynamics draws wheel travel in the viewport, which makes it obvious when spring length does not fit the wheel well.
+
+
+## Wheel Editor Preview
+
+**Editor Preview**, under the wheel's Suspension Dynamics, draws wheel travel in the viewport.
+
+This makes it obvious when spring length does not fit the wheel well.
 
 
 
@@ -42,7 +67,9 @@ On the wheel side, **Editor Preview** under Suspension Dynamics draws wheel trav
 
 Check the counters before the timings. See [Tick and Performance](https://overtorque-creations.com/Dev/Docs/#AVS/Advanced/Tick_And_Performance.md) for how to read it.
 
-Useful console commands while testing:
+
+
+## Useful Console Commands
 
 ```text
 stat AVS          Plugin tick pipeline and vehicle counters

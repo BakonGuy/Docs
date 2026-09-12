@@ -4,16 +4,22 @@ Vehicle-wide settings under **Advanced Vehicle System → General**. Select `Cla
 
 
 
+## Basic Understanding
+
+These are settings that apply to the vehicle as a whole rather than to a component. Most projects set **Speed Units** once and never touch the rest.
+
+A few vehicle-wide behaviors live in other categories, listed at the bottom of this page.
+
+
+
 ## Speed Units
 
-**Speed Units** sets the unit for every speed value AVS calculates or returns. Set it before building a gear table. It is the conversion between Unreal units (cm/s) and what you want to work in, so every "Speed" output is in this unit.
+**Speed Units** sets the unit for every speed value AVS calculates or returns. It is the conversion between Unreal units (cm/s) and what you want to work in, so every "Speed" output is in this unit.
 
 <!-- side-by-side:57 -->
 **Gear speeds and shift points use this unit too.** Changing it after tuning a vehicle does not convert the gear table. The numbers stay the same and now mean something else: a vehicle that topped out at 75 MPH will top out at 75 KPH.
 
 Set it once, before building your gear table, and leave it alone.
-
-`GetSpeedUnitData` returns the abbreviation and conversion factors, which is what you want for a HUD that displays units rather than hardcoding "MPH".
 <!-- split -->
 | Option | Unit |
 |---|---|
@@ -24,6 +30,14 @@ Set it once, before building your gear table, and leave it alone.
 | `KNOTS` | Knots |
 | `Furlong` | Furlongs per fortnight |
 <!-- /side-by-side -->
+
+
+
+## Reading Speed Units for a HUD
+
+`GetSpeedUnitData` returns the abbreviation and conversion factors.
+
+This is what you want for a HUD that displays units, rather than hardcoding "MPH".
 
 
 

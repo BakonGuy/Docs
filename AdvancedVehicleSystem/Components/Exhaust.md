@@ -1,5 +1,7 @@
 # Exhaust
 
+`AVS_ExhaustController` drives exhaust particles from the vehicle's engine state.
+
 
 
 ## Setting up Exhaust Smoke
@@ -9,3 +11,14 @@ The Vehicle System also includes another optional component called `AVS_ExhaustC
 <!-- split -->
 ![Exhaust controller component on the rear of a muscle car with two particle systems attached, positioned at the tailpipe](../Assets/Images/components-ExhaustController-01.png "Attach particle systems as children of the controller and position it at the tailpipe")
 <!-- /side-by-side -->
+
+
+
+## Exhaust Particle Parameters
+
+The controller sets two parameters on every particle system attached beneath it:
+
+- **SmokeVelocity**
+- **SmokeSize**
+
+Any particle system reading those two names will work. The included exhaust particle is a good starting point for your own.

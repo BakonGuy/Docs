@@ -6,9 +6,15 @@ Before tuning anything here, apply the [recommended project settings](https://ov
 
 
 
-## Center of Mass Placement
+## Basic Understanding
 
 Center of mass placement affects handling more than any other single setting, and it is worth checking first when a vehicle handles badly for no obvious reason.
+
+Everything else on this page falls into two groups. **Body limits** — angular velocity, rest threshold, flip threshold — control what the physics body is allowed to do. **Movement functions** — teleporting, repositioning, toggling simulation — are how you move a vehicle without breaking its physics state.
+
+
+
+## Setting the Center of Mass
 
 <!-- side-by-side:57 -->
 **1. Add a [Center of Mass component](https://overtorque-creations.com/Dev/Docs/#AVS/Components/Center_Of_Mass.md)** to the vehicle. It is a marker with no settings — you position it and AVS uses its location.
@@ -22,7 +28,11 @@ Center of mass placement affects handling more than any other single setting, an
 ![Vehicle in the viewport with the center of mass visualizer enabled, showing the marker below the chassis](../Assets/Images/_placeholder.png "Visualize Center of Mass draws the real COM, after all offsets")
 <!-- /side-by-side -->
 
-Height is a trade, not a value to minimise:
+
+
+## Center of Mass Height
+
+Height is a trade, not a value to minimise.
 
 | Placement | Result |
 |---|---|
@@ -32,7 +42,9 @@ Height is a trade, not a value to minimise:
 
 A vehicle that leans outward through a corner looks wrong even when it drives correctly, so placing the center of mass as low as possible is not automatically better.
 
-### Setting Center of Mass from Code
+
+
+## Center of Mass Precedence
 
 Three sources, in order of precedence:
 
@@ -40,9 +52,15 @@ Three sources, in order of precedence:
 2. The Center of Mass component's location.
 3. The vehicle mesh pivot, when neither of the above exists.
 
-`SetCenterOfMassOffset` adds a further offset on top of whichever base applies. It **sets rather than accumulates**, so calling it repeatedly will not drift — useful for shifting mass with cargo load.
-
 `GetExactCenterOfMass` returns the real value with a validity flag. It is invalid until a physics body exists, so do not call it during construction.
+
+
+
+## SetCenterOfMassOffset
+
+`SetCenterOfMassOffset` adds a further offset on top of whichever base applies.
+
+It **sets rather than accumulates**, so calling it repeatedly will not drift. This is what you want for shifting mass with cargo load.
 
 
 
@@ -56,45 +74,77 @@ Three sources, in order of precedence:
 | **Wheels Push Physics** | `true` | Whether wheels physically push other simulating objects. |
 | **Disable Skeletal Collisions** | `true` | See [Important Information](https://overtorque-creations.com/Dev/Docs/#AVS/Getting_Started/Important_Information.md). |
 
-Two of these need explanation:
 
-**Wheels Push Physics** allows a vehicle to push loose props. It also causes a see-saw effect when a vehicle drives onto another physics object, because the wheels push the object and the object pushes back. Turn it off if that happens.
 
-**Vehicle Max Angular Velocity** limits how fast the body spins after a heavy crash. It is separate from the engine's global Max Angular Velocity, which applies to wheels. If a vehicle will not reach top speed, the engine setting is the one to check.
+## Wheels Push Physics
 
-### Advanced Physics Settings
+**Wheels Push Physics** allows a vehicle to push loose props.
 
-**Rest Velocity Threshold** (`25` cm/s) decides when a vehicle counts as stopped, for both passive mode and network rest state. Raise it and vehicles settle sooner, which helps performance but can cut off slow creeping. Lower it if vehicles sleep while they should still be rolling.
-
-**Upside Down Angle Threshold** (`90` deg) sets when the vehicle counts as flipped — `0` is upright, `180` fully inverted, and the default counts a vehicle on its side. `GetIsUpsideDown` reads it, and **OnVehicleFlipped** fires when it changes, which is where a "press R to recover" prompt belongs.
+It also causes a see-saw effect when a vehicle drives onto another physics object, because the wheels push the object and the object pushes back. Turn it off if that happens.
 
 
 
-## Teleporting and Repositioning a Vehicle
+## Vehicle Max Angular Velocity
 
-Do not set the actor transform directly on a simulating vehicle. The wheels do not follow, and the physics state ends up incorrect.
+**Vehicle Max Angular Velocity** limits how fast the body spins after a heavy crash.
 
-<!-- side-by-side:50 -->
-**Teleporting**
+It is separate from the engine's global Max Angular Velocity, which applies to wheels.
+
+> If a vehicle will not reach top speed, the engine's global setting is the one to check, not this one.
+
+
+
+## Rest Velocity Threshold
+
+**Rest Velocity Threshold** (`25` cm/s) decides when a vehicle counts as stopped, for both passive mode and network rest state.
+
+Raise it and vehicles settle sooner, which helps performance but can cut off slow creeping.
+
+Lower it if vehicles sleep while they should still be rolling.
+
+
+
+## Upside Down Angle Threshold
+
+**Upside Down Angle Threshold** (`90` deg) sets when the vehicle counts as flipped. `0` is upright, `180` fully inverted, and the default counts a vehicle on its side.
+
+`GetIsUpsideDown` reads it, and **OnVehicleFlipped** fires when it changes.
+
+That event is where a "press R to recover" prompt belongs.
+
+
+
+## Teleporting a Vehicle
+
+> Do not set the actor transform directly on a simulating vehicle. The wheels do not follow, and the physics state ends up incorrect.
 
 `TeleportVehicle(Location, Rotation, KeepRelativeVelocity)` moves the vehicle and its wheels together.
 
 `KeepRelativeVelocity` decides whether it arrives moving or stopped — keep it for a portal, drop it for a respawn.
-<!-- split -->
-**Aligning to a marker**
+
+
+
+## Aligning a Vehicle to a Marker
 
 `SetVehiclePositionWithVirtualPivot(LocalPivot, WorldTransform, bTeleport)` positions the vehicle so a chosen local pivot lands on a target world transform.
 
 Use it when your spawn marker represents something other than the vehicle origin — a wheel contact point, or a trailer coupler.
-<!-- /side-by-side -->
 
-`SetPhysics(bool)` toggles simulation entirely, which is what you want before attaching a vehicle to something else or handing it to a sequencer.
+
+
+## Enabling and Disabling Physics
+
+`SetPhysics(bool)` toggles simulation entirely.
+
+This is what you want before attaching a vehicle to something else or handing it to a sequencer.
 
 
 
 ## Drag and Damping
 
-**Base Linear Drag** is the fallback linear damping, and **Dynamic Air Drag** enables additional slip-based damping at higher speeds. Both are runtime values rather than editor settings, so set them from Blueprint or C++ when drag should change with vehicle state — a spoiler deploying, or a load being dropped.
+**Base Linear Drag** is the fallback linear damping, and **Dynamic Air Drag** enables additional slip-based damping at higher speeds.
+
+Both are runtime values rather than editor settings, so set them from Blueprint or C++ when drag should change with vehicle state — a spoiler deploying, or a load being dropped.
 
 > Damping was reworked in 1.5. Suspension damping now uses the spring's actual compression and extension instead of estimating from movement at the contact point. If you had instability around 140 MPH on an older version, that was the old approximation leaking velocity.
 
