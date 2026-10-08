@@ -7,7 +7,7 @@ This page provides information on how to input wheel data from AVS into your Ani
 ## Step 1: Create Your AnimBP
 
 <!-- side-by-side:57 -->
-Create a new AnimBP using the skeletion you wish to animate
+Create a new AnimBP using the skeleton you wish to animate
 <!-- split -->
 ![Content browser context menu on SKM_Offroad_Skeleton with Create > Anim Blueprint highlighted](../Assets/Images/tutorials-skeletal-mesh-skeletal-animation-01.png)
 <!-- /side-by-side -->
@@ -45,7 +45,7 @@ After casting, you need to validate one of your wheel components. This is becaus
 <!-- side-by-side:58 -->
 ![Get Initialization State on the AVS vehicle feeding a SET node for the Init boolean](../Assets/Images/tutorials-skeletal-mesh-skeletal-animation-05.png)
 <!-- split -->
-### 2D - Save vehicle initalization state
+### 2D - Save vehicle initialization state
 
 Next we will save the initialization state, we will use this later to prevent the graph from animating pre-runtime.
 <!-- /side-by-side -->
@@ -83,7 +83,7 @@ Transform each of your bones as needed. Here we will be setting the bone locatio
 <!-- split -->
 ### 3B - Offroad Control Rig
 
-If your following along using the UE5 template offroad car, or if you have a control rig. You will want to add the control rig here. I used the offroad control rig unmodified.
+If you're following along using the UE5 template offroad car, or if you have a control rig. You will want to add the control rig here. I used the offroad control rig unmodified.
 <!-- /side-by-side -->
 
 <!-- side-by-side:58 -->

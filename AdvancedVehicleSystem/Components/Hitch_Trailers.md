@@ -90,6 +90,22 @@ Regardless of what you choose, you will need to be mindful of how you call these
 
 
 
+## Hitch To Overlapped Requirements
+
+`HitchToOverlapped` only connects when all of these hold:
+
+- Call it on the **tow hitch**. Called on a trailer hitch, it does nothing.
+- Each hitch needs a collision shape — box, sphere or capsule — as a **direct child**. A shape nested under something else is not found.
+- Trailer hitches that are already hitched are skipped, and the two hitches must share a **Connect Type**.
+
+
+
+## Trailer Chains
+
+A trailer can tow another trailer. This works in single player, but is untested in multiplayer and likely does not work there.
+
+
+
 ## Driving a Trailer's Inputs with Input Host
 
 A trailer is a full AVS vehicle, so it has its own throttle, brakes and steering that nothing is driving by default.
@@ -106,6 +122,8 @@ Useful for:
 
 Set the host when the hitch connects and clear it when it releases, which is what the **Hitched** and **Unhitched** events are for.
 
+Clearing the host does not reset the trailer's inputs. Zero its throttle and release its brakes and handbrake on **Unhitched**, or it keeps whatever the truck was doing at the moment it let go.
+
 
 
 ## Events
@@ -118,7 +136,7 @@ The hitch component broadcasts three events you can bind to:
 | **Unhitched** | The connection is released. |
 | **Hitched To Destroyed** | The thing on the other end was destroyed. |
 
-**Hitched To Destroyed** is the one worth handling. A trailer being destroyed while attached is otherwise easy to miss, and it is where you clean up any state you were tracking about the load.
+**Hitched To Destroyed** fires when the vehicle on the other end is destroyed while attached. Clean up any state you were tracking about the load there.
 
 `GetIsHitched` returns the current state if you would rather poll than bind.
 

@@ -73,7 +73,7 @@ When using raycast wheels, you can reduce lateral friction in the wheel config t
 
 ## Scaled Down Vehicles
 
-A vehicle scaled down — an RC car, a toy, a miniature — is still simulated as real physics, so it behaves like a small heavy object rather than a small car.
+A vehicle scaled down — an RC car, a toy, a miniature — is still simulated as real physics, so it performs differently from the full size version.
 
-It has to be tuned at the size it will be played at. Mass, torque, suspension and friction all need revisiting after a scale change; the values from the full size version will not transfer.
+It has to be tuned at the size it will be played at.
 

@@ -63,7 +63,9 @@ Each entry in a light controller's **Relations** array is one rule: when a group
 
 **When Group Active** is the light group name the rule watches, and **Set Intensity** is the intensity to apply while that group is active.
 
-A controller with several relations uses the **highest** intensity among the rules whose groups are currently active, which is what produces the blinker-over-headlights behavior described above.
+When several rules have active groups, the **last one in the array wins**. Order them from lowest to highest priority.
+
+That is what produces the blinker-over-headlights behavior described above: the blinker rule is listed after the headlights rule. Swap them and the headlights would override the blinker.
 
 
 

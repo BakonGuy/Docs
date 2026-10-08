@@ -240,7 +240,8 @@ If you want to use the buttons and sliders, press **'SHIFT + F1'** to bring your
 
 ## Next Steps
 
-- [Wheels](https://overtorque-creations.com/Dev/Docs/#AVS/Components/Wheels.md) — every wheel setting, including suspension and detaching
+- [Wheels](https://overtorque-creations.com/Dev/Docs/#AVS/Components/Wheels.md) — every wheel setting, including suspension
+- [Wheels at Runtime](https://overtorque-creations.com/Dev/Docs/#AVS/Components/Wheels_At_Runtime.md) — detaching, adding and changing wheels while the game runs
 - [Wheel Effects](https://overtorque-creations.com/Dev/Docs/#AVS/Wheel_Effects/Overview.md) — skid marks, smoke, and tire audio
 - [Camera Pivot](https://overtorque-creations.com/Dev/Docs/#AVS/Components/Camera_Pivot.md) — a real camera rig instead of a fixed spring arm
 - [Arcade Physics](https://overtorque-creations.com/Dev/Docs/#AVS/Guides/Arcade_Physics.md) — tuning toward snappier, more forgiving handling

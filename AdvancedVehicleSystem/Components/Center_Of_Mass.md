@@ -15,7 +15,7 @@ It is not the only thing that can set the center of mass — a code override bea
 ## Adding a Center of Mass Component
 
 <!-- side-by-side:57 -->
-**1. Add the component** to your vehicle.
+**1. Add the component** directly under `VehicleMesh`.
 
 **2. Position it slightly above wheel height**, roughly where the vehicle's mass actually is. Low in the chassis, between the axles, is a good starting point for a car.
 
@@ -26,6 +26,8 @@ It is not the only thing that can set the center of mass — a code override bea
 ![Center of mass component positioned inside a vehicle chassis with the visualizer enabled](../Assets/Images/_placeholder.png "Position the marker, then confirm with the visualizer")
 <!-- /side-by-side -->
 
+> The component must be attached **directly** to `VehicleMesh`. One nested under any other component is ignored, and only the first one found is used.
+
 
 
 ## Center of Mass Height
@@ -34,7 +36,7 @@ Lower is not automatically better:
 
 Too high and the vehicle rolls over in corners. Slightly above wheel height is stable but responsive, which is the usual target. Below the wheels it resists flipping, but leans the wrong way through a corner.
 
-A vehicle leaning outward through a corner looks wrong even when it drives correctly. If you need a vehicle that cannot flip, keep the center of mass in a normal position and adjust suspension and grip instead.
+A vehicle leaning outward through a corner looks wrong even when it drives correctly.
 
 
 
@@ -44,7 +46,9 @@ Three things can set the center of mass:
 
 1. `SetExactCenterOfMass` — explicit override, relative to the vehicle mesh pivot. Beats the component.
 2. **This component's location.**
-3. The vehicle mesh pivot, when neither exists.
+3. Neither — Unreal's own center of mass, calculated from the vehicle mesh's physics bodies.
+
+The one exception: `SetCenterOfMassOffset` with no component and no exact override measures its offset from the vehicle mesh pivot.
 
 `GetExactCenterOfMass` returns the real value with a validity flag. It is invalid until a physics body exists, so do not call it during construction.
 

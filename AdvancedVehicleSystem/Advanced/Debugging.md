@@ -81,11 +81,11 @@ stat FPS          Frame rate, for comparing against the physics rate
 
 ## A Vehicle That Shakes, Jitters or Bounces
 
-Four settings account for most cases. Work through them in this order.
+Check these four, in this order.
 
-**1. Vehicle mass is too low.** Under `1000` kg is very light for a car. A light body reacts violently to suspension forces meant for a heavier one. See [Vehicle Mass](https://overtorque-creations.com/Dev/Docs/#AVS/Configuration/Physics.md).
+**1. Vehicle mass is too low.** Under `1000` kg is very light for a car. See [Vehicle Mass](https://overtorque-creations.com/Dev/Docs/#AVS/Configuration/Physics.md).
 
-**2. Tire friction is too high.** Friction well above the default `1.4` on the Y axis is a frequent cause. Put it back to `1.4` and confirm the shaking stops before tuning it again.
+**2. Tire friction is too high.** Friction well above the default `1.4` causes jittering. Put it back to `1.4` and confirm the shaking stops before tuning it again.
 
 **3. Project physics settings have not been applied.** Substepping in particular. See [Recommended Project Settings](https://overtorque-creations.com/Dev/Docs/#AVS/Getting_Started/Project_Settings.md).
 
@@ -97,30 +97,25 @@ If all four check out and the vehicle still shakes only while standing still, it
 
 ## Physics Wheels Reacting Harshly to Bumps and Curbs
 
-A wheel in **physics mode** is a rigid body. It reacts as though perfectly solid — rolling a marble at a curb rather than a tire deforming over it, since there is no tire deformation model.
-
-A sharp edge therefore transfers its full impulse into the vehicle.
+A wheel in **physics mode** is a rigid body. It reacts as though perfectly solid — rolling a marble at a curb rather than a tire deforming over it.
 
 Raycast wheels do not have this behavior, and have been the default since 1.4. Switching the wheel mode is the first thing to try.
-
-Suspension values will not tune it away, because the harshness is in the collision rather than in the spring.
 
 
 
 ## Common Problems and Fixes
 
-| Symptom | Usual cause |
+| Symptom | Check |
 |---|---|
 | Vehicle will not move | Engine off, or still in Park. A vehicle spawns with both. Then check a wheel has **Is Driving Wheel** on. |
-| Stops responding after sitting still | It went passive. See [Tick and Performance](https://overtorque-creations.com/Dev/Docs/#AVS/Advanced/Tick_And_Performance.md). |
+| Stops responding while moved by something that does not possess it | It went passive. See [Tick and Performance](https://overtorque-creations.com/Dev/Docs/#AVS/Advanced/Tick_And_Performance.md). |
 | Wheels bounce or misbehave at speed | Physics wheel mode with non-sphere collision, or engine contact offsets left at default. |
 | Wheels will not reach high speed | Engine **Max Angular Velocity** too low. See [Project Settings](https://overtorque-creations.com/Dev/Docs/#AVS/Getting_Started/Project_Settings.md). |
 | Skeletal mesh parts jitter violently | Physics constraints defined inside the mesh's Physics Asset. Move them to the vehicle Blueprint. |
 | Inputs do nothing in multiplayer | Called from a non-owning client. See [Networking](https://overtorque-creations.com/Dev/Docs/#AVS/Advanced/Networking.md). |
 | Vehicle see-saws on another physics object | Turn off **Wheels Push Physics**. |
-| Effects cut off abruptly | An effect destroying its particles instead of deactivating them. See [Custom Effects](https://overtorque-creations.com/Dev/Docs/#AVS/Wheel_Effects/Custom_Effects.md). |
-| Vehicle shoved around by a character | A character collision is welded to the vehicle. See [Attaching Objects](https://overtorque-creations.com/Dev/Docs/#AVS/Components/Attaching_Objects.md). |
-| Actors vanish at distance while driving | Network relevancy using a stale view location. See [Networking](https://overtorque-creations.com/Dev/Docs/#AVS/Advanced/Networking.md). |
+| Vehicle shoved around by a character | A character attached to the vehicle still has collision enabled. See [Attaching Objects](https://overtorque-creations.com/Dev/Docs/#AVS/Components/Attaching_Objects.md). |
+| Actors vanish at distance while driving | Network relevancy. Check **Use Client Side Camera Updates** is on, or switch to server side relevancy. See [Networking](https://overtorque-creations.com/Dev/Docs/#AVS/Advanced/Networking.md). |
 | Skeletal wheels sit or scale wrong | A bone with non-1.0 scale. Apply the scale in your modeling software. |
 
 

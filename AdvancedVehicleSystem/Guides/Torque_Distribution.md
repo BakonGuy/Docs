@@ -34,6 +34,6 @@ With that in place, the gear table is total drivetrain torque, and adding or rem
 
 Dividing equally is the simple case. An uneven split — more torque to the rear axle than the front — needs one of two other approaches.
 
-`SetWheelTorque` on a wheel drives that wheel directly, and is the simpler of the two. See [Wheels](https://overtorque-creations.com/Dev/Docs/#AVS/Components/Wheels.md).
+`SetWheelTorque` on a wheel drives that wheel directly, and is the simpler of the two. See [Wheels at Runtime](https://overtorque-creations.com/Dev/Docs/#AVS/Components/Wheels_At_Runtime.md).
 
 Overriding the drivetrain gives you the whole distribution step, per substep, on the physics thread. That is a C++ path. See [Drivetrain and Physics Overrides](https://overtorque-creations.com/Dev/Docs/#AVS/Advanced/Physics_Overrides.md).

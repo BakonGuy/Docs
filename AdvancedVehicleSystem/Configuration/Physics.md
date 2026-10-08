@@ -17,7 +17,7 @@ Everything else on this page falls into two groups. **Body limits** — angular 
 ## Setting the Center of Mass
 
 <!-- side-by-side:57 -->
-**1. Add a [Center of Mass component](https://overtorque-creations.com/Dev/Docs/#AVS/Components/Center_Of_Mass.md)** to the vehicle. It is a marker with no settings — you position it and AVS uses its location.
+**1. Add a [Center of Mass component](https://overtorque-creations.com/Dev/Docs/#AVS/Components/Center_Of_Mass.md)** directly under `VehicleMesh`. It is a marker with no settings — you position it and AVS uses its location. Nested under any other component, it is ignored.
 
 **2. Put it slightly above wheel height**, roughly where the mass actually sits. This gives a stable but responsive feel and is a good starting point for most vehicles.
 
@@ -46,7 +46,9 @@ Three sources, in order of precedence:
 
 1. `SetExactCenterOfMass` — explicit override relative to the vehicle mesh pivot. Beats everything.
 2. The Center of Mass component's location.
-3. The vehicle mesh pivot, when neither of the above exists.
+3. Neither — Unreal's own center of mass, calculated from the vehicle mesh's physics bodies.
+
+The one exception: `SetCenterOfMassOffset` with no component and no exact override measures its offset from the vehicle mesh pivot.
 
 `GetExactCenterOfMass` returns the real value with a validity flag. It is invalid until a physics body exists, so do not call it during construction.
 
@@ -64,7 +66,7 @@ It **sets rather than accumulates**, so calling it repeatedly will not drift. Th
 
 Mass is set on the vehicle mesh component, in Unreal's own physics settings, rather than by AVS. AVS does not modify it — it applies forces to the body you give it.
 
-Use realistic figures. A vehicle under `1000` kg is very light, and is the usual cause of a car that feels skittish or gets shoved around by other physics objects.
+Use realistic figures. A vehicle under `1000` kg is very light for a car.
 
 A compact car starts around `1100` kg, a midsize sedan around `1500`, and a pickup or van around `2000`.
 
@@ -106,17 +108,15 @@ It is separate from the engine's global Max Angular Velocity, which applies to w
 
 ## Rest Velocity Threshold
 
-**Rest Velocity Threshold** (`25` cm/s) decides when a vehicle counts as stopped, for both passive mode and network rest state.
+**Rest Velocity Threshold** (`25` cm/s) decides when a vehicle counts as stopped, for both passive mode and network rest state. The vehicle has to stay below it for **3 seconds** before it counts.
 
-Raise it and vehicles settle sooner, which helps performance but can cut off slow creeping.
-
-Lower it if vehicles sleep while they should still be rolling.
+Raise it and slow-moving vehicles count as stopped sooner. Lower it if vehicles are treated as stopped while they should still be rolling.
 
 
 
 ## Upside Down Angle Threshold
 
-**Upside Down Angle Threshold** (`90` deg) sets when the vehicle counts as flipped. `0` is upright, `180` fully inverted, and the default counts a vehicle on its side.
+**Upside Down Angle Threshold** (`90` deg) sets when the vehicle counts as flipped. `0` is upright and `180` fully inverted. The vehicle has to tip past the threshold, so the default counts it as flipped once it goes past its side.
 
 `GetIsUpsideDown` reads it, and **OnVehicleFlipped** fires when it changes, with `bIsNowUpsideDown` telling you which way.
 
@@ -166,8 +166,8 @@ Both are runtime values rather than editor settings, so set them from Blueprint 
 |---|---|
 | `GetAirSpeed` | Actual speed, in your chosen speed unit |
 | `GetAcceleration` | Change in speed per second |
-| `GetSlip` | General lateral slip for the whole vehicle |
+| `GetSlip` | The vehicle's sideways speed, as `0` to `1` |
 | `AnyWheelContact` | Whether any wheel is touching a surface |
 | `GetPhysicsTickDelta` | Current Chaos substep delta |
 
-`GetSlip` is an approximate whole-vehicle value. For accurate results, such as traction control or per-corner effects, read slip from the wheels instead.
+`GetSlip` is not tire slip. It is `0` below 1000 cm/s of sideways speed, rising to `1` at 2500 cm/s — the same value that lifts the steering limit while sliding. For tire slip, read it from the wheels.

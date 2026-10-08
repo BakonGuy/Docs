@@ -68,7 +68,7 @@ With `Instant` selected, the speed settings hide themselves — nothing uses the
 
 **Steering Speed** is how quickly the vehicle responds to a change in input.
 
-**Steering Recenter Speed** is a separate rate, used when steering returns to center from zero input.
+**Steering Recenter Speed** is a separate rate, used whenever the input is closer to center than the current steering — releasing the stick, or easing off it.
 
 Real vehicles self-center faster than a driver turns in. Setting recenter faster than turn-in removes a lot of floatiness without changing grip.
 
@@ -81,7 +81,9 @@ A curve mapping **speed** (X) to **maximum steering input** (Y). Without it, ful
 <!-- side-by-side:57 -->
 At low speed you want full lock available, so the curve starts at or near `1.0`. As speed climbs, the available input should shrink — a car at motorway speed should barely turn compared to one in a car park.
 
-The curve does not change the physical **Max Steering Angle**. It scales how much of that angle the player can ask for, so a shallow curve at speed means the wheels simply do not turn as far.
+The curve does not change the physical **Max Steering Angle**. It scales how much of that angle the player can ask for, so a shallow curve at speed means the wheels do not turn as far.
+
+**Sliding raises the limit.** While the vehicle is moving sideways, AVS adds to the curve's value — nothing below 1000 cm/s of sideways speed, rising to a full extra `1.0` at 2500 cm/s. A car sliding sideways can reach full lock even where the curve would normally restrict it, which is what makes countersteering possible.
 
 Raising the curve's values across the board allows stronger steering at speed, which is one of the main levers for arcade handling. See [Arcade Physics](https://overtorque-creations.com/Dev/Docs/#AVS/Guides/Arcade_Physics.md).
 <!-- split -->

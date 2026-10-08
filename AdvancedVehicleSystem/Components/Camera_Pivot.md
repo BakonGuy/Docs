@@ -33,7 +33,9 @@ Add an `AVS_CameraPivot` component to your vehicle.
 
 Position it at the point the camera should rotate *around* — roughly the driver's head for a first person view, or the center of the vehicle for a chase camera.
 
-The pivot's own transform is its default position. Everything the movement modes do is measured as an offset from it, and `ResetPivotRotation` returns to it.
+The pivot's location is its default position, and the movement modes are measured as an offset from it.
+
+Its rotation behaves differently — see **Relative To Actor** below.
 <!-- split -->
 ![Add Component menu filtered to "camera", showing AVS Camera Pivot in the list](../Assets/Images/_placeholder.png "Add Component → AVS Camera Pivot")
 <!-- /side-by-side -->
@@ -106,9 +108,13 @@ With the locks off, the camera rolls and pitches with the vehicle, which is what
 
 ## Relative To Actor
 
-**Relative To Actor** (on by default) uses the vehicle's actor rotation as the reference frame for look input.
+**Relative To Actor** (on by default) uses the vehicle's actor rotation as the reference frame for look input. The pivot's own rotation is then used as the target for `ResetPivotRotation`.
 
-With it off, the pivot's own default rotation is the reference frame instead. A pivot that is already angled — a chase camera pitched down at the vehicle, for example — then measures input from that angle rather than from the vehicle's.
+With it off, the pivot's own rotation is part of the reference frame instead, and input is measured from that angle.
+
+> **With Relative To Actor on, the pivot's rotation is not applied until `ResetPivotRotation` is called.** Look input starts at zero, so the camera begins facing along the vehicle. A chase camera pitched down at the vehicle only takes up that angle after a reset.
+>
+> Calling `ResetPivotRotation` when the vehicle is possessed, as the example at the bottom of this page does, is what applies it.
 
 
 
@@ -118,7 +124,7 @@ With it off, the pivot's own default rotation is the reference frame instead. A 
 
 The pivot searches its children for a camera component on BeginPlay. If more than one camera lives under the same pivot, call `SetTrackedCamera` to say which one counts.
 
-> With **Detect Active Camera** on and no camera beneath the pivot, the pivot never moves. That is the usual cause of a pivot that appears to do nothing.
+> With **Detect Active Camera** on and no camera beneath the pivot, the pivot never moves.
 
 
 
@@ -156,7 +162,7 @@ An actual spring simulation. The camera leans under acceleration, dips under bra
 Low stiffness with high damping lets an impact move the camera a long way without it oscillating on the way back.
 <!-- /side-by-side -->
 
-`None` holds the pivot at its default. A camera that should not move at all uses `None` for both.
+`None` applies no lag or spring. The pivot sits at its default location and follows look input directly.
 
 
 
@@ -202,6 +208,8 @@ Both default to `700`, and both are Bounce only.
 ## Choosing Settings for your Game
 
 The same component covers a tight arcade chase camera and a subtle simulation cockpit. The difference is which mode each half uses, and how far the pivot is allowed to move from its default.
+
+> The arcade, cockpit and cinematic values below are starting points to tune from, not tested presets. The two off-road examples are settings from a shipped game.
 
 | Style | Location | Rotation | Result |
 |---|---|---|---|

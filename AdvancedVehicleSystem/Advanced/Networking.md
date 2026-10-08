@@ -12,7 +12,7 @@ Two things follow from that, and they cover most of this page:
 
 **The vehicle's network type** decides how a client follows the server — buffered and smooth, or predicted and immediate.
 
-**Input functions only work from the owning client or the server.** Calling them anywhere else does nothing and reports no error.
+**Input functions have to be called from the owning client or the server.** From anywhere else they do nothing and report no error.
 
 
 
@@ -43,9 +43,11 @@ Input functions are replicated, but where they are called from decides whether t
 <!-- side-by-side:57 -->
 In single player, call them from anywhere. In multiplayer they only work from the **owning client** — the client possessing the pawn — or from the server.
 
-Calling `SetThrottleInput` on a non-owning client does nothing, and produces no error.
+Calling `SetThrottleInput`, `SetBrakeInput`, `SetSteeringInput` or `MoveShifterInput` on a non-owning client does nothing, and produces no error.
 
 `isOwningClient` is the check to make before calling input functions from anything that might run elsewhere.
+
+Throttle, brake and steering are rounded to one decimal place before they are stored and sent, so they move in steps of `0.1`. The controlling client is the exception for steering — it steers with the raw value, and only the replicated copy is rounded.
 
 `SetLocalEngineRunning` is the deliberate exception, for local-only cosmetic changes.
 <!-- split -->
@@ -62,7 +64,7 @@ void AMyVehicle::ApplyThrottle(float Value)
 }
 ```
 
-The same applies to hitching. `Hitch` and `HitchToOverlapped` must come from the owning client or the server.
+The same applies to hitching. `Hitch` and `HitchToOverlapped` go through the tow hitch's server RPC, so they must come from whoever owns the towing vehicle, or from the server.
 
 
 
@@ -92,8 +94,8 @@ Settings under **Advanced Vehicle System → Network**. These three are usually 
 |---|---|---|---|
 | **Net Send Rate** | `0.05` s | Save bandwidth | Update more often |
 | **Net Time Behind** | `0.15` s | Absorb jitter on poor connections | Tighten responsiveness |
-| **Net Lerp Start** | `0.35` | Tolerate more drift before correcting | Correct sooner |
-| **Net Position Tolerance** | `0.1` | Ignore small differences | Correct more precisely |
+| **Net Lerp Start** | `0.35` s | Blend toward each server state for longer | Let local physics run longer before blending |
+| **Net Position Tolerance** | `0.1` cm | Ignore larger differences | Correct smaller differences |
 | **Net Smoothing** | `10.0` | Correct faster, more visibly | Correct gently |
 | **Net Use Smoothing** | `true` | — | Turn off to apply corrections directly, with no smoothing |
 
@@ -101,7 +103,7 @@ Settings under **Advanced Vehicle System → Network**. These three are usually 
 
 ## Net Time Behind
 
-**Net Time Behind** is the main trade on this page.
+**Net Time Behind** is how far behind the server a client plays back the states it receives.
 
 More absorbs packet loss and jitter, at the cost of remote vehicles lagging further behind reality.
 
@@ -109,11 +111,19 @@ Less is tighter, but makes bad connections obvious.
 
 
 
+## Net Lerp Start and Net Position Tolerance
+
+A client runs its own physics between server states. **Net Lerp Start** is how long before each state it stops and starts blending toward it.
+
+**Net Position Tolerance** is the distance, per axis, under which a state is skipped instead of blended to. It lets a slow-moving vehicle's physics settle rather than being nudged toward positions it is already at.
+
+
+
 ## Net Send Rate
 
-Do not lower **Net Send Rate** without measuring.
+**Net Send Rate** is the interval between the states the owner sends.
 
-With many vehicles it is the setting most likely to cost you real bandwidth.
+Lowering it sends more often, and with many vehicles it is the setting with the largest effect on bandwidth.
 
 
 
@@ -123,19 +133,19 @@ Movement state goes over **unreliable** RPCs. A dropped packet is simply replace
 
 The **resting** state is sent **reliably**, once, when a vehicle settles. It is the authoritative final position.
 
-That split explains a behavior people notice: a vehicle that looked slightly out of place while moving snaps to the correct position the moment it stops, because the reliable rest update has arrived.
+That is why a vehicle that looked slightly out of place while moving snaps to the correct position when it stops: the reliable rest update has arrived.
 
-> Under heavy network load, unreliable movement packets are the first thing to be dropped. If vehicles drift while moving but correct themselves on stopping, look at total networked actor count before changing AVS settings.
+> Under heavy network load, unreliable packets are the first to be dropped. Vehicles that drift while moving but correct themselves on stopping are a sign of that.
 
 
 
 ## Network Rest State
 
-Vehicles that come to a stop stop sending updates, rather than repeatedly sending an unchanged position.
+Vehicles that come to a stop stop sending movement updates. Instead the rest state is sent once, and sent again only if the vehicle moves away from it — by more than 50 cm while its physics is awake, or 0.5 cm while asleep.
 
-**Rest Velocity Threshold** under **Advanced Vehicle System → Physics** decides when that kicks in, and it is the same threshold passive mode uses.
+**Rest Velocity Threshold** under **Advanced Vehicle System → Physics** decides when that kicks in: below it for 3 seconds. It is the same threshold passive mode uses.
 
-> If parked vehicles are drifting out of sync on clients, that threshold is too high.
+> A vehicle moving slower than the threshold counts as stopped. If slow-moving vehicles drift out of sync on clients, the threshold is too high.
 
 
 
@@ -143,7 +153,7 @@ Vehicles that come to a stop stop sending updates, rather than repeatedly sendin
 
 Trailer sync is automatic once a hitch connection is made. Reworked in 1.5 with an adaptive send rate — trailers update more when they need to and back off while resting.
 
-The current implementation supports a single tow hitch and trailer hitch pair. Hitch chains are not yet supported, so a truck towing a trailer towing another trailer is outside what the networking handles today.
+Trailer chains — a trailer towing another trailer — work in single player, but are untested in multiplayer and likely do not work there.
 
 
 

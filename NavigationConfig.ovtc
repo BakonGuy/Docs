@@ -14,6 +14,7 @@ dir "Wheel Effects" -> Wheel_Effects recursive
 dir "Skeletal Mesh" -> Skeletal_Mesh recursive
 dir "Guides" -> Guides recursive
 dir "Advanced" -> Advanced recursive
+dir "Reference" -> Reference recursive
 
 [asset "Advanced Vehicle System (Legacy)"]
 id = AVS_Legacy

@@ -9,7 +9,7 @@ The mechanism is passive mode, and it is the reason a Blueprint Tick can stop ru
 
 A vehicle that has come to rest does not need most of what a moving one does, so AVS stops doing it. That state is called **passive mode**, and it is what makes a street full of parked vehicles practical.
 
-Passive mode also gates the standard Tick event, which is the part that surprises people. Blueprint logic placed on Tick stops running once the vehicle settles.
+Passive mode also gates the standard Tick event, and AVS's own 25 TPS tick with it. Blueprint logic placed on either stops running once the vehicle settles.
 
 AVS provides three additional tick events with different guarantees, and picking the right one is the whole answer to that problem.
 
@@ -25,7 +25,7 @@ When a vehicle comes to rest it enters **passive mode**, a low resource state. A
 
 ## Passive Tick Gatekeeping
 
-**Passive Tick Gatekeeping** (on by default) means passive mode also gates the standard Tick event.
+**Passive Tick Gatekeeping** (on by default) means that while passive, only **AVS_AlwaysTick** and **AVS_PassiveTick** run. The standard Tick and **AVS_25TPS** both stop.
 
 This is intentional and is where the performance saving comes from. Use one of the other tick events rather than disabling gatekeeping.
 
@@ -41,7 +41,7 @@ Use it for anything that must work on a parked vehicle — interaction prompts, 
 
 ## Tick Event: AVS_PassiveTick
 
-Runs only while passive, after AlwaysTick.
+Runs only while passive **and** Passive Tick Gatekeeping is on, after AlwaysTick. With gatekeeping off, it never runs.
 
 Use it for logic that only matters while resting, so you are not paying for it while driving.
 
@@ -49,7 +49,7 @@ Use it for logic that only matters while resting, so you are not paying for it w
 
 ## Tick Event: AVS_25TPS
 
-Runs at a fixed 25 ticks per second.
+Runs at a fixed 25 ticks per second while the vehicle is not passive. At very low frame rates it catches up at most two steps per frame, so it can fall below 25.
 
 Use it for anything that does not need per-frame precision — HUD values, audio parameters, light updates. Cheaper and more predictable than the standard tick.
 
@@ -95,7 +95,7 @@ The risk is anything that moves a vehicle **without possessing it**: a sequencer
 
 Setting **Allow Passive Mode** to false keeps a vehicle awake permanently.
 
-This works, but gives up the optimisation entirely. Prefer the override below unless the vehicle should genuinely never rest.
+This works, but gives up the optimization entirely. Prefer the override below unless the vehicle should genuinely never rest.
 
 
 
@@ -128,10 +128,10 @@ The stock implementation returns passive only when **all** of these are true:
 
 - **Allow Passive Mode** is enabled
 - the vehicle has finished initializing
-- the vehicle is locally at rest, per **Rest Velocity Threshold**
+- the vehicle is locally at rest — below **Rest Velocity Threshold** for 3 seconds
 - it is not currently syncing as a trailer
 - it is not possessed by a player or an AI controller
-- engine RPM is at or below idle (or the engine is off)
+- engine RPM has settled — at idle if the engine is running, or at zero if it is off
 
 
 
@@ -177,10 +177,10 @@ Check the three counters before the timings.
 
 
 
-## Common Performance Problems
+## Performance with Many Vehicles
 
-Most AVS performance problems are one of these three:
+AVS has shipped in a number of released games without being the bottleneck. When a game with many vehicles slows down, profile it first.
 
-1. **Vehicles not going passive.** Check Active Vehicles. Usually something is nudging them, or Allow Passive Mode got turned off and never back on.
-2. **Blueprint logic on standard Tick** that should be on AVS_25TPS.
-3. **Physics wheel mode used where raycast would do.** Physics wheels are considerably more expensive. Use them when you need real wheel collision, not by default.
+At scale, the costs that matter are particles, lights, LOD, materials and network relevancy. In the AVS demo project, exhaust particles cost more than anything else; six or seven vehicles without them barely register.
+
+Wheel collision complexity makes little to no difference to performance. Complex collision is avoided for a different reason — it treats each triangle as a plane, so objects clip through it.

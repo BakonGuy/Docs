@@ -48,13 +48,16 @@ Call the parent implementation unless you intend to replace force application en
 
 Each `FAVS_PhysicsForce` carries:
 
-- a mode
+- a **mode** — `Force`, `ForceAtLocation`, `ProxyForceAtLocation` or `Brake`
+- what it acts on — a component, or for `ProxyForceAtLocation` a physics proxy
 - a location, in cm
 - a force, in centinewtons
-- an optional brake torque, in Nm
+- a brake torque, in Nm, for `Brake` operations
 - the delta time
 - an acceleration-change flag
 - the originating wheel index
+
+`ProxyForceAtLocation` is how AVS pushes back on whatever a wheel is standing on. When a wheel rests on another physics object, the object receives the opposite of the force the wheel applies — suspension and tire friction for a raycast wheel, suspension only for a physics wheel, whose friction comes from the physics engine.
 
 
 
@@ -98,9 +101,9 @@ Wheels you do not flag keep stock behavior, so an override can cover one axle an
 
 
 
-## Example: Open Differential
+## Example: Cutting Torque to Slipping Wheels
 
-A simple open differential that sends torque to whichever driven wheel has more grip.
+A simple traction control that scales back each driven wheel's torque as it starts to slip.
 
 ```cpp
 void AMyVehicle::PhysicsTickDrivetrain(

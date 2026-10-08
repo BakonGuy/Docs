@@ -1,4 +1,4 @@
- # Attaching Objects to a Vehicle
+# Attaching Objects to a Vehicle
 
 Plows, roof racks, cargo, weapons, characters in a seat — anything you bolt onto a vehicle and expect to move with it.
 
@@ -20,11 +20,11 @@ Which one you get is decided by *what you attach to*, not by a setting.
 
 ## Welding a Collision Mesh to the Vehicle
 
-To weld, a static mesh must be attached **directly to `VehicleMesh`**.
+Attach the collision mesh **directly to `VehicleMesh`**, so it welds to the vehicle's root body.
 
 Welding means multiple physics bodies act as one. A snow plow welded to the front of a truck adds its collision to the truck, so the truck can push snow with it and the weight is part of the simulation.
 
-An object attached further down the hierarchy — to a child component, or to another attached mesh — will not weld to the root body.
+A mesh attached to a skeletal mesh does not weld, for the reason below.
 
 
 
@@ -47,7 +47,7 @@ This is also why AVS wants the vehicle's root to be a **static mesh**, with skel
 
 A character attached to the vehicle with collision still enabled acts as an **immovable object**. It will push simulated physics objects of any weight around as though they were not there, including the vehicle it is riding on.
 
-Disable collision on anything you attach to a seat. In multiplayer, confirm it is disabled on clients as well as the server, since a character whose collision is only disabled on the server produces physics that disagree between machines.
+Disable collision on anything you attach to a seat. In multiplayer, confirm it is disabled on clients as well as the server.
 
 
 

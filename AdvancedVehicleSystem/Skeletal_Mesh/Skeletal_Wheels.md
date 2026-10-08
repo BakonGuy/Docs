@@ -84,7 +84,7 @@ Under Rendering for the VehicleMesh, you can set it to never be visible, or be h
 **2D**
 
 - Now select your wheel components, select a static mesh if you wish to use one. If not, leave it blank and a sphere collision will be used as a default.
-- Make sure your using Physics wheel mode.
+- Make sure you're using Physics wheel mode.
 - Check the box "Connect to Bone" and type in the associated bone name. If you typed the bone's name correctly, the component will snap to the bone location.
 - The rotation will not snap, so make sure you have the X axis facing in the forward direction, and Z axis facing in the upward direction.
 - Adjust the Wheel radius to match your wheel size.
@@ -95,7 +95,7 @@ Under Rendering for the VehicleMesh, you can set it to never be visible, or be h
 
 ## Step 3: Drive your Vehicle
 
-You should now be able to test your vehicle. If all is working your wheel bones should follow the location of it's respective wheel component.
+You should now be able to test your vehicle. If all is working your wheel bones should follow the location of its respective wheel component.
 
 ![Sports car driving in engine with the vehicle setup HUD showing 21 mph, drive, gear 1 and four wheels](../Assets/Images/tutorials-skeletal-mesh-skeletal-wheels-08.png)
 
@@ -112,7 +112,7 @@ Due to the way that AVS simulates wheels in this setup, the bone location of whe
 
 On initialization you need to get a reference to the mesh within the world. In this example I will save it as _BuggyMesh_ (Skeletal Mesh Component Variable Type).
 
-In the UpdateAnimation event you can then use your saved mesh to get the current bone locations, and save them. Here I have 4 wheels that need saved, so I save them using similiar names to their bone name.
+In the UpdateAnimation event you can then use your saved mesh to get the current bone locations, and save them. Here I have 4 wheels that need saved, so I save them using similar names to their bone name.
 <!-- /side-by-side -->
 
 <!-- side-by-side:40 -->
@@ -131,21 +131,19 @@ This AnimBP is named _VH_BuggyAnimBP_VS_
 
 
 
-## What Connect to Bone Actually Does
+## How Connect to Bone Works
 
-**Connect to Bone** on the wheel component tells that bone to simulate physics, then creates a locked constraint between the bone and the wheel's position.
+**Connect to Bone** on the wheel component tells that bone to simulate physics, then creates a locked constraint between the bone and the wheel. With **Wheel Reprojection** on, the bone is constrained to the projected mesh, since that is the one being displayed.
 
-The bone follows the wheel directly, with no AnimBP in between.
+The bone follows the wheel directly, with no AnimBP in between. An AnimBP reads the wheel's transform after the fact, so it can show the wheel a frame behind; a constraint does not have that delay.
 
-That is the reason to prefer it where it fits: an AnimBP reads the wheel's transform after the fact, so it can show the wheel a frame behind. A constraint does not have that delay.
+> **Physics mode only.** With the wheel in raycast mode, AVS shows a warning and leaves the bone unsimulated.
 
 
 
-## Scaled Bones Break Skeletal Wheels
+## Wheels Sit or Size Wrong on a Skeletal Mesh
 
-Unreal does not handle scaled bones well, and a wheel bone with a scale other than `1.0` produces wheels that sit or size incorrectly.
+This is usually a bone with a scale other than `1.0`. Unreal does not handle scaled bones well.
 
 Apply the scale in your modeling software and re-export, so Unreal sees every bone at `1.0` scale.
-
-This is the usual cause when a skeletal setup looks correct but the wheels are visibly the wrong size or in the wrong place.
 

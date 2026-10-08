@@ -24,7 +24,7 @@ While unconventional setups are allowed, **a sphere is the most stable and recom
 
 If you used AVS 1.4 or earlier, you had to right click certain Blueprint events and add a call to the parent function, or the vehicle would not work correctly.
 
-**That is no longer necessary.** As of 1.5 the entire plugin is native C++, and Unreal calls the native implementation for you before your Blueprint event runs. Construction Script, BeginPlay, Destroyed, OnPossessed, and Unpossessed all work without any extra wiring.
+**That is no longer necessary.** As of 1.5 the entire plugin is native C++, and the native code runs whether or not your Blueprint event calls its parent. Construction Script, BeginPlay, Destroyed, OnPossessed, and Unpossessed all work without any extra wiring.
 
 Parent calls carried over from an older project are harmless and do not need to be removed. New vehicles do not need them at all.
 

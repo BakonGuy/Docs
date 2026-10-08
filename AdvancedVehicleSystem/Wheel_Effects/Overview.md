@@ -1,250 +1,155 @@
 # Wheel Effects
 
-Skid marks, tire smoke, rolling audio, surface reactions, brake squeal — anything a wheel should produce as it interacts with the ground.
+Wheel effects are the sounds and particles a wheel makes against the ground: tire smoke, skid marks, rolling noise, impacts and brake squeal. This page sets up tire smoke, skid marks and rolling sound on a rear wheel drive car.
 
-New in 1.5, replacing the old SurfaceEffects system.
+Every effect setting is listed in [Wheel Effect Settings](https://overtorque-creations.com/Dev/Docs/#AVS/Reference/Wheel_Effect_Settings.md). Writing your own effect is covered in [Custom Effects](https://overtorque-creations.com/Dev/Docs/#AVS/Wheel_Effects/Custom_Effects.md).
 
-
-
-## Basic Understanding
-
-An effect is a self-contained object. It reads the wheel every tick, decides whether it should be running, calculates a 0-1 intensity, and hands that intensity to an output — a sound, a Niagara system, or both.
-
-Effects live in arrays, and there are two kinds of array:
-
-**Global Wheel Effects** always apply, whatever the wheel is driving on. Tire roll audio and brake squeal belong here.
-
-**Surface Effects** apply only on a specific physical surface. This is how dirt produces different smoke from tarmac.
-
-Effects are normally configured on the **vehicle** and inherited by every wheel. Wheels can then override what they need, so common changes only have to be made once.
+Wheel effects are new in 1.5 and replace the SurfaceEffects system.
 
 
 
-## Adding a Wheel Effect
+## How Wheel Effects Work
 
-<!-- side-by-side:57 -->
-**1. Open Advanced Vehicle System → Wheel Effects** on the vehicle.
+An effect watches one wheel. Every tick it decides how strongly it should play, from `0` to `1`, and drives a sound, a particle system, or both at that intensity.
 
-**2. Pick the right slot.** For an effect that should always run regardless of surface — tire roll audio, brake squeal — use **Global Wheel Effects**. For an effect that depends on what you are driving on, use **Effects For Default Surface**.
+Effects are set up once on the vehicle and copied to every wheel. Each wheel gets its own copy, so four wheels can smoke independently.
 
-**3. Add an entry and choose an effect type.** Roll, Skid / Slip, Bump / Impact, Brake Squeal, or one of your own.
+AVS ships with four effects:
 
-**4. Set the conditions** that decide when it fires — speed and slip thresholds, covered below.
+| Effect | Plays when |
+|---|---|
+| **Roll** | The wheel is rolling along a surface. |
+| **Skid / Slip** | The wheel is sliding or spinning. |
+| **Bump / Impact** | The wheel hits something, such as a landing or a curb. |
+| **Brake Squeal** | The brakes are working hard. |
 
-**5. Set the output** — a sound, a Niagara system, or both.
 
-**6. Drive it.** Effects only exist at runtime.
+
+## Global or Surface Effects
+
+The vehicle has three places to put effects.
+
+<!-- side-by-side:50 -->
+**Global Wheel Effects** play on every surface. Rolling noise and brake squeal go here, since they sound the same on any ground.
 <!-- split -->
-![Wheel Effects section on a vehicle with an effects array expanded, showing an effect type selected](../Assets/Images/_placeholder.png "Configure once on the vehicle; every wheel inherits it")
+**Effects For Default Surface** play on any surface without its own entry. **Surface Effects** hold effects for specific surfaces, such as dirt or gravel.
 <!-- /side-by-side -->
 
-
-
-## Effect Type: Roll
-
-The wheel is turning on a surface. Contact is implied.
-
-Use it for tire roll noise and light dust from ordinary driving.
-
-Intensity ramps from **Min Speed** (`100` cm/s) to **Full Speed** (`2000` cm/s), and holds at full above that.
+Smoke and skid marks change with the surface, so for the example car they go in **Effects For Default Surface**.
 
 
 
-## Effect Type: Skid / Slip
-
-The wheel is losing grip. This covers skid marks, smoke and squeal.
-
-Its **Slip Source** setting decides what it reacts to, covered in the next two sections.
-
-> A common setup is **two** skid effects: one on `X Slip` for burnout smoke, one on `Y Slip` for cornering squeal. They are separate objects, so they can have completely different sounds, particles, and thresholds.
-
-
-
-## Effect Type: Bump / Impact
-
-A one-shot on impacts into the contact normal — landings, curbs, potholes.
-
-Intensity ramps from **Min Strength** (`200` cm/s) to **Full Strength** (`1000` cm/s), with a **Cooldown** (`0.2` s) between firings.
-
-> Keep the cooldown. Without it, rough ground triggers an impact sound every frame the wheel makes contact.
-
-
-
-## Effect Type: Brake Squeal
-
-Surface independent, audio only. Worn brake noise, with a wear value you can change at runtime.
-
-It is also the shipped example of a custom effect that implements its own output instead of the standard one.
-
-
-
-## Skid Effect Slip Sources
-
-**Slip Source** changes what the Skid / Slip effect responds to.
-
-| Source | Responds to | Reach for it when |
-|---|---|---|
-| `Skid Speed (Classic)` | Lateral speed, or full planar speed while locked | You want the original AVS behavior, or are updating an older project |
-| `X Slip` | Longitudinal slip | Burnout smoke and lockup marks |
-| `Y Slip` | Lateral slip | Cornering squeal and drift smoke |
-| `Combined Slip` | Total slip | One effect covering both, when you do not need to tell them apart |
-
-The classic source uses **Min Skid Speed** (`500` cm/s) and **Full Skid Speed** (`1500` cm/s).
-
-The calculated sources use **Min Slip** (`0.5`) and **Full Slip** (`1.5`) instead. The settings you are not using hide themselves.
-
-
-
-## Skid Effect Response Settings
-
-**Response Speed** (`5.0`) is how fast intensity chases changing slip. Lower smooths out brief spikes; higher snaps.
-
-**Min Wheel Speed** (`100` cm/s) is a floor below which nothing plays. This is what stops a stationary wheel from squealing.
-
-
-
-## Surface Effects
+## Adding Tire Smoke
 
 <!-- side-by-side:57 -->
-**Surface Effects** is a map from physical surface to a set of effects. Add an entry, pick the surface, and configure effects for it.
-
-A wheel on a surface with an entry uses that entry.
-
-A wheel on a surface without one falls back to **Effects For Default Surface**.
+1. Select the vehicle and open **Advanced Vehicle System → Wheel Effects**.
+2. Add an entry to **Effects For Default Surface** and set its type to **Skid / Slip**.
+3. Set **Niagara System** to your smoke.
+4. Turn on **Attach To Wheel**, so the smoke follows the wheel.
+5. Play, and slide the car.
 <!-- split -->
-![Surface Effects map with entries for several physical surfaces, each holding its own effects array](../Assets/Images/_placeholder.png "One entry per surface; anything unlisted falls back to the default slot")
+![Wheel Effects section on a vehicle with an effects array expanded, showing an effect type selected](../Assets/Images/_placeholder.png "Effects are set up once on the vehicle")
 <!-- /side-by-side -->
 
+By default the effect starts at `500` cm/s of sideways speed and reaches full strength at `1500` cm/s. To make smoke appear sooner, lower **Min Skid Speed**.
 
+If your Niagara system has a parameter for how dense the smoke is, put its name in **Niagara Intensity Param**. AVS sets it from `0` to `1` as the slide gets stronger. **Parameter Intensity Range** rescales that if your system expects other numbers, such as `0` to `100`.
 
-## The Effects For Default Surface Slot
 
-`Default` is a real value in Unreal's surface enum, and once you use it as a key you cannot add another entry with an unassigned key.
 
-That is why **Effects For Default Surface** is its own slot. Configure the default there, and treat `Default` as "unassigned" when adding map entries.
+## Adding Skid Marks
 
-A `Default` key in the map is not just discouraged, it is ignored — the default surface is resolved from its own slot before the map is ever consulted.
+Skid marks are a second **Skid / Slip** effect in the same slot, with a different setup:
 
+1. Add another **Skid / Slip** entry to **Effects For Default Surface**.
+2. Set **Niagara System** to your skid mark system.
+3. Leave **Attach To Wheel** off, so the marks stay on the road as the car drives away.
+4. Leave **Use Contact Point** on, so they appear where the tire touches the ground.
 
+Separate effects can have separate thresholds. The marks can start at a lower speed than the smoke.
 
-## Per-Wheel Effect Overrides
 
-Wheels inherit their effects from the vehicle. An override lets one wheel differ — a spare wheel that should be quiet, a steel wheel with its own surface sound, heavier smoke on the driven axle.
 
-There are three overrides, one for each slot on the vehicle:
+## Choosing a Slip Source
 
-- **Override Global Effects** — replaces the vehicle's global effects
-- **Surface Effect Overrides** — replaces the vehicle's entry for one specific surface
-- **Effects For Default Surface Override** — replaces the vehicle's default surface entry
+**Slip Source** decides what a **Skid / Slip** effect responds to.
 
-An override **replaces, it does not merge**. Overriding the Dirt surface on a wheel means the vehicle's Dirt effects no longer apply to it at all, rather than yours being added on top.
+The default, `Skid Speed (Classic)`, responds to the wheel sliding sideways, or to any movement while the wheel is locked. It works in both wheel modes.
 
+The other three respond to tire slip, which only raycast wheels calculate:
 
+- `X Slip` responds to wheelspin and lockup. Use it for burnout smoke.
+- `Y Slip` responds to sliding sideways. Use it for cornering smoke.
+- `Combined Slip` responds to both.
 
-## How a Wheel Resolves Its Effects
+These use **Min Slip** and **Full Slip** for their thresholds. On physics wheels they never play.
 
-For its global effects, a wheel checks one thing:
 
-1. **Override Global Effects** is on → use the wheel's **Global Effects Override**.
-2. Otherwise → use the vehicle's **Global Wheel Effects**.
 
-For the surface it is driving on, it works down this list until something matches:
+## Different Effects on Different Surfaces
 
-1. The wheel's **Surface Effect Overrides** has an entry for that surface.
-2. The vehicle's **Surface Effects** has an entry for that surface.
-3. Neither does → fall back to the default surface, which resolves as below.
+To give the car dust on dirt:
 
-For the default surface:
+1. Add an entry to **Surface Effects** and set its key to your dirt physical surface.
+2. Add a **Skid / Slip** effect to that entry with your dust particles.
 
-1. The wheel's **Effects For Default Surface Override** is **not empty** → use it.
-2. Otherwise → use the vehicle's **Effects For Default Surface**.
+On dirt, the wheel now uses the dirt entry. On any surface without an entry, it uses **Effects For Default Surface**.
 
+> Do not use `Default` as a key in **Surface Effects**. AVS never reads it. Set up the default surface in **Effects For Default Surface**.
 
 
-## Silencing a Wheel with an Empty Override
 
-An empty override is meaningful. It means "this wheel has no effects here", not "fall back to the vehicle".
+## Adding Rolling Sound
 
-**To silence a wheel's global effects:** enable **Override Global Effects** and leave the array empty.
+1. Add a **Roll** effect to **Global Wheel Effects**.
+2. Set **Sound** to a looping tire sound.
+3. Set **Random Start Time Max** to the length of the loop.
 
-**To silence a wheel on one surface:** add that surface to **Surface Effect Overrides** and leave its array empty. The entry existing is what counts, so an empty one is still an override.
+Without step 3, all four wheels start the loop at the same point and play in sync.
 
-> **This does not work for the default surface.** An empty **Effects For Default Surface Override** falls back to the vehicle's effects instead of silencing them, because there is no separate flag marking the override as set — emptiness is what AVS uses to decide whether it was configured at all.
->
-> There is also no way round it through the map: a `Default` key added to **Surface Effect Overrides** is never read, because the default surface is resolved before the map is consulted.
->
-> If you need a wheel that is silent on the default surface, put its effects in **Override Global Effects** instead of the default surface slot, so the empty-override rule is available to you.
+Rolling sound starts at `100` cm/s and reaches full volume at `2000` cm/s. To vary pitch or volume with speed, put a parameter name in **Audio Intensity Param**.
 
 
 
-## Effect Output: Attach To Wheel and Use Contact Point
+## Changing Effects for One Wheel
 
-<!-- side-by-side:57 -->
-**Attach To Wheel** decides whether the effect follows the wheel or stays where it spawned.
+Every wheel uses the vehicle's effects unless it overrides them. Each wheel has three overrides, matching the vehicle's three slots: **Override Global Effects**, **Surface Effect Overrides** and **Effects For Default Surface Override**.
 
-Skid marks want it **off** — the marks should stay on the ground as the car drives away. Smoke and dust usually want it **on**, so the effect travels with the wheel.
+An override replaces the vehicle's effects for that slot. It does not add to them.
 
-**Use Contact Point** (on by default) spawns at the surface contact rather than the wheel component's location. Leave it on for anything that should appear where rubber meets road.
-<!-- split -->
-![Placement settings on an effect output showing Attach To Wheel and Use Contact Point](../Assets/Images/_placeholder.png "Attach To Wheel off for marks, on for smoke")
-<!-- /side-by-side -->
+To silence a wheel's global effects, turn on **Override Global Effects** and leave the list empty. To silence one surface on one wheel, add that surface to **Surface Effect Overrides** with an empty list.
 
-Every built-in effect except Brake Squeal shares this output block.
+> An empty **Effects For Default Surface Override** does not silence the wheel. It falls back to the vehicle's default surface effects. There is currently no way for one wheel to opt out of those.
 
 
 
-## Effect Output: Location and Rotation Offset
+## When Effects Restart
 
-**Location Offset** and **Rotation Offset** fine-tune placement, in AVS wheel space.
+Each wheel's surface effects stop when the wheel leaves the ground, and start fresh when it lands or moves onto a different surface.
 
-Wheels using **Invert Torque** are corrected automatically, so a mirrored wheel does not need mirrored offsets.
+Global effects keep running, unless an effect requires contact. The built-in Roll, Skid / Slip and Bump / Impact effects all require contact, so they also stop in the air and start fresh on landing.
 
+`ClearAllWheelEffects()` on the vehicle restarts every wheel's effects. Call it after changing effects at runtime.
 
 
-## Parameter Intensity Range
 
-**Parameter Intensity Range** maps the effect's normalized 0-1 intensity into whatever range your assets expect.
+## Fixing Wheel Effect Problems
 
-If your Niagara system wants 0-100, set it here rather than rebuilding the system.
+### Skid Effect Never Plays on Physics Wheels
 
+The effect is using `X Slip`, `Y Slip` or `Combined Slip`. Those need raycast wheels. Use `Skid Speed (Classic)`.
 
+### All Four Wheels Sound Like One
 
-## Audio Output Settings
+Set **Random Start Time Max** to the length of the looping sound.
 
-Set a **Sound** and an **Attenuation**, then use **Audio Intensity Param** to feed the mapped intensity into a Sound Cue or MetaSound — driving volume, pitch, or a crossfade.
+### Skid Marks Follow the Car
 
-**Audio Fade Out Duration** (`0.1` s) fades continuous audio to silence before the component is released, so effects do not cut off abruptly.
+Turn off **Attach To Wheel** on the skid mark effect.
 
-> Set **Random Start Time Max** to the length of the looping audio. Without it, all four wheels start the same loop at the same position and sound like a single loud wheel.
 
 
+## Next Steps
 
-## Particle Output Settings
-
-Niagara and Cascade are both supported, each with an optional float parameter receiving the mapped intensity.
-
-Use Niagara for new work.
-
-
-
-## Effect Templates and Runtime Instances
-
-Effects you configure are **templates**. Each wheel duplicates them into its own runtime instance, so wheels never share state.
-
-**Surface effects are recreated** when contact or surface changes, and any state inside them resets.
-
-**Global effects persist** across those changes and keep their state.
-
-
-
-## Clearing Effects at Runtime
-
-`ClearAllWheelEffects()` on the vehicle refreshes everything.
-
-Call it after changing effect configuration at runtime.
-
-
-
-## Custom Effects
-
-Effects are extendable in Blueprint and C++, using the same functions the built-in ones use. See [Custom Effects](https://overtorque-creations.com/Dev/Docs/#AVS/Wheel_Effects/Custom_Effects.md).
+- [Custom Effects](https://overtorque-creations.com/Dev/Docs/#AVS/Wheel_Effects/Custom_Effects.md): writing your own effect in Blueprint or C++.
+- [Wheel Effect Settings](https://overtorque-creations.com/Dev/Docs/#AVS/Reference/Wheel_Effect_Settings.md): every effect setting, with defaults.
