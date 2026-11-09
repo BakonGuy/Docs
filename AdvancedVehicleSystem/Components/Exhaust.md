@@ -16,9 +16,11 @@ The Vehicle System also includes another optional component called `AVS_ExhaustC
 
 ## Exhaust Particle Parameters
 
-The controller sets two parameters on every particle system attached beneath it:
+The controller sets two vector parameters on every Cascade particle system component beneath it. Only X is used:
 
-- **SmokeVelocity**
-- **SmokeSize**
+- **SmokeVelocity** X goes from `40` to `150` as RPM rises from `0` to `10000`.
+- **SmokeSize** X goes from `30` to `80` as throttle goes from `0` to `1`.
 
-Any particle system reading those two names will work. The included exhaust particle is a good starting point for your own.
+Any Cascade particle system reading those two names will work. Niagara systems are not driven by the controller.
+
+The particles are active while the engine is running and the vehicle is slower than `40` in your **Speed Units**, and inactive otherwise.

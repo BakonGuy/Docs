@@ -55,7 +55,9 @@ A detached wheel is a real physics body, even if it was a raycast wheel. Give th
 Wheel->Attach(/*ResetPosition*/ true, /*Force*/ true);
 ```
 
-**ResetPosition** moves the wheel back to its place on the vehicle. **Force** rebuilds its constraints from scratch.
+**ResetPosition** moves a physics mode wheel back to its place on the vehicle before reattaching it. A raycast wheel always snaps back to its place when attached.
+
+**Force** rebuilds the wheel's constraints even if it is already attached. A detached wheel has its constraints rebuilt either way.
 
 
 
@@ -75,9 +77,11 @@ Vehicle->ResetAllWheels();
 
 ## Disabling a Wheel Without Removing It
 
-There is no disable setting. Detach the wheel, then turn off physics, collision and visibility on its wheel mesh. The component and its settings stay on the vehicle.
+`SetIsSimulatingSuspension(false)` takes a wheel out of the simulation while it stays attached. It gives no suspension, grip or drive, and a raycast wheel's mesh stops moving. `SetIsSimulatingSuspension(true)` puts it back.
 
-To bring it back, restore the mesh and call `Attach()`.
+The vehicle's `SetPhysics` sets this on every wheel, to match whether the vehicle is simulating. AVS calls `SetPhysics` at startup and in `AddWheel`, so adding a wheel puts every wheel back into the simulation. `ChangeStaticMesh` resets it on that wheel too.
+
+To hide the wheel as well, detach it, then turn off physics, collision and visibility on its wheel mesh. The component and its settings stay on the vehicle. To bring it back, restore the mesh and call `Attach()`.
 
 
 
@@ -152,7 +156,9 @@ Friction changed this way does not need replicating, as long as every machine ca
 
 ## Changing a Wheel Mesh at Runtime
 
-`ChangeStaticMesh(NewMesh)` swaps the wheel's mesh and reattaches the wheel. It also clears any material overrides on the old mesh.
+`ChangeStaticMesh(NewMesh)` swaps the wheel's mesh and reattaches the wheel. It also clears any material overrides on the wheel mesh.
+
+With **Auto Wheel Radius** on, the radius is measured again from the new mesh.
 
 With **Wheel Reprojection** on, the projected mesh is updated too.
 
@@ -160,14 +166,16 @@ With **Wheel Reprojection** on, the projected mesh is updated too.
 
 ## Driving One Wheel from Code
 
-`SetWheelTorque` takes one wheel away from the gear table and drives it directly.
+`SetWheelTorque` drives a physics mode wheel directly.
 
 ```cpp
-// TargetSpeed is in cm/s. Torque is in hNm.
+// TargetSpeed is in cm/s.
 Wheel->SetWheelTorque(/*OverrideVehicle*/ true, /*TargetSpeed*/ 2000.0f, /*Torque*/ 30.0f, /*Reverse*/ false);
 ```
 
 **OverrideVehicle** keeps your value. With it off, the vehicle's next torque update replaces it. Call it again with `false` to hand the wheel back to the gear table.
+
+> Raycast wheels do not use `SetWheelTorque` for driving. They take their drive torque from the vehicle. On a raycast wheel, it only changes how fast the wheel mesh spins while in the air. To drive raycast wheels individually, override the drivetrain in C++. See [Drivetrain and Physics Overrides](https://overtorque-creations.com/Dev/Docs/#AVS/Advanced/Physics_Overrides.md).
 
 ![Blueprint with two examples: a throttle axis looping every wheel into Set Wheel Torque with Override Vehicle enabled, and a key press calling Lock Wheel on the two right hand wheels](../Assets/Images/components-Wheels-PerWheelControl-01.png "Driving torque per wheel, and locking individual wheels")
 
@@ -183,6 +191,8 @@ AVS also locks wheels on its own: handbrake wheels while the handbrake is applie
 
 ## Moving a Wheel from Code
 
-`SetWheelPosition(Location, Rotation)` moves the wheel relative to its parent. `ResetPosition()` puts it back.
+`SetWheelPosition(Location, Rotation)` moves the wheel component relative to its parent, and the wheel's suspension and constraints move with it.
+
+`ResetPosition()` moves a physics mode wheel's mesh back to the wheel component. Raycast wheel meshes are placed by AVS every tick and do not need it.
 
 Use it for a vehicle whose wheels move: an articulated frame, or a vehicle that changes shape. Keep every wheel on one AVS vehicle and move them each frame.

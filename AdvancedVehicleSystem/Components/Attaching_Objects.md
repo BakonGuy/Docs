@@ -1,99 +1,106 @@
 # Attaching Objects to a Vehicle
 
-Plows, roof racks, cargo, weapons, characters in a seat — anything you bolt onto a vehicle and expect to move with it.
+How to attach objects such as plows, roof racks, cargo, weapons and seated characters to a vehicle, and how to carry one vehicle on another.
 
-The rules below are Unreal's, not AVS's. Getting them wrong produces a vehicle that handles strangely or shoves other objects around.
+The rules come from Unreal's physics. Getting them wrong makes a vehicle handle strangely or shove other objects around.
 
 
 
-## Basic Understanding
+## Welded and Unwelded Objects
 
-There are two ways an object can ride on a vehicle, and they behave completely differently.
+An object attached to a vehicle is either welded or not, depending on what it is attached to.
 
-**Welded** means the object's collision becomes part of the vehicle's physics body. Its shape and mass count toward the vehicle's simulation.
+A welded object's collision becomes part of the vehicle's physics body. Its shape and mass count in the vehicle's simulation.
 
-**Attached but not welded** means the object follows the vehicle's transform without affecting its physics at all. It is along for the ride and nothing more.
-
-Which one you get is decided by *what you attach to*, not by a setting.
+An unwelded object follows the vehicle without affecting its physics.
 
 
 
 ## Welding a Collision Mesh to the Vehicle
 
-Attach the collision mesh **directly to `VehicleMesh`**, so it welds to the vehicle's root body.
+Attach the collision mesh directly to `VehicleMesh`. It welds to the vehicle's body.
 
-Welding means multiple physics bodies act as one. A snow plow welded to the front of a truck adds its collision to the truck, so the truck can push snow with it and the weight is part of the simulation.
+A snow plow welded to the front of a truck adds its collision to the truck. The truck can push snow with it, and the plow's weight is part of the simulation.
 
-A mesh attached to a skeletal mesh does not weld, for the reason below.
+A mesh attached to a skeletal mesh does not weld.
 
 
 
 ## Skeletal Meshes Cannot Weld
 
-A skeletal mesh cannot weld to a static root body.
+`VehicleMesh` is always a static mesh, and a skeletal mesh cannot weld to it. Skeletal meshes are attached to `VehicleMesh` as children, and AVS turns off their collision by default. See [Important Information](https://overtorque-creations.com/Dev/Docs/#AVS/Getting_Started/Important_Information.md).
 
-If a skeletal part needs to affect vehicle physics, there are two options:
+If a skeletal part needs to affect the vehicle's physics, either:
 
-- **Fake it with a collision mesh.** Add a static collision mesh directly to `VehicleMesh` and drive it to follow the bone's location.
-- **Use a physics constraint.** Join the two with a physics constraint rather than attaching them.
-
-This is also why AVS wants the vehicle's root to be a **static mesh**, with skeletal meshes attached as children for visuals. See [Important Information](https://overtorque-creations.com/Dev/Docs/#AVS/Getting_Started/Important_Information.md).
+- add a static collision mesh directly to `VehicleMesh`, and move it to follow the bone, or
+- join the part to `VehicleMesh` with a physics constraint.
 
 
 
-## Character Collisions on a Vehicle
+## Characters Riding on a Vehicle
 
-> Make sure character meshes — skeletal mesh, capsule, weapons — do not collide with the vehicle.
+Turn off collision on every part of a character attached to a vehicle: its skeletal mesh, capsule and any weapons. In multiplayer, turn it off on clients as well as the server.
 
-A character attached to the vehicle with collision still enabled acts as an **immovable object**. It will push simulated physics objects of any weight around as though they were not there, including the vehicle it is riding on.
+A character attached with collision on acts as an immovable object. It pushes simulated objects of any weight around, including the vehicle it is riding.
 
-Disable collision on anything you attach to a seat. In multiplayer, confirm it is disabled on clients as well as the server.
+To find what is pushing a vehicle, see [Finding What Is Pushing a Vehicle](https://overtorque-creations.com/Dev/Docs/#AVS/Advanced/Debugging.md).
 
 
 
 ## Carrying a Vehicle on Another Vehicle
 
-A vehicle loaded onto a flatbed is not an attachment problem, it is a constraint problem.
+A vehicle loaded onto a flatbed is held on with physics constraints. There are two ways to do it.
 
-There are two ways to do it, and they trade setup effort against how it looks.
+<!-- side-by-side:50 -->
+**Constraining the body**
 
-**Constraining the body** is the simpler one. Spawn a physics constraint at the carried vehicle holding it at the socket location, give the constraint a limited Z so it can move a little under load, and set the carried vehicle's wheels to physics mode so its weight transfers properly.
+One physics constraint holds the carried vehicle at a point on the carrier. Give it a limited Z so the vehicle can move a little under load, and set the carried vehicle's wheels to physics mode so its weight rests on them.
 
-**Constraining each wheel** looks considerably better. The carried vehicle settles on its own suspension and reacts to the carrier's movement the way a real load would, instead of being held rigid at one point. It is more work to set up, and noticeably more in multiplayer.
+Simpler to set up.
+<!-- split -->
+**Constraining each wheel**
 
+One locked constraint per wheel holds each wheel on the carrier. The carried vehicle settles on its own suspension and moves with the carrier like a real load.
 
-
-## Constraining a Carried Vehicle's Wheels in Multiplayer
-
-The constraint positions have to be identical on the server and on every client, so the arrangement has to be replicated rather than recreated locally.
-
-Build a struct holding a **relative transform** and a **wheel index**, one entry per wheel on the carried vehicle.
-
-**On the carrier, server side,** when the vehicle is loaded: fill an array of that struct and replicate it with a RepNotify.
-
-**In the RepNotify on clients:**
-
-1. Disable movement replication on the carried vehicle.
-2. Loop the array. For each entry, get the wheel mesh by its wheel index, move the wheel mesh to the relative transform, create the constraint at that transform, and constrain the wheel mesh.
-
-Replicating an empty array then serves as the unload — clients see the array clear and release their constraints.
+Looks better, and takes more setup, especially in multiplayer.
+<!-- /side-by-side -->
 
 
 
-## Building the Wheel Constraints
+## Constraining a Carried Vehicle's Wheels
 
-The constraint setup itself is the same on the server and on clients. For each wheel of the carried vehicle:
+For each wheel of the carried vehicle:
 
-1. **Add a Physics Constraint Component** to the carrier.
-2. **Set its world location** to the wheel mesh's world location, so the joint sits at the wheel rather than at the carrier's origin.
-3. **Set Constrained Components** to the carrier's `VehicleMesh` and that wheel's mesh.
+1. Add a **Physics Constraint Component** to the carrier.
+2. Set its world location to the wheel mesh's world location.
+3. Set its constrained components to the carrier's `VehicleMesh` and the wheel's mesh.
+4. Lock every axis: **X**, **Y** and **Z Motion**, and **Swing 1**, **Swing 2** and **Twist Motion**.
+5. Turn on **Disable Collision**, so the wheel and the carrier do not collide, and **Parent Dominates**, so the load does not push the carrier.
 
-Lock every axis — **X**, **Y** and **Z Motion** locked, and **Swing 1**, **Swing 2** and **Twist Motion** locked. The wheel is being held in place; the carried vehicle's own suspension provides the movement.
-
-Enable **Disable Collision** on the constraint so the wheel and the carrier do not collide, and **Parent Dominates** so the carrier drives the pair rather than being pushed by the load.
-
-`GetWheels` returns the carried vehicle's wheels, and `GetWheelMesh` on each one gives the mesh to constrain.
+`GetWheels` returns the carried vehicle's wheels, and `GetWheelMesh` on each one returns the mesh to constrain.
 
 ![Blueprint looping the carried vehicle's wheels, adding a physics constraint component per wheel, setting its world location to the wheel mesh, and constraining the wheel mesh to the vehicle mesh with all axes locked](../Assets/Images/components-Attaching-WheelConstraints-01.png "One constraint per wheel, placed at the wheel mesh, with every axis locked")
 
-> Disabling movement replication on the carried vehicle is the part that matters. Without it the server and client fight over its position, which produces a lagging body and eventually a physics explosion. See [Networking](https://overtorque-creations.com/Dev/Docs/#AVS/Advanced/Networking.md).
+The wheel is held in place. The carried vehicle's suspension provides the movement.
+
+
+
+## Carrying a Vehicle in Multiplayer
+
+The constraints have to be in the same place on the server and every client, so the server decides where they go and replicates it.
+
+1. Make a struct holding a relative transform and a wheel index.
+2. On the carrier, when a vehicle is loaded, the server fills an array of that struct, one entry per wheel, and replicates it with a RepNotify.
+3. In the RepNotify, turn off movement replication on the carried vehicle with `SetMovementReplicationEnabled(false)`.
+4. Then, for each entry, get the wheel mesh by its index, move it to the relative transform, and constrain it as in the steps above.
+
+To unload, replicate an empty array. Clients see it clear and release their constraints.
+
+Without turning off movement replication on the carried vehicle, the server and clients fight over its position. The vehicle lags behind, and eventually its physics explodes. See [Networking](https://overtorque-creations.com/Dev/Docs/#AVS/Advanced/Networking.md).
+
+
+
+## Next Steps
+
+- [Hitch / Trailers](https://overtorque-creations.com/Dev/Docs/#AVS/Components/Hitch_Trailers.md): towing a trailer.
+- [Networking](https://overtorque-creations.com/Dev/Docs/#AVS/Advanced/Networking.md): movement replication.

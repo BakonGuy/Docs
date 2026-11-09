@@ -1,215 +1,147 @@
 # Networking
 
-AVS vehicles replicate out of the box and the defaults work for most projects. You need this page when tuning for a specific connection profile, or when something is desyncing.
+How AVS vehicles replicate in multiplayer, where input functions have to be called from, and what to change when something desyncs. AVS vehicles replicate without any extra setup.
+
+Every network setting is listed in [Vehicle Settings](https://overtorque-creations.com/Dev/Docs/#AVS/Reference/Vehicle_Settings.md).
 
 
 
-## Basic Understanding
+## How AVS Replicates a Vehicle
 
-Physics vehicles are difficult to replicate because the server and clients never simulate identically. Instead of keeping every simulation in step, AVS replicates vehicle state and has clients follow it.
+Server and clients never simulate physics identically, so AVS does not try to keep every machine's simulation in step.
 
-Two things follow from that, and they cover most of this page:
+The machine that controls the vehicle simulates it and sends its state (location, rotation and velocity) 20 times a second by default. That is the client possessing it, or the server for a vehicle nobody possesses. Every other machine moves its copy of the vehicle toward those states.
 
-**The vehicle's network type** decides how a client follows the server — buffered and smooth, or predicted and immediate.
+Inputs (throttle, brake, steering, handbrake and shifter) replicate separately, so every machine knows what the driver is doing.
 
-**Input functions have to be called from the owning client or the server.** From anywhere else they do nothing and report no error.
-
-
-
-## Network Type: History Interpolation
-
-This is the default.
-
-Clients buffer incoming states and play them back slightly behind the server. Smooth, stable, and forgiving of jitter.
-
-The cost is latency, since remote vehicles are always a little behind reality.
+When a vehicle comes to rest, it stops sending states and sends one final resting position instead. See Vehicles at Rest below.
 
 
 
-## Network Type: Client Prediction
+## Calling Input Functions in Multiplayer
 
-Clients simulate ahead and correct against server state.
-
-More immediate, at the cost of correction artifacts when a prediction turns out wrong.
-
-Use it when remote vehicle responsiveness matters more than smoothness.
-
-
-
-## Calling Input Functions on Client and Server
-
-Input functions are replicated, but where they are called from decides whether they do anything.
+In multiplayer, call input functions on the owning client (the client possessing the vehicle) or on the server.
 
 <!-- side-by-side:57 -->
-In single player, call them from anywhere. In multiplayer they only work from the **owning client** — the client possessing the pawn — or from the server.
+`SetThrottleInput`, `SetBrakeInput`, `SetSteeringInput` and `MoveShifterInput` do nothing when called anywhere else, with no error. `isOwningClient` returns whether the current machine is the owner.
 
-Calling `SetThrottleInput`, `SetBrakeInput`, `SetSteeringInput` or `MoveShifterInput` on a non-owning client does nothing, and produces no error.
+`SetHandbrakeInput` and `SetShifterInput` do not check. On a non-owning client they change only that client's copy, and the server ignores them.
 
-`isOwningClient` is the check to make before calling input functions from anything that might run elsewhere.
-
-Throttle, brake and steering are rounded to one decimal place before they are stored and sent, so they move in steps of `0.1`. The controlling client is the exception for steering — it steers with the raw value, and only the replicated copy is rounded.
-
-`SetLocalEngineRunning` is the deliberate exception, for local-only cosmetic changes.
+`Hitch` and `HitchToOverlapped` follow the same rule: call them from whoever owns the towing vehicle, or from the server.
 <!-- split -->
-![Blueprint checking isOwningClient before calling a vehicle input function](../Assets/Images/_placeholder.png "Check ownership before calling input functions")
+![Blueprint checking isOwningClient before calling a vehicle input function](../Assets/Images/_placeholder.png "Input functions only work on the owning client or the server")
 <!-- /side-by-side -->
 
-```cpp
-void AMyVehicle::ApplyThrottle(float Value)
-{
-	// Input functions do nothing on a client that does not own this pawn.
-	if( !isOwningClient() ) return;
-
-	SetThrottleInput(Value);
-}
-```
-
-The same applies to hitching. `Hitch` and `HitchToOverlapped` go through the tow hitch's server RPC, so they must come from whoever owns the towing vehicle, or from the server.
+Throttle, brake and steering are rounded to steps of `0.1` before they are sent. The controlling client steers with its raw steering input. Only the replicated copy is rounded.
 
 
 
-## Reaching a Vehicle You Do Not Own
+## Changing a Vehicle You Do Not Own
 
-When the call has to come from somewhere that does not own the vehicle, route it through something that does.
+To change a vehicle from a client that does not own it, such as starting the engine of a parked car, go through an actor the client does own.
 
-The pattern is to put a Server RPC on an actor the client owns — usually the player's own pawn or controller — have the server do the work on the vehicle, and multicast the result if clients need to react.
+Put a Server RPC on the player's own pawn or controller. The server then makes the change on the vehicle, and multicasts the result if clients need to react.
 
 ![Blueprint showing a client key press calling a reliable Server RPC on the owned character, the server finding the AVS vehicle and calling Start Engine, then a multicast telling all clients to disable passive mode](../Assets/Images/advanced-Networking-ServerRPC-01.png "Client to server through an owned actor, then the server acts on the vehicle")
 
-The same reasoning covers anything that changes vehicle state from outside the vehicle, not only input functions.
+
+
+## Network Type
+
+**Network Type** decides how other machines follow the states they receive.
+
+`History Interpolation` (the default) buffers the states and plays them back slightly behind the owner, blending from one to the next. Remote vehicles are always shown a little behind where they really are.
+
+`Client Prediction` is unfinished in the current version. It draws a debug arrow over every remote vehicle.
 
 
 
-## Core Network Settings
+## Tuning Replication
 
-Settings under **Advanced Vehicle System → Network**. These three are usually left alone.
+These settings are under **Network → Advanced**:
 
-**Movement Replication** decides whether movement replicates at all, and **Sync Location** and **Sync Rotation** control position and rotation individually. All three default to on, and can be changed at runtime.
-
-
-
-## Advanced Network Settings
-
-| Setting | Default | Raise it to | Lower it to |
+| Setting | Default | Higher | Lower |
 |---|---|---|---|
-| **Net Send Rate** | `0.05` s | Save bandwidth | Update more often |
-| **Net Time Behind** | `0.15` s | Absorb jitter on poor connections | Tighten responsiveness |
-| **Net Lerp Start** | `0.35` s | Blend toward each server state for longer | Let local physics run longer before blending |
-| **Net Position Tolerance** | `0.1` cm | Ignore larger differences | Correct smaller differences |
-| **Net Smoothing** | `10.0` | Correct faster, more visibly | Correct gently |
-| **Net Use Smoothing** | `true` | — | Turn off to apply corrections directly, with no smoothing |
+| **Net Send Rate** | `0.05` s | Fewer states sent, less bandwidth | More states sent |
+| **Net Time Behind** | `0.15` s | Absorbs more jitter and packet loss, further behind | Closer to the owner, bad connections show more |
+| **Net Lerp Start** | `0.35` s | Blends toward each state for longer | Local physics runs longer before blending |
+| **Net Position Tolerance** | `0.1` cm | Skips larger differences | Corrects smaller differences |
+| **Net Smoothing** | `10` | Corrects faster | Corrects more gently |
+
+With many vehicles, **Net Send Rate** has the largest effect on bandwidth.
+
+States are sent with unreliable RPCs. Under heavy network load, unreliable packets are the first to be dropped, and a dropped state is replaced by the next one.
 
 
 
-## Net Time Behind
+## Vehicles at Rest
 
-**Net Time Behind** is how far behind the server a client plays back the states it receives.
+A vehicle that has stayed below **Rest Velocity Threshold** (`25` cm/s, under **Physics → Advanced**) for 3 seconds stops sending states. It sends its resting position once, reliably, and again only if it moves more than about 50 cm while awake, or 0.5 cm while its physics sleeps.
 
-More absorbs packet loss and jitter, at the cost of remote vehicles lagging further behind reality.
+Other machines move the vehicle to that exact position. A vehicle that was slightly out of place while moving ends up in the right place when it stops.
 
-Less is tighter, but makes bad connections obvious.
-
-
-
-## Net Lerp Start and Net Position Tolerance
-
-A client runs its own physics between server states. **Net Lerp Start** is how long before each state it stops and starts blending toward it.
-
-**Net Position Tolerance** is the distance, per axis, under which a state is skipped instead of blended to. It lets a slow-moving vehicle's physics settle rather than being nudged toward positions it is already at.
+A vehicle creeping slower than the threshold also counts as at rest. If slow vehicles drift out of sync, lower the threshold.
 
 
 
-## Net Send Rate
+## Trailers
 
-**Net Send Rate** is the interval between the states the owner sends.
+Trailer replication is automatic once a hitch connects. A hitched trailer does not send states of its own. The owner of the towing vehicle sends the trailer's angle at the hitch instead, 5 to 20 times a second depending on how fast the trailer is turning, and once when both vehicles are at rest. Other machines turn the trailer toward that angle while it moves slower than 1000 cm/s.
 
-Lowering it sends more often, and with many vehicles it is the setting with the largest effect on bandwidth.
-
-
-
-## How Vehicle State is Sent
-
-Movement state goes over **unreliable** RPCs. A dropped packet is simply replaced by the next one, which is what you want for a value that updates constantly.
-
-The **resting** state is sent **reliably**, once, when a vehicle settles. It is the authoritative final position.
-
-That is why a vehicle that looked slightly out of place while moving snaps to the correct position when it stops: the reliable rest update has arrived.
-
-> Under heavy network load, unreliable packets are the first to be dropped. Vehicles that drift while moving but correct themselves on stopping are a sign of that.
+Trailer chains (a trailer towing another trailer) work in single player, but are untested in multiplayer and likely do not work there.
 
 
 
-## Network Rest State
+## Turning Off Movement Replication
 
-Vehicles that come to a stop stop sending movement updates. Instead the rest state is sent once, and sent again only if the vehicle moves away from it — by more than 50 cm while its physics is awake, or 0.5 cm while asleep.
+`SetMovementReplicationEnabled(false)` pauses movement replication for one vehicle. It does not change the **Movement Replication** setting, and `true` resumes it.
 
-**Rest Velocity Threshold** under **Advanced Vehicle System → Physics** decides when that kicks in: below it for 3 seconds. It is the same threshold passive mode uses.
+Pause it when something else moves the vehicle: a cinematic, attaching it to another actor, your own movement code, or constraints holding it to another vehicle. Without pausing it, AVS and the other system fight over the vehicle's position.
 
-> A vehicle moving slower than the threshold counts as stopped. If slow-moving vehicles drift out of sync on clients, the threshold is too high.
+A vehicle held to another vehicle by your own constraints needs this. The server and clients otherwise fight over its position, the vehicle lags behind, and eventually its physics explodes. [Attaching Objects](https://overtorque-creations.com/Dev/Docs/#AVS/Components/Attaching_Objects.md) covers carrying a vehicle in multiplayer. Trailers on the hitch system do not need it.
 
-
-
-## Trailer Networking
-
-Trailer sync is automatic once a hitch connection is made. Reworked in 1.5 with an adaptive send rate — trailers update more when they need to and back off while resting.
-
-Trailer chains — a trailer towing another trailer — work in single player, but are untested in multiplayer and likely do not work there.
+To use another replication plugin, turn off **Movement Replication**. It turns off only location, rotation and velocity. AVS keeps replicating the inputs, and the plugin replicates the transform.
 
 
 
-## Disabling Movement Replication
+## Network Relevancy
 
-`SetMovementReplicationEnabled` disables replication temporarily. 
-It does not change the configured **Movement Replication** setting.
+Unreal decides which actors are relevant to a client from where the server thinks that client's camera is. By default it relies on the client sending camera updates.
 
-Use it when something else takes over the vehicle's movement — a cinematic, attaching it to another actor, or your own movement code.
+AVS handles this the same way Chaos Vehicles does. While a client drives, the vehicle has the player camera manager send the server camera updates, so actors around the player are not culled. This needs **Use Client Side Camera Updates** on the camera manager, which is Unreal's default.
 
-Turning it off for the duration stops AVS and your system fighting over the transform, and re-enabling restores normal behavior.
+Server side relevancy is an alternative:
 
-
-
-## Towing or Carrying a Vehicle in Multiplayer
-
-A vehicle held to another vehicle by your own constraints needs its movement replication turned off.
-
-If both machines keep replicating the towed vehicle's position while the constraints are also moving it, the server and the client fight over its transform. The result is a body that lags behind, then eventually explodes.
-
-1. Build the connection so the **constraint positions are identical on the server and the client**.
-2. Once the connection is made, call `SetMovementReplicationEnabled(false)` on the towed vehicle.
-3. Re-enable it when the connection is released.
-
-The constraints keep the two vehicles in sync from that point, which is what replication would otherwise be doing badly.
-
-> This applies to your own constraint-based towing. The [hitch system](https://overtorque-creations.com/Dev/Docs/#AVS/Components/Hitch_Trailers.md) handles its own trailer sync and does not need this.
-
-
-
-## Using a Third Party Networking Plugin
-
-Turning off **Movement Replication** disables only the code that replicates location, rotation and velocity. It hands the transform to something else — a replication plugin, or your own system.
-
-Throttle, brake, steering and handbrake stay replicated regardless. They are specific to AVS and are not something an external transform-syncing plugin can carry.
-
-So the arrangement is: your plugin syncs the transform, AVS keeps syncing the inputs.
-
-
-
-## Network Relevancy and Server Side Relevancy
-
-Unreal decides what is relevant to a client from where the server believes that client is viewing from. By default it relies on **client side camera updates**, and those are driven from player characters rather than generic pawns.
-
-AVS handles this itself, the same way Chaos Vehicles does — while a client is driving, the vehicle asks the player camera manager to send the server a camera update, so the server's view location stays current and actors around the player are not culled.
-
-That relies on **Use Client Side Camera Updates** being enabled on the camera manager, which is Unreal's default. It explains why a vehicle pawn behaves correctly here when a plain custom pawn would not.
-
-**Server side relevancy is an alternative, and is arguably the better arrangement:**
-
-1. Create a Player Camera Manager class, or open the one you already use.
-2. Set your player controller to use that camera manager.
-3. Disable **Use Client Side Camera Updates** on it.
+1. Create a Player Camera Manager class, or open the one you use.
+2. Set your player controller to use it.
+3. Turn off **Use Client Side Camera Updates** on it.
 
 ![Player Camera Manager details panel with the Use Client Side Camera Updates checkbox unticked and highlighted](../Assets/Images/advanced-Networking-CameraUpdates-01.png "Use Client Side Camera Updates, on the Player Camera Manager")
 
-The server then computes relevancy itself, which covers every pawn type rather than only the ones that send updates.
+The server then works out relevancy itself, for every pawn type.
 
-> If actors are being culled at distance, raising **Net Cull Distance Squared** or marking the vehicle **Always Relevant** will hide it. Both cost real bandwidth and neither addresses a stale view location.
+Raising **Net Cull Distance Squared**, or marking actors **Always Relevant**, hides a stale camera location without fixing it, and costs bandwidth.
+
+
+
+## Fixing Networking Problems
+
+### Inputs Do Nothing on a Client
+
+The input function is being called on a client that does not own the vehicle. Call it on the owning client, or go through a Server RPC as in Changing a Vehicle You Do Not Own.
+
+### Actors Disappear Around a Driving Player
+
+Check that **Use Client Side Camera Updates** is on, or switch to server side relevancy.
+
+### Carried or Towed Vehicle Lags Behind and Explodes
+
+Turn off movement replication on it with `SetMovementReplicationEnabled(false)` while it is attached.
+
+
+
+## Next Steps
+
+- [Attaching Objects](https://overtorque-creations.com/Dev/Docs/#AVS/Components/Attaching_Objects.md): carrying a vehicle in multiplayer.
+- [Hitch / Trailers](https://overtorque-creations.com/Dev/Docs/#AVS/Components/Hitch_Trailers.md): towing.
+- [Vehicle Settings](https://overtorque-creations.com/Dev/Docs/#AVS/Reference/Vehicle_Settings.md): every network setting.

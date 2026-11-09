@@ -29,7 +29,7 @@ Controls how quickly the vehicle responds to steering changes. Increase this for
 
 **Steering Recenter Speed**
 
-Controls how fast the steering returns to center when no input is given. Raising this can make the steering feel tighter and more controlled.
+Controls how fast the steering returns toward center when the input moves back toward center or is released. Raising this can make the steering feel tighter and more controlled.
 
 
 
@@ -64,16 +64,16 @@ When using raycast wheels, you can reduce lateral friction in the wheel config t
 
 ## See Also
 
-- [Steering](https://overtorque-creations.com/Dev/Docs/#AVS/Configuration/Steering.md) — the falloff curve and smoothing modes in detail
-- [Wheels](https://overtorque-creations.com/Dev/Docs/#AVS/Components/Wheels.md) — tire friction, arcade wheel friction, and brakes
-- [Engine and Transmission](https://overtorque-creations.com/Dev/Docs/#AVS/Configuration/Engine_And_Transmission.md) — gear torque values
-- [Physics](https://overtorque-creations.com/Dev/Docs/#AVS/Configuration/Physics.md) — center of mass and body limits
+- [Steering](https://overtorque-creations.com/Dev/Docs/#AVS/Configuration/Steering.md): the falloff curve and smoothing modes in detail
+- [Wheels](https://overtorque-creations.com/Dev/Docs/#AVS/Components/Wheels.md): tire friction, arcade wheel friction, and brakes
+- [Engine and Transmission](https://overtorque-creations.com/Dev/Docs/#AVS/Configuration/Engine_And_Transmission.md): gear torque values
+- [Physics](https://overtorque-creations.com/Dev/Docs/#AVS/Configuration/Physics.md): center of mass and body limits
 
 
 
 ## Scaled Down Vehicles
 
-A vehicle scaled down — an RC car, a toy, a miniature — is still simulated as real physics, so it performs differently from the full size version.
+A scaled down vehicle, such as an RC car or a toy, is still simulated at its real size, so it behaves differently from the full size version.
 
 It has to be tuned at the size it will be played at.
 

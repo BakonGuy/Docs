@@ -1,6 +1,6 @@
 # Custom Wheel Effects
 
-How to write your own wheel effect. This page builds one in C++: an effect that plays a sound and smoke when a wheel slides sideways. The same steps work in Blueprint.
+How to write your own wheel effect. This page builds one in C++: an effect that plays a sound and smoke when a wheel slides sideways.
 
 The built-in effects are written the same way, with the same functions. Every effect function is listed in [Wheel Effect Settings](https://overtorque-creations.com/Dev/Docs/#AVS/Reference/Wheel_Effect_Settings.md).
 
@@ -17,13 +17,13 @@ An effect is a class based on `AVS_WheelEffect`. The one you add to the vehicle 
 
 Each function receives the wheel it belongs to.
 
+The steps below use C++. Blueprint effects work differently in the current version, and are covered under Writing an Effect in Blueprint, at the end of this page.
+
 
 
 ## Step 1: Create the Effect Class
 
-In Blueprint, create a new Blueprint class with `AVS_WheelEffect` as its parent.
-
-In C++, inherit from `UAVS_WheelEffect` with the same class specifiers the built-in effects use. **DisplayName** is the name shown in the effect type list.
+Inherit from `UAVS_WheelEffect` with the same class specifiers the built-in effects use. Your module needs `VehicleSystemPlugin` in its `Build.cs` dependencies. **DisplayName** is the name shown in the effect type list.
 
 ```cpp
 UCLASS(BlueprintType, Blueprintable, EditInlineNew, DefaultToInstanced, meta=(DisplayName="Lateral Slip"))
@@ -197,7 +197,21 @@ void ULateralSlipEffect::TickEffect_Implementation(UAVS_Wheel* Wheel, float Delt
 }
 ```
 
-In Blueprint, override the same events with the same logic. `StartOutput`, `UpdateOutput` and `StopOutput` are available there too.
+
+
+## Writing an Effect in Blueprint
+
+Create a Blueprint class with `AVS_WheelEffect` as its parent, and override **Requirements Met**, **Init Effect**, **Tick Effect** and **Clear Effect**. Each event receives the wheel.
+
+In the current version, `StartOutput`, `UpdateOutput` and `StopOutput` are C++ only. A Blueprint effect spawns, updates and stops its own sounds and particles:
+
+- **Spawn Sound Attached** and **Spawn System Attached**, attached to the wheel, work without extra setup.
+- Nodes that take a world context, such as **Spawn Sound at Location**, show a **World Context Object** pin. Connect the wheel to it.
+- Keep references to what you spawn, and fade out or deactivate them in **Clear Effect**. AVS only stops output it started itself.
+
+The wheel values a Blueprint effect can read include **Wheel Data** (slip, suspension force, contact normal speed, angular velocity), `GetHasContact`, `GetWheelVelocity`, `GetIsLocked`, `GetCurrentBrakingTorque` and `GetContactSurfaceType`. On the effect itself, `GetContactStartedThisFrame` and `GetContactImpactSpeed` are available.
+
+To reuse the standard output from Blueprint, create a Blueprint with a built-in effect such as **Skid / Slip** as its parent. Override **Tick Effect** and call the parent, then add your own logic around it.
 
 
 

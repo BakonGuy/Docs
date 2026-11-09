@@ -29,7 +29,7 @@ Unreal Engine applies limits to how fast physics objects can move and spin. Thes
 
 For reference:
 
-A wheel with a **35 cm radius** spinning at **10000 degrees per second** reaches a linear surface speed of about **6105 cm/s (≈ 136 MPH)**.
+A wheel with a **35 cm radius** spinning at **10000 degrees per second** reaches a linear surface speed of about **6109 cm/s (≈ 137 MPH)**.
 
 This means if your wheels need to push past that speed, you'll need to increase this value further.
 <!-- /side-by-side -->

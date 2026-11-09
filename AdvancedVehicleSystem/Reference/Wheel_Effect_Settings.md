@@ -16,11 +16,13 @@ On the vehicle, under **Advanced Vehicle System → Wheel Effects**.
 
 Each wheel can replace any of these. See the **Wheel Effects** section of [Wheel Settings](https://overtorque-creations.com/Dev/Docs/#AVS/Reference/Wheel_Settings.md).
 
+Effects do not run on a dedicated server, on a detached wheel, or while the vehicle is passive.
+
 
 
 ## Roll
 
-Runs while the wheel has contact. Intensity follows how fast the wheel is moving.
+Runs while the wheel has contact. Intensity follows the wheel's speed over the ground.
 
 | Setting | Default | Description |
 |---|---|---|
@@ -43,7 +45,7 @@ Runs while the wheel has contact. Intensity follows the selected **Slip Source**
 | **Min Slip** | `0.5` | Calculated sources. Where the effect begins. |
 | **Full Slip** | `1.5` | Calculated sources. Where it reaches full intensity. |
 | **Response Speed** | `5.0` | How quickly intensity follows changes. Higher reacts faster; lower smooths brief changes. |
-| **Min Wheel Speed** | `100` cm/s | Below this wheel speed, nothing plays. |
+| **Min Wheel Speed** | `100` cm/s | Below this speed over the ground, nothing plays. |
 
 | Slip Source | Responds to |
 |---|---|
@@ -72,17 +74,17 @@ Uses the shared output block.
 
 ## Brake Squeal
 
-Runs on braking wheels, on any surface. Audio only, with its own output settings.
+Runs on braking wheels, on any surface, while the wheel has contact and is not locked. Audio only, with its own output settings. Raycast wheels only: physics wheels never squeal.
 
 | Setting | Default | Description |
 |---|---|---|
-| **Brake Power Range** | `10000, 150000` W | Brake power where squeal can begin, and full workload. |
+| **Brake Power Range** | `10000, 150000` W | Brake power is this wheel's braking torque multiplied by its rotation speed. X is where squeal can begin at full **Squeal Propensity**. Y is full workload. |
 | **Wheel Speed Range** | `100, 1000` cm/s | Wheel speed where squeal begins, and where it reaches full. |
-| **Squeal Propensity** | `1` | Brake condition, from `0` to `1`. Change it at runtime to simulate wear. Higher values squeal at lower brake power, and louder. `0` disables squeal. |
+| **Squeal Propensity** | `1` | Brake condition, from `0` to `1`. Change it at runtime to simulate wear. It moves the point where squeal begins from Y toward X, and raises **Intensity Param**. `0` disables squeal. |
 | **Sound** | none | The squeal sound. |
 | **Attenuation** | none | Sound attenuation. |
 | **Intensity Param** | none | Optional audio parameter, `0` to `1`, from the square of **Squeal Propensity**. Suited to volume. |
-| **Brake Power Param** | none | Optional audio parameter, `0` to `1`, across **Brake Power Range**. |
+| **Brake Power Param** | none | Optional audio parameter, `0` to `1`, from where squeal begins up to Y of **Brake Power Range**. |
 | **Wheel Speed Param** | none | Optional audio parameter, `0` to `1`, across **Wheel Speed Range**. Suited to pitch. |
 | **Fade In Duration** | `0.1` s | Time for the squeal to reach full volume. |
 | **Fade Out Duration** | `0.1` s | Time for the squeal to fade out. |
@@ -96,8 +98,8 @@ Roll, Skid / Slip and Bump / Impact share these settings.
 
 | Setting | Default | Description |
 |---|---|---|
-| **Attach To Wheel** | off | On, the effect follows the wheel. Off, it stays where it spawned. |
-| **Use Contact Point** | on | Spawns at the contact point. Off, or when there is no contact, spawns at the wheel component. |
+| **Attach To Wheel** | off | On, the effect is attached to the wheel component, at **Location Offset** from it. Off, the effect is placed in the world, and a looping effect is moved to its placement every tick. |
+| **Use Contact Point** | on | Places the effect at the contact point. Off, or when there is no contact, places it at the wheel component. Ignored while **Attach To Wheel** is on. |
 | **Location Offset** | `0, 0, 0` cm | Offset in the wheel's own directions. Corrected for **Invert Torque** wheels. |
 | **Rotation Offset** | `0, 0, 0` | Rotation relative to the wheel's forward. Corrected for **Invert Torque** wheels. |
 | **Parameter Intensity Range** | `0, 1` | Maps the effect's `0` to `1` intensity into the range your audio and particle parameters expect. |
@@ -115,7 +117,7 @@ Roll, Skid / Slip and Bump / Impact share these settings.
 
 ## Effect Functions
 
-Available on any wheel effect, including your own:
+Available to C++ effects. Blueprint effects cannot call these.
 
 | Function | Description |
 |---|---|
@@ -124,6 +126,11 @@ Available on any wheel effect, including your own:
 | `StopOutput()` | Fades audio out and deactivates particles. |
 | `IsOutputActive()` | Whether output is running. |
 | `GetOutputTransform(Output)` | The world transform the output's placement settings resolve to. |
+
+Available to C++ and Blueprint effects:
+
+| Function | Description |
+|---|---|
 | `GetContactStartedThisFrame()` | True on the frame the wheel regains contact. |
 | `GetContactImpactSpeed()` | The strongest current or completed impact this frame, in cm/s. |
 

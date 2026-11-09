@@ -1,138 +1,115 @@
 # Debugging
 
-Tools for diagnosing a vehicle that is not behaving correctly, in the order to try them.
-
-
-
-## Basic Understanding
-
-There are three tools, and they answer different questions.
-
-**The config assist HUD** shows live vehicle state while you drive, and lets you change spring values without leaving the game.
-
-**The debug visualizers** draw things you cannot otherwise see — the real center of mass, suspension traces.
-
-**`stat AVS`** reports what the plugin is costing, and how many vehicles are actually awake.
+The tools for finding out why a vehicle is not behaving, followed by known problems and their fixes.
 
 
 
 ## Config Assist HUD
 
-The plugin includes a HUD for building and tuning vehicles. It shows live vehicle state and lets you change spring values while driving, which is much faster than editing components and pressing play again.
+`VehicleSetup_HUD` shows the vehicle's state while you drive, and has sliders for the suspension.
 
 <!-- side-by-side:57 -->
-Setup is covered in step 5 of the [Quick Start guide](https://overtorque-creations.com/Dev/Docs/#AVS/Getting_Started/Quick_Start.md). Once it is running, press **Shift + F1** to get your cursor back so you can use the sliders.
+Turn on **Display Debug Menu** under **Advanced Vehicle System → Debug**. The HUD appears when a local player possesses the vehicle, and is removed when possession ends. `ShowDebugMenu` shows or hides it at runtime.
 
-Read the state panel before changing anything. Air speed, shifter position, current gear, torque, engine status and wheel count answer most questions immediately. A vehicle in Park with the engine off is a different problem from one in Drive producing no torque.
+Adding the widget from a player controller, as in step 5 of the [Quick Start](https://overtorque-creations.com/Dev/Docs/#AVS/Getting_Started/Quick_Start.md), also works.
 
+The HUD shows speed, shifter position, current gear and torque. A vehicle in Park with the engine off is a different problem from one in Drive producing no torque.
+
+Press **Shift + F1** to get the mouse cursor, so you can use the sliders.
 <!-- split -->
 ![In-game vehicle with the setup HUD showing air speed, shifter position, current gear, torque and live spring sliders](../Assets/Images/tutorials-Creating-Vehicles-16.png "The config assist HUD running in game")
 <!-- /side-by-side -->
 
-
-
-## Config Assist HUD Spring Sliders
-
-Spring values from the HUD apply to **every wheel**, overriding your per-wheel configuration, and are not saved.
-
-That is what makes it fast for finding a baseline, and why you copy the numbers back into the components when you are done.
+The spring sliders set every wheel at once, replacing each wheel's own values. They are not saved. Copy the values back into the wheel components when you are done.
 
 
 
 ## Debug Visualizers
 
-Under **Advanced Vehicle System → Debug**:
+Under **Advanced Vehicle System → Debug** on the vehicle:
 
-| Setting | Shows |
-|---|---|
-| **Visualize Center of Mass** | The actual physics center of mass, after every offset |
-| **Suspension Debug** | Suspension traces and state |
-| **Display Debug Menu** | The in-game debug menu, also toggleable with `ShowDebugMenu` |
+- **Visualize Center of Mass** draws the center of mass the physics body is using. It cannot be seen any other way.
+- **Suspension Debug** draws each wheel's trace (orange when it hits, red when it misses), a line for each wheel's force, and each wheel's current spring length. Development builds only.
 
-Enable **Visualize Center of Mass** first when a vehicle handles strangely with no obvious cause. A center of mass in an unexpected position explains a large share of handling problems, and it cannot be confirmed by looking at the vehicle.
+On each wheel, **Editor Preview** draws the wheel at both ends of its suspension travel in the viewport. It needs **Wheel Static Mesh** to be set.
 
 
 
-## Wheel Editor Preview
+## Profiling
 
-**Editor Preview**, under the wheel's Suspension Dynamics, draws wheel travel in the viewport.
+`stat AVS` shows timings for AVS's work, and counts active vehicles and wheels. See [Tick and Performance](https://overtorque-creations.com/Dev/Docs/#AVS/Advanced/Tick_And_Performance.md).
 
-This makes it obvious when spring length does not fit the wheel well.
-
-
-
-## Profiling with stat AVS
-
-`stat AVS` opens the plugin's stat group — the full tick pipeline plus **Active Vehicles**, **Simulated Wheels**, and **Wheels In Contact**.
-
-Check the counters before the timings. See [Tick and Performance](https://overtorque-creations.com/Dev/Docs/#AVS/Advanced/Tick_And_Performance.md) for how to read it.
-
-
-
-## Useful Console Commands
-
-```text
-stat AVS          Plugin tick pipeline and vehicle counters
-stat Physics      Engine-side physics cost
-stat FPS          Frame rate, for comparing against the physics rate
-```
-
-
-
-## A Vehicle That Shakes, Jitters or Bounces
-
-Check these four, in this order.
-
-**1. Vehicle mass is too low.** Under `1000` kg is very light for a car. See [Vehicle Mass](https://overtorque-creations.com/Dev/Docs/#AVS/Configuration/Physics.md).
-
-**2. Tire friction is too high.** Friction well above the default `1.4` causes jittering. Put it back to `1.4` and confirm the shaking stops before tuning it again.
-
-**3. Project physics settings have not been applied.** Substepping in particular. See [Recommended Project Settings](https://overtorque-creations.com/Dev/Docs/#AVS/Getting_Started/Project_Settings.md).
-
-**4. Spring strength does not match the mass.** A vehicle riding on fully compressed springs has no travel left to absorb anything. Check it with **Editor Preview** and aim for roughly half compression at rest.
-
-If all four check out and the vehicle still shakes only while standing still, it is worth confirming the behavior persists in a fresh project. Physics sleep behavior has changed between engine releases and has caused this symptom before.
-
-
-
-## Physics Wheels Reacting Harshly to Bumps and Curbs
-
-A wheel in **physics mode** is a rigid body. It reacts as though perfectly solid — rolling a marble at a curb rather than a tire deforming over it.
-
-Raycast wheels do not have this behavior, and have been the default since 1.4. Switching the wheel mode is the first thing to try.
-
-
-
-## Common Problems and Fixes
-
-| Symptom | Check |
-|---|---|
-| Vehicle will not move | Engine off, or still in Park. A vehicle spawns with both. Then check a wheel has **Is Driving Wheel** on. |
-| Stops responding while moved by something that does not possess it | It went passive. See [Tick and Performance](https://overtorque-creations.com/Dev/Docs/#AVS/Advanced/Tick_And_Performance.md). |
-| Wheels bounce or misbehave at speed | Physics wheel mode with non-sphere collision, or engine contact offsets left at default. |
-| Wheels will not reach high speed | Engine **Max Angular Velocity** too low. See [Project Settings](https://overtorque-creations.com/Dev/Docs/#AVS/Getting_Started/Project_Settings.md). |
-| Skeletal mesh parts jitter violently | Physics constraints defined inside the mesh's Physics Asset. Move them to the vehicle Blueprint. |
-| Inputs do nothing in multiplayer | Called from a non-owning client. See [Networking](https://overtorque-creations.com/Dev/Docs/#AVS/Advanced/Networking.md). |
-| Vehicle see-saws on another physics object | Turn off **Wheels Push Physics**. |
-| Vehicle shoved around by a character | A character attached to the vehicle still has collision enabled. See [Attaching Objects](https://overtorque-creations.com/Dev/Docs/#AVS/Components/Attaching_Objects.md). |
-| Actors vanish at distance while driving | Network relevancy. Check **Use Client Side Camera Updates** is on, or switch to server side relevancy. See [Networking](https://overtorque-creations.com/Dev/Docs/#AVS/Advanced/Networking.md). |
-| Skeletal wheels sit or scale wrong | A bone with non-1.0 scale. Apply the scale in your modeling software. |
-
-
-
-## Getting Support
-
-If none of that covers it, the `#avs_support` channels on [Discord](https://discord.gg/8YvWARS) are the fastest way to reach me, or send an email.
-
-Include your Unreal version, your AVS version, and whether you are using raycast or physics wheels. Those three answer most of the first round of questions.
+`stat Physics` shows the engine's physics cost, and `stat FPS` the frame rate.
 
 
 
 ## Finding What Is Pushing a Vehicle
 
-When a vehicle is being shoved by something and it is not obvious what, let the engine tell you.
+Select `VehicleMesh`, add its **On Component Hit** event, and print **Other Component** to the screen. Reproduce the problem, and the print names the component doing the pushing.
 
-Select `VehicleMesh` on the vehicle, add its **On Component Hit** event, and print the **Other Component** to the screen.
 
-Reproduce the problem and the print spams whatever component is doing the pushing, usually a character mesh/capsule or a weapon mesh that still has collision enabled.
 
+## Fixing Vehicle Problems
+
+### Vehicle Shakes, Jitters or Bounces While Parked
+
+These four causes come up repeatedly in support. Check them in this order:
+
+1. Vehicle mass is too low. Under `1000` kg is very light for a car. See [Physics](https://overtorque-creations.com/Dev/Docs/#AVS/Configuration/Physics.md).
+2. Tire friction is too high. Put **Tire Friction** back to `1.4`, and confirm the shaking stops before tuning it again.
+3. The recommended project physics settings are not applied, substepping in particular. See [Project Settings](https://overtorque-creations.com/Dev/Docs/#AVS/Getting_Started/Project_Settings.md).
+4. The springs are too soft for the mass, so the vehicle sits on fully compressed springs. Raise **Spring Strength** until it sits about halfway through its travel.
+
+If all four check out and it only shakes while standing still, try the vehicle in a new project. Physics sleep behavior has changed between engine releases, and has caused this before.
+
+### Vehicle Does Not Move
+
+Check that the engine is running and the shifter is in Drive. A vehicle spawns with the engine off and in Park. Then check that at least one wheel has **Is Driving Wheel** on.
+
+### Vehicle Stops Responding While Moved by Something That Does Not Possess It
+
+It went passive. See [Keeping a Vehicle Awake](https://overtorque-creations.com/Dev/Docs/#AVS/Advanced/Tick_And_Performance.md).
+
+### Vehicle Is Shoved Around by a Character
+
+A character attached to the vehicle still has collision on. Turn it off on the character's mesh, capsule and weapons. See [Attaching Objects](https://overtorque-creations.com/Dev/Docs/#AVS/Components/Attaching_Objects.md).
+
+### Vehicle Rocks Back and Forth on Another Physics Object
+
+Turn off **Wheels Push Physics**.
+
+### Physics Wheels Bounce or Shake at Speed
+
+Give the wheel mesh a simple sphere collision. See [Important Information](https://overtorque-creations.com/Dev/Docs/#AVS/Getting_Started/Important_Information.md). Lowering the project's contact offsets also helps. See [Project Settings](https://overtorque-creations.com/Dev/Docs/#AVS/Getting_Started/Project_Settings.md).
+
+### Physics Wheels Hit Curbs Harshly
+
+A physics mode wheel is a solid body, and hits a curb with no tire deforming over it. Raycast wheels do not have this behavior.
+
+### Physics Wheels Stop Getting Faster
+
+Raise **Max Angular Velocity** in the project's physics settings. See [Project Settings](https://overtorque-creations.com/Dev/Docs/#AVS/Getting_Started/Project_Settings.md).
+
+### Skeletal Mesh Parts Jitter Violently
+
+Physics constraints are defined inside the skeletal mesh's Physics Asset. Move them to the vehicle Blueprint, connected to `VehicleMesh`. See [Important Information](https://overtorque-creations.com/Dev/Docs/#AVS/Getting_Started/Important_Information.md).
+
+### Skeletal Wheels Sit or Size Wrong
+
+A bone has a scale other than `1.0`. Apply the scale in your modeling software and re-export.
+
+### Inputs Do Nothing in Multiplayer
+
+The input function is called on a client that does not own the vehicle. See [Networking](https://overtorque-creations.com/Dev/Docs/#AVS/Advanced/Networking.md).
+
+### Actors Disappear Around a Driving Player
+
+Check that **Use Client Side Camera Updates** is on, or switch to server side relevancy. See [Network Relevancy](https://overtorque-creations.com/Dev/Docs/#AVS/Advanced/Networking.md).
+
+
+
+## Getting Support
+
+If none of this covers it, ask in the `#avs_support` channels on [Discord](https://discord.gg/8YvWARS), or send an email.
+
+Include your Unreal version, your AVS version, and whether you are using raycast or physics wheels.

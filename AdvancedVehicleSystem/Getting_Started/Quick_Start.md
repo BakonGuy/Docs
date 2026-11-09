@@ -20,7 +20,7 @@ A simple template is available here. It is still recommended to follow the tutor
 
 > Check the [FAB listing](https://www.fab.com/listings/e1457ad1-297b-4a70-aecb-5c6716d9494f) for the engine versions the current release supports.
 >
-> Still on AVS 1.4 or earlier? Use the [Legacy documentation](https://overtorque-creations.com/Dev/Docs/#AVS_Legacy/README.md) instead — a lot changed in 1.5.
+> Still on AVS 1.4 or earlier? Use the [Legacy documentation](https://overtorque-creations.com/Dev/Docs/#AVS_Legacy/README.md) instead. A lot changed in 1.5.
 
 
 
@@ -71,7 +71,7 @@ By default, the vehicle is not running and in park. For simplicity, we will star
 ![Event BeginPlay wired into Start Engine and Set Shifter Position set to Drive](../Assets/Images/tutorials-Creating-Vehicles-03.png "The Parent: BeginPlay node shown here is no longer required in 1.5")
 <!-- /side-by-side -->
 
-> **Changed in 1.5:** you no longer need to add a call to the parent function on Blueprint events. AVS is native C++ now and Unreal runs the parent implementation for you. Older screenshots and tutorials will still show those nodes — they are harmless, just unnecessary.
+> **Changed in 1.5:** you no longer need to add a call to the parent function on Blueprint events. AVS is native C++ now, and its code runs whether or not your event calls the parent. Older screenshots and tutorials still show those nodes. They are harmless, just unnecessary.
 
 <!-- side-by-side:48 -->
 **2D**
@@ -136,7 +136,7 @@ For better productivity and organization, it is advisable to name the components
 
 Now you'll want to configure your wheel components.
 
-Select one of your wheels from the details panel, then open the "Wheel Config" section.
+Select one of your wheels from the details panel, then open the "Advanced Vehicle System" section.
 
 **Wheel Static Mesh:**
 
@@ -153,7 +153,7 @@ Select one of your wheels from the details panel, then open the "Wheel Config" s
 ![Vehicle Wheel - Config panel showing Wheel Mode Raycast, wheel mass and tire friction, plus the Drive/Steer, Brakes and Suspension sections](../Assets/Images/tutorials-Creating-Vehicles-10.png "Every wheel carries its own full configuration")
 <!-- /side-by-side -->
 
-Every wheel setting is covered in full on the [Wheels](https://overtorque-creations.com/Dev/Docs/#AVS/Components/Wheels.md) page.
+Setting up and tuning wheels is covered on the [Wheels](https://overtorque-creations.com/Dev/Docs/#AVS/Components/Wheels.md) page, and every wheel setting is listed in [Wheel Settings](https://overtorque-creations.com/Dev/Docs/#AVS/Reference/Wheel_Settings.md).
 
 
 
@@ -191,6 +191,8 @@ Every gear variable is explained on the [Engine and Transmission](https://overto
 ## Step 5: Setup the config assist HUD
 
 _The plugin includes a basic HUD to assist in the creation of vehicles. This step is not required but is recommended if you are not extremely familiar with Unreal Engine._
+
+> As of 1.5, the HUD can also be shown without a player controller: turn on **Display Debug Menu** under **Advanced Vehicle System → Debug** on the vehicle. It appears while a local player possesses the vehicle. See [Debugging](https://overtorque-creations.com/Dev/Docs/#AVS/Advanced/Debugging.md).
 
 <!-- side-by-side:48 -->
 **5A**
@@ -240,8 +242,8 @@ If you want to use the buttons and sliders, press **'SHIFT + F1'** to bring your
 
 ## Next Steps
 
-- [Wheels](https://overtorque-creations.com/Dev/Docs/#AVS/Components/Wheels.md) — every wheel setting, including suspension
-- [Wheels at Runtime](https://overtorque-creations.com/Dev/Docs/#AVS/Components/Wheels_At_Runtime.md) — detaching, adding and changing wheels while the game runs
-- [Wheel Effects](https://overtorque-creations.com/Dev/Docs/#AVS/Wheel_Effects/Overview.md) — skid marks, smoke, and tire audio
-- [Camera Pivot](https://overtorque-creations.com/Dev/Docs/#AVS/Components/Camera_Pivot.md) — a real camera rig instead of a fixed spring arm
-- [Arcade Physics](https://overtorque-creations.com/Dev/Docs/#AVS/Guides/Arcade_Physics.md) — tuning toward snappier, more forgiving handling
+- [Wheels](https://overtorque-creations.com/Dev/Docs/#AVS/Components/Wheels.md): setting up and tuning wheels, including suspension
+- [Wheels at Runtime](https://overtorque-creations.com/Dev/Docs/#AVS/Components/Wheels_At_Runtime.md): detaching, adding and changing wheels while the game runs
+- [Wheel Effects](https://overtorque-creations.com/Dev/Docs/#AVS/Wheel_Effects/Overview.md): skid marks, smoke, and tire audio
+- [Camera Pivot](https://overtorque-creations.com/Dev/Docs/#AVS/Components/Camera_Pivot.md): a camera rig with look input, lag and G-force movement
+- [Arcade Physics](https://overtorque-creations.com/Dev/Docs/#AVS/Guides/Arcade_Physics.md): tuning toward snappier, more forgiving handling

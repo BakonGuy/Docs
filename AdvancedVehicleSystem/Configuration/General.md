@@ -1,92 +1,43 @@
 # General Vehicle Settings
 
-Vehicle-wide settings under **Advanced Vehicle System → General**. Select `ClassName(self)` in the components list, or press **Class Defaults**, to find them.
+The settings under **Advanced Vehicle System → General**, which apply to the whole vehicle. To find them, select `ClassName(self)` in the components list or press **Class Defaults**.
 
-
-
-## Basic Understanding
-
-These are settings that apply to the vehicle as a whole rather than to a component. Most projects set **Speed Units** once and never touch the rest.
-
-A few vehicle-wide behaviors live in other categories, listed at the bottom of this page.
+Every vehicle setting is listed in [Vehicle Settings](https://overtorque-creations.com/Dev/Docs/#AVS/Reference/Vehicle_Settings.md).
 
 
 
 ## Speed Units
 
-**Speed Units** sets the unit for every speed value AVS calculates or returns. It is the conversion between Unreal units (cm/s) and what you want to work in, so every "Speed" output is in this unit.
+**Speed Units** (`MPH`) is the unit for every speed AVS takes or returns. That includes `GetAirSpeed`, the steering falloff curve and every speed in the gear table.
 
-<!-- side-by-side:57 -->
-**Gear speeds and shift points use this unit too.** Changing it after tuning a vehicle does not convert the gear table. The numbers stay the same and now mean something else: a vehicle that topped out at 75 MPH will top out at 75 KPH.
+Set it before building the gear table. Changing it later does not convert the numbers already entered. A vehicle with a top gear ending at `75` mph would end at `75` km/h after switching to km/h.
 
-Set it once, before building your gear table, and leave it alone.
-<!-- split -->
-| In the editor | In C++ |
-|---|---|
-| (mph) Miles Per Hour | `MPH` |
-| (km/h) Kilometers Per Hour | `KPH` |
-| (ft/s) Feet Per Second | `FTPS` |
-| (m/s) Meters Per Second | `MPS` |
-| (kn) Knots | `KNOTS` |
-| Furlong Per Fortnight | `Furlong` |
-<!-- /side-by-side -->
+The options are `(mph) Miles Per Hour`, `(km/h) Kilometers Per Hour`, `(ft/s) Feet Per Second`, `(m/s) Meters Per Second`, `(kn) Knots` and `Furlong Per Fortnight`.
 
-
-
-## Reading Speed Units for a HUD
-
-`GetSpeedUnitData` returns the abbreviation and conversion factors.
-
-This is what you want for a HUD that displays units, rather than hardcoding "MPH".
+`GetSpeedUnitData` returns the selected unit, its abbreviation (such as `mph`), and the factors for converting to and from cm/s. A speedometer that shows the abbreviation stays correct when **Speed Units** changes.
 
 
 
 ## Brake Lock Speed
 
-**Brake Lock Speed** (`10`) is the speed below which the wheels fully lock to hold the vehicle still, while the brake is held at `0.95` or more. It is in your **Speed Units**.
+Below **Brake Lock Speed** (`10`), with the brake held at `0.95` or more, the wheels lock to hold the vehicle still.
 
-Only wheels with a braking, handbrake or driving role lock. Free-rolling wheels never do.
-
-Set it to `0` to disable the lock.
+Only wheels with **Is Braking Wheel**, **Is Handbrake Wheel** or **Is Driving Wheel** on lock. `0` turns the lock off.
 
 
 
 ## Cinematic Playback
 
-Enable this **after** recording a cinematic, not before. When on, it prevents cinematic playback fighting against the vehicle's own logic.
+Turn on **Cinematic Playback** after recording a vehicle for a cinematic.
 
-Leave it off while driving or recording, or you will be fighting it instead.
+While it is on and no player controls the vehicle, AVS releases every wheel lock (handbrake, Park and **Brake Lock Speed**), so the recorded wheel motion plays back. `IsCinematic` returns this state. A vehicle a player takes over behaves normally.
 
-`IsCinematic` returns true only while **Cinematic Playback** is on **and** the vehicle is not player controlled, so a vehicle a player takes over behaves normally again.
-
-
-
-## Recording a Vehicle with Take Recorder
-
-Add your wheel meshes manually as children of the wheel components before recording, then record the vehicle with Take Recorder as normal.
+To record a vehicle with Take Recorder, first add the wheel meshes yourself as children of the wheel components, then record as normal.
 
 
 
-## Related Settings in Other Categories
+## Next Steps
 
-A few vehicle-wide behaviors live in other categories:
-
-- **Allow Passive Mode** and **Passive Tick Gatekeeping** (Tick) — see [Tick and Performance](https://overtorque-creations.com/Dev/Docs/#AVS/Advanced/Tick_And_Performance.md)
-- **Upside Down Angle Threshold** (Physics, Advanced) and the **OnVehicleFlipped** event — see [Physics](https://overtorque-creations.com/Dev/Docs/#AVS/Configuration/Physics.md)
-- **Disable Skeletal Collisions** (Physics) — see [Important Information](https://overtorque-creations.com/Dev/Docs/#AVS/Getting_Started/Important_Information.md)
-
-
-
-## Driving One Vehicle from Another with Input Host
-
-`SetInputHost(OtherVehicle)` makes a vehicle copy its inputs from another AVS vehicle, on the 25 TPS tick.
-
-Throttle, brake, steering and handbrake are all taken from the host. The follower still runs its own physics, its own gears and its own wheels — it is only the driver input that is shared.
-
-Input Host was built for trailers. See [Hitch / Trailers](https://overtorque-creations.com/Dev/Docs/#AVS/Components/Hitch_Trailers.md).
-
-Pass `nullptr` (or an empty reference in Blueprint) to stop copying.
-
-> Clearing the host does not reset the follower's inputs. Whatever was last copied — throttle, brake, steering, handbrake — stays until something sets it, so zero them yourself when you release the host.
-
-> The host relationship is one way. Setting a host on a vehicle does not make the host follow it back.
+- [Engine and Transmission](https://overtorque-creations.com/Dev/Docs/#AVS/Configuration/Engine_And_Transmission.md): building the gear table.
+- [Steering](https://overtorque-creations.com/Dev/Docs/#AVS/Configuration/Steering.md): steering speed and the falloff curve.
+- [Physics](https://overtorque-creations.com/Dev/Docs/#AVS/Configuration/Physics.md): mass, center of mass and moving a vehicle.

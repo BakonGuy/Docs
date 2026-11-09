@@ -1,63 +1,64 @@
 # Center of Mass
 
-`AVS_CenterOfMass` is a marker component with no settings. You add it, drag it where the mass should sit, and AVS uses its location.
+Where a vehicle's center of mass sits changes how much its body rolls in corners. `AVS_CenterOfMass` is a component you place to set it. This page sets the center of mass for the car from the [Quick Start](https://overtorque-creations.com/Dev/Docs/#AVS/Getting_Started/Quick_Start.md).
 
 
 
-## Basic Understanding
+## How the Center of Mass Is Chosen
 
-The component is a position and nothing else. It exists so you can place the center of mass visually instead of entering coordinates.
+Without a Center of Mass component, the vehicle uses Unreal's own center of mass, calculated from the vehicle mesh's collision.
 
-It is not the only thing that can set the center of mass — a code override beats it, and an additional offset can be applied on top. The precedence is listed at the bottom of this page.
+The component is a marker with no settings. When it is attached directly to `VehicleMesh`, its location becomes the center of mass. One nested under any other component is ignored. If there is more than one, only the first found is used.
+
+Two functions can change it from code:
+
+1. `SetExactCenterOfMass(Location)` sets the center of mass relative to the vehicle mesh's pivot, and overrides the component.
+2. `SetCenterOfMassOffset(Offset)` adds an offset on top of whichever of the above applies. With neither the component nor `SetExactCenterOfMass`, the offset is measured from the vehicle mesh's pivot.
 
 
 
 ## Adding a Center of Mass Component
 
 <!-- side-by-side:57 -->
-**1. Add the component** directly under `VehicleMesh`.
-
-**2. Position it slightly above wheel height**, roughly where the vehicle's mass actually is. Low in the chassis, between the axles, is a good starting point for a car.
-
-**3. Turn on Visualize Center of Mass** under **Advanced Vehicle System → Debug**, and confirm the drawn COM is where you intended. This draws the *actual* physics center of mass after every offset has been applied — it is the only reliable check.
-
-**4. Drive it, then adjust.** Front to back placement changes the balance: rearward adds rear grip and understeer, forward does the opposite.
+1. Add an `AVS_CenterOfMass` component directly under `VehicleMesh`.
+2. Move it to the middle of the car, between the axles, slightly above wheel height.
+3. Turn on **Visualize Center of Mass** under **Advanced Vehicle System → Debug**. It draws the center of mass the physics body is actually using.
+4. Drive the car, then adjust the height in small steps.
 <!-- split -->
-![Center of mass component positioned inside a vehicle chassis with the visualizer enabled](../Assets/Images/_placeholder.png "Position the marker, then confirm with the visualizer")
+![Center of mass component positioned inside a vehicle chassis with the visualizer enabled](../Assets/Images/_placeholder.png "Position the marker, then check it with the visualizer")
 <!-- /side-by-side -->
-
-> The component must be attached **directly** to `VehicleMesh`. One nested under any other component is ignored, and only the first one found is used.
 
 
 
 ## Center of Mass Height
 
-Lower is not automatically better:
+The higher the center of mass is above the wheels, the more the body rolls in corners. At wheel height it does not roll at all. Below the wheels, the body leans into the turn, which a real vehicle does not do.
 
-Too high and the vehicle rolls over in corners. Slightly above wheel height is stable but responsive, which is the usual target. Below the wheels it resists flipping, but leans the wrong way through a corner.
-
-A vehicle leaning outward through a corner looks wrong even when it drives correctly.
+Small changes in height make a large difference.
 
 
 
-## Center of Mass Precedence
+## Changing the Center of Mass at Runtime
 
-Three things can set the center of mass:
+Each call to `SetCenterOfMassOffset` replaces the previous offset, so calling it repeatedly with the same value does not move the center of mass further. It can shift the center of mass as cargo is loaded.
 
-1. `SetExactCenterOfMass` — explicit override, relative to the vehicle mesh pivot. Beats the component.
-2. **This component's location.**
-3. Neither — Unreal's own center of mass, calculated from the vehicle mesh's physics bodies.
-
-The one exception: `SetCenterOfMassOffset` with no component and no exact override measures its offset from the vehicle mesh pivot.
-
-`GetExactCenterOfMass` returns the real value with a validity flag. It is invalid until a physics body exists, so do not call it during construction.
-
-> Both the component and the visualizer were fixed in 1.5.2. If either seems to do nothing, check your plugin version first.
+`GetExactCenterOfMass` returns the center of mass the physics body is using, in vehicle mesh space, and whether that value is valid. It is not valid until the physics body exists, so it cannot be read during construction.
 
 
 
-## SetCenterOfMassOffset
+## Fixing Center of Mass Problems
 
-`SetCenterOfMassOffset` adds a further offset on top of whichever base applies, and **sets rather than accumulates**.
+### Center of Mass Component Has No Effect
 
-That makes it safe to call repeatedly — shifting mass as cargo loads, or as a fuel tank empties, without drift.
+Check that it is attached directly to `VehicleMesh`. Before AVS 1.5.2, the component and the visualizer did not work correctly.
+
+### Car Leans Into Corners
+
+The center of mass is below the wheels. Raise it above wheel height.
+
+
+
+## Next Steps
+
+- [Physics](https://overtorque-creations.com/Dev/Docs/#AVS/Configuration/Physics.md): mass, drag and moving a vehicle.
+- [Component Settings](https://overtorque-creations.com/Dev/Docs/#AVS/Reference/Component_Settings.md): every component setting.

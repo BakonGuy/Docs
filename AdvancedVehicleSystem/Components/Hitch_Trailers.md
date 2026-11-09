@@ -94,9 +94,19 @@ Regardless of what you choose, you will need to be mindful of how you call these
 
 `HitchToOverlapped` only connects when all of these hold:
 
-- Call it on the **tow hitch**. Called on a trailer hitch, it does nothing.
-- Each hitch needs a collision shape — box, sphere or capsule — as a **direct child**. A shape nested under something else is not found.
-- Trailer hitches that are already hitched are skipped, and the two hitches must share a **Connect Type**.
+- It is called on the tow hitch. Called on a trailer hitch, it does nothing.
+- Each hitch has a collision shape (box, sphere or capsule) as a direct child. A shape nested under something else is not found.
+- The two hitches share a **Connect Type**.
+
+Trailer hitches that are already hitched are skipped. Of the rest, only the first overlapping trailer hitch is tried. If it does not share a **Connect Type**, nothing happens, even if another overlapping trailer hitch would.
+
+
+
+## Hitch Rotation Limits
+
+**X Rotation Limit** (`45`), **Y Rotation Limit** (`70`) and **Z Rotation Limit** (`120`) set how far, in degrees, the trailer can rotate at the hitch: X is roll, Y is pitch and Z is yaw. `180` leaves that axis free.
+
+Only the tow hitch's limits are used. The values on the trailer hitch have no effect.
 
 
 
@@ -112,17 +122,15 @@ A trailer is a full AVS vehicle, so it has its own throttle, brakes and steering
 
 `SetInputHost(TowingVehicle)` on the trailer makes it copy throttle, brake, steering and handbrake from the towing vehicle, on the 25 TPS tick. This is what Input Host was built for.
 
-The trailer still runs its own physics, its own gears and its own wheels. Only the driver input is shared.
+The trailer still runs its own physics, gears and wheels. Only the driver input is shared. With a host set:
 
-Useful for:
+- The trailer's braking wheels brake when the towing vehicle brakes.
+- A powered trailer's driving wheels pull under the same throttle. The trailer's engine must be running.
+- The trailer's steerable wheels follow the towing vehicle's steering input.
 
-- **A trailer that brakes with the truck.** Mark its wheels as braking wheels and the trailer brakes when the cab does.
-- **A powered trailer or dolly**, where the trailer's own driving wheels should pull under the same throttle.
-- **A steerable rear trailer axle** that follows the cab's steering input.
+Set the host on **Hitched** and clear it on **Unhitched**.
 
-Set the host when the hitch connects and clear it when it releases, which is what the **Hitched** and **Unhitched** events are for.
-
-Clearing the host does not reset the trailer's inputs. Zero its throttle and release its brakes and handbrake on **Unhitched**, or it keeps whatever the truck was doing at the moment it let go.
+Clearing the host does not reset the trailer's inputs. Without resetting them on **Unhitched**, the trailer keeps the throttle, brake and handbrake it had when it was released.
 
 
 
@@ -136,9 +144,9 @@ The hitch component broadcasts three events you can bind to:
 | **Unhitched** | The connection is released. |
 | **Hitched To Destroyed** | The thing on the other end was destroyed. |
 
-**Hitched To Destroyed** fires when the vehicle on the other end is destroyed while attached. Clean up any state you were tracking about the load there.
+**Hitched To Destroyed** fires when the hitch on the other end is destroyed while attached, for example when its vehicle is destroyed. The hitch then unhitches itself.
 
-`GetIsHitched` returns the current state if you would rather poll than bind.
+`GetIsHitched` returns whether the hitch is connected. `GetHitchedTo` returns the hitch on the other end, and `GetHitchedVehicle` and `GetHitchedTrailer` return the towing vehicle and the trailer.
 
 
 

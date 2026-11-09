@@ -1,73 +1,57 @@
 # Engine and Transmission
 
-AVS does not simulate a full engine and drivetrain. Torque comes from the gear you are in, the vehicle's speed and the throttle, and RPM is a cosmetic value for audio and UI.
+How AVS turns throttle into drive torque, and how to build a gear table. The example is the three-gear car from the [Quick Start](https://overtorque-creations.com/Dev/Docs/#AVS/Getting_Started/Quick_Start.md).
+
+Every engine and transmission setting is listed in [Vehicle Settings](https://overtorque-creations.com/Dev/Docs/#AVS/Reference/Vehicle_Settings.md).
 
 
 
-## Basic Understanding
+## How the Engine and Transmission Work
 
-The transmission is a table of gears. Each gear covers a speed range and supplies an amount of torque across that range.
+AVS does not simulate an engine. Drive torque comes from a table of gears.
 
-At any moment AVS looks at the vehicle's speed and the active gear:
+Each gear covers a range of speeds. At its **Start Speed** the gear gives **Max Torque**, and at its **End Speed** it gives **Min Torque**. Between the two, torque changes evenly from one to the other. The throttle then scales that torque.
 
-- **Inside the gear's range,** available torque moves from **Max Torque** at **Start Speed** down to **Min Torque** at **End Speed**.
-- **Below Start Speed,** torque ramps up toward Max Torque.
-- **Past End Speed,** torque falls to zero over a further quarter of the gear's speed range.
+Every driving wheel receives this torque. Two driving wheels get twice the total torque of one.
 
-Throttle then scales whatever torque is available.
-
-RPM is not part of that calculation. Each gear carries a **Low RPM** and **High RPM** that AVS maps across the gear's speed range, for audio and UI only.
-
-This keeps setup to a table of numbers, and is enough to drive audio, HUDs, and shift behavior convincingly.
+RPM is not part of the calculation. Each gear's **Low RPM** and **High RPM** set the RPM shown across its speed range, for engine audio and the HUD.
 
 
 
-## Step 1: Set your Speed Units
+## Choosing a Transmission Mode
 
-**Speed Units** decides what every speed number on the vehicle means, including every value in the gear table.
+<!-- side-by-side:50 -->
+**Automatic** (the default)
 
-> Changing **Speed Units** after building a table does not convert the numbers. Your gear speeds will silently mean something else. Pick the unit first.
+**Automatic Transmission** on. AVS changes gears at each gear's **Up Shift** and **Down Shift** speeds.
+
+The player moves the shifter between Park, Reverse, Neutral and Drive.
+<!-- split -->
+**Fully automatic**
+
+**Automatic Shifter Positon** on as well. AVS moves the shifter too.
+
+Pressing throttle from a stop selects Drive. Pressing brake from a stop selects Reverse. Releasing both at a stop selects Park.
+<!-- /side-by-side -->
+
+Fully automatic needs throttle and brake on one input axis, sent with `SetThrottleAndBrakeInput`. The Quick Start covers the input setup.
+
+For a manual transmission, turn **Automatic Transmission** off and select gears with `SetManualGear`. It only selects forward gears.
+
+The example car uses the automatic mode.
 
 
 
-## Step 2: Build the Gears Array
+## Building the Gear Table
 
 <!-- side-by-side:57 -->
-**1. Decide the vehicle's top speed.** That is roughly the **End Speed** of your last gear, in whatever unit **Speed Units** is set to.
-
-**2. Work backwards.** Each gear's End Speed is roughly where the next one takes over.
-
-**3. Set Start Speed** to where the gear becomes useful — usually the previous gear's End Speed, or slightly below it so they overlap.
-
-**4. Set shift points.** **Up Shift** is the speed the transmission changes up at, **Down Shift** the speed it changes back down.
-
-**5. Set torque.** **Max Torque** applies at Start Speed, **Min Torque** at End Speed, interpolated between.
+1. Set **Speed Units** under **Advanced Vehicle System → General** first. Every speed in the gear table uses it, and changing it later does not convert them.
+2. Open **Advanced Vehicle System → Transmission** and expand **Gears**.
+3. Gear `0` is reverse. Every gear after it is a forward gear. Add gears until there are four.
+4. Enter the values from the table below.
 <!-- split -->
 ![Gears array with four elements expanded, showing end speed, start speed, shift points, RPM and torque values](../Assets/Images/tutorials-Creating-Vehicles-11.png "Gear 0 is always reverse; everything after it is forward")
 <!-- /side-by-side -->
-
-> Set each gear's **Down Shift** below the previous gear's **Up Shift**. Otherwise the transmission changes up, finds itself already under the new gear's Down Shift, and changes straight back down.
-
-
-
-## Gear Settings Reference
-
-| Setting | Means |
-|---|---|
-| **End Speed** | Intended maximum speed of the gear. Torque is at Min Torque here. |
-| **Start Speed** | Intended minimum speed of the gear. Torque is at Max Torque here. |
-| **Up Shift** | Automatic transmission only. Changes up when above this speed. |
-| **Down Shift** | Automatic transmission only. Changes down when below this speed. |
-| **High RPM** | Cosmetic. The RPM shown at End Speed. |
-| **Low RPM** | Cosmetic. The RPM shown at Start Speed. |
-| **Max Torque** | Torque at Start Speed, in hNm. |
-| **Min Torque** | Torque at End Speed, in hNm. |
-
-
-
-## Example Gear Table
-
-A working starting point with three forward gears, and reverse in gear 0.
 
 | | Gear 0 (reverse) | Gear 1 | Gear 2 | Gear 3 |
 |---|---|---|---|---|
@@ -80,176 +64,70 @@ A working starting point with three forward gears, and reverse in gear 0.
 | Max Torque | 30.0 | 30.0 | 30.0 | 30.0 |
 | Min Torque | 5.0 | 5.0 | 5.0 | 5.0 |
 
-Gear 0's **Up Shift** and **Down Shift** are never read. The automatic transmission only picks gear 0 when the shifter is in Reverse, and its upshift and downshift searches both skip index 0. The `100.0` above is simply the default every gear is created with.
+Each gear's speed range overlaps the next one. Gear 1 runs from 5 to 30, and gear 2 starts at 25.
 
+Gear 1 changes up at 20, before its **End Speed**. Gear 2 changes back down at 15, below gear 1's **Up Shift**. With **Down Shift** above the previous gear's **Up Shift**, the transmission changes up, finds itself below the new gear's **Down Shift**, and changes straight back down.
 
+Reverse's **Up Shift** and **Down Shift** have no effect.
 
-## Gear 0 is Always Reverse
+Torque is in hectonewton meters (hNm). `30` is 3000 Nm at each driving wheel.
 
-The first entry in the Gears array is the reverse gear. Everything after it is a forward gear.
 
-A four gear car therefore has five entries: gear 0 for reverse, then gears 1 to 4.
 
+## Starting the Engine and Shifting into Drive
 
+A vehicle spawns with the engine off and the shifter in Park. It does not move until both change.
 
-## Top Speed and End Speed
+- **Start With Engine Running** starts the engine on spawn. In code, `StartEngine` starts it.
+- `SetShifterInput(Drive)` puts the shifter in Drive. `MoveShifterInput` moves it one position, toward Park when **MoveUp** is true and toward Drive when it is false.
 
-The last gear's **End Speed** is not a hard limit. Past it, torque falls away over a further quarter of the gear's speed range before reaching zero.
+The engine runs after **Ignition Time** (`0.5` s). An Engine Audio component plays its start sound during that time.
 
-A last gear running from `50` to `75` therefore still has some torque until about `81`. Where the vehicle actually tops out depends on how much drag that remaining torque has to overcome.
+In Park, the driving wheels are locked.
 
 
 
-## When a Vehicle Never Reaches its End Speed
+## Tuning Speed and Acceleration
 
-If **Min Torque** is too low to keep the vehicle accelerating, it stops short and never reaches End Speed. Raising Min Torque on that gear is the fix.
+**Max Torque** sets how hard a gear pulls at the bottom of its range. Raise it for faster acceleration.
 
+**Min Torque** sets how much pull is left at the top of the range. If it is too low to overcome drag, the vehicle never reaches the gear's **End Speed**.
 
+The last gear's **End Speed** is not a hard limit. Past **End Speed**, torque starts again from **Max Torque** and falls to `0` over a further quarter of the gear's range. The example's gear 3 runs from 50 to 75, so it still pulls until about 81.
 
-## Torque is Applied Per Driving Wheel
+Torque applies to every driving wheel, so an all wheel drive version of the example has twice the drive torque of a rear wheel drive one. To keep the total the same as driving wheels change, see [Distributing Gear Torque Across Driving Wheels](https://overtorque-creations.com/Dev/Docs/#AVS/Guides/Torque_Distribution.md).
 
-**Max Torque** and **Min Torque** are not engine or drivetrain torque. They are the torque applied at **each driving wheel**.
 
-Enabling **Is Driving Wheel** on another wheel adds that much torque again. A four wheel drive vehicle built from the same gear table as a rear wheel drive one has twice the total drive torque, not the same amount split four ways.
 
-For most vehicles this is fine — tune the numbers until the vehicle drives the way you want, with the wheels it has.
+## Shifter Position and Current Gear
 
-It matters when the driving wheel count changes, or when you want to author the table as total drivetrain torque. See [Distributing Gear Torque Across Driving Wheels](https://overtorque-creations.com/Dev/Docs/#AVS/Guides/Torque_Distribution.md).
+The shifter is Park, Reverse, Neutral or Drive. The gear is the entry in **Gears** that is supplying torque.
 
+A gear change takes **Gear Switch Time** (`0.5` s). During it, no gear supplies torque. **Zero Throttle While Shifting** also cuts the throttle during it.
 
+`GetSelectedGear` returns the gear the transmission wants. `GetCurrentGear` returns the gear actually engaged, and `-1` during a gear change or out of gear. A gear display should read `GetCurrentGear`.
 
-## Torque Units: Hectonewton Meters
+**GearChanged** fires when a gear change completes, with the old and new gear index. **ShifterChanged** fires when the shifter is set. Both are Blueprint events and can be overridden in C++.
 
-Torque is in **hectonewton meters (hNm)**, equal to 100 Nm.
 
-A value of `50` applies 5000 Nm at the wheel.
 
+## RPM
 
+In gear, RPM follows the driving wheels' speed across the gear's range, from **Low RPM** to **High RPM**. Throttle adds up to 1000 RPM either way, kept within that range.
 
-## High RPM and Low RPM are Cosmetic
+With no gear engaged (Park, Neutral, or during a gear change), RPM goes from **Idle RPM** (`1000`) with no throttle to **Idle Max RPM** (`7500`) at full throttle.
 
-In gear, RPM follows the driven wheels' speed across the gear's range, from **Low RPM** to **High RPM**. Throttle adds a swing of up to 1000 RPM either way, clamped to that range.
+`GetEngineRPM` returns the current RPM. The [Engine Audio](https://overtorque-creations.com/Dev/Docs/#AVS/Components/Engine_Audio.md) component sends it to the engine sound.
 
-None of it is used in any physics calculation. Set the values to whatever sounds right for the vehicle.
 
 
+## Changing the Gear Table at Runtime
 
-## Shifter Position vs Current Gear
+`SetGearArray` replaces the whole table. `SetGearItem` replaces one gear by index, and adds entries if the index is past the end.
 
-These are two separate things.
+Both apply to the gear currently engaged straight away. In a forward gear, neither causes a gear change. In reverse, both reset the selected gear to `1`, so the transmission changes back into reverse, taking **Gear Switch Time**.
 
-<!-- side-by-side:50 -->
-**The shifter** is the PRND position — Park, Reverse, Neutral, Drive. It is what the player controls.
-
-`SetShifterInput` sets it directly. `MoveShifterInput(MoveUp)` steps one position up or down and returns the new position, which is what you bind to shift up and shift down keys.
-
-A vehicle spawns in **Park**. It will not move until something shifts it into Drive. In Park, the driving wheels are locked.
-<!-- split -->
-**The gear** is the entry in the Gears array currently supplying torque. With Automatic Transmission on, AVS picks it.
-
-`GetSelectedGear` returns the gear chosen by input. `GetCurrentGear` returns the gear actually in use.
-
-They differ during the shift delay. For a tachometer, read `GetCurrentGear` — it is what the engine is actually doing.
-<!-- /side-by-side -->
-
-
-
-## Transmission Modes: Automatic and Manual
-
-<!-- side-by-side:50 -->
-**Automatic with manual shifter** (the default)
-
-**Automatic Transmission** on, **Automatic Shifter Positon** off. AVS picks gears; the player still moves the shifter between Drive and Reverse.
-
-Suits driving sims and anything where reversing should be deliberate.
-<!-- split -->
-**Fully automatic**
-
-Both on. The vehicle moves itself between Drive and Reverse based on input, so the player never shifts.
-
-Suits arcade and casual driving. Requires the combined input function, covered below.
-<!-- /side-by-side -->
-
-For a manual transmission, turn **Automatic Transmission** off and drive gear selection yourself with `SetManualGear`.
-
-
-
-## Gear Switch Time
-
-**Gear Switch Time** (`0.5` s) is how long a gear change takes. During that window the vehicle is between gears: no gear supplies torque, and `GetSelectedGear` and `GetCurrentGear` disagree.
-
-Enable **Zero Throttle While Shifting** under Engine to also cut throttle during the change.
-
-
-
-## Automatic Shifter Position Setup
-
-**Automatic Shifter Positon** needs a specific input arrangement, and it will not work without it.
-
-1. In project input settings, remove the separate brake axis. Add your brake keys to the throttle axis with a scale of `-1.0`, so one axis carries both.
-2. In the event graph, replace `SetThrottleInput` with **`SetThrottleAndBrakeInput`**, fed from that axis.
-
-Negative values then act as brake while moving forward, and as throttle once the vehicle is in reverse.
-
-Full walkthrough with screenshots in the [Quick Start guide](https://overtorque-creations.com/Dev/Docs/#AVS/Getting_Started/Quick_Start.md).
-
-
-
-## Starting and Stopping the Engine
-
-<!-- side-by-side:57 -->
-A vehicle spawns with the engine off and in Park. Handle both, or nothing happens when the player presses a key.
-
-The simplest approach is **Start With Engine Running** on, and shifting into Drive on BeginPlay. That is what the Quick Start does, and it is enough for a prototype.
-
-For anything with an ignition, leave it off and call `StartEngine` — a convenience for `SetEngineRunning(true)`.
-
-`SetEngineRunning` goes through the server, so call it from the owning client or the server. `SetLocalEngineRunning` sets the state on the local machine only.
-<!-- split -->
-![Advanced Vehicle System - Engine settings showing Start With Engine Running, Ignition Time and the idle RPM range](../Assets/Images/_placeholder.png "A vehicle spawns with the engine off and in Park")
-<!-- /side-by-side -->
-
-
-
-## Ignition Time
-
-**Ignition Time** (`0.5` s) is the delay between `StartEngine` and the engine actually running.
-
-This is the window your starter sound plays into.
-
-
-
-## Idle RPM and Idle Max RPM
-
-**Idle RPM** (`1000`) and **Idle Max RPM** (`7500`) set the RPM range while no gear is engaged — in Park or Neutral, and during a gear change — from no throttle to full throttle.
-
-
-
-## GearChanged and ShifterChanged Events
-
-**GearChanged** fires with the old and new gear index. 
-**ShifterChanged** fires when the PRND position moves.
-
-Both are Blueprint events, and both are overridable in C++.
-
-These are where shift audio, dash indicators, and transmission animation belong — rather than polling the current gear on Tick and comparing it to last frame.
-
-
-
-## Changing the Gears Array at Runtime
-
-- `SetGearArray` replaces the whole table.
-- `SetGearItem` replaces a single gear by index.
-
-Useful for a vehicle that gets an upgrade, or a configurator swapping transmissions.
-
-Both refresh the gear the vehicle is currently in, so a change to that gear applies straight away. Neither forces a shift.
-
-They also clamp the selected and current gear to the new array's bounds, so shrinking the table cannot leave the vehicle in a gear that no longer exists. `SetGearItem` grows the array if you pass an index past the end.
-
-> **Editing the `Gears` array directly does not take effect until the next shift.** AVS keeps a cached copy of the active gear and does its torque and speed maths against that copy, not against the array. `SetGearArray` and `SetGearItem` refresh the cache; writing to the array does not.
-
-Changing the table during a shift is safe. The cache refresh is skipped while a shift is in progress, and the shift completes by reading the new table.
+Editing the **Gears** array directly takes effect at the next gear change, because AVS works from a copy of the engaged gear.
 
 ```cpp
 TArray<FVehicleGear> NewGears;
@@ -259,9 +137,9 @@ Reverse.StartSpeed = 0.0f;
 Reverse.EndSpeed   = 20.0f;
 Reverse.LowRPM     = 950.0f;
 Reverse.HighRPM    = 5500.0f;
-Reverse.MaxTorque  = 30.0f;  // [hNm] 30 = 3000 Nm at each driving wheel
+Reverse.MaxTorque  = 30.0f;  // hNm at each driving wheel
 Reverse.MinTorque  = 5.0f;
-NewGears.Add(Reverse);       // Gear 0 is always reverse; its shift points are never read
+NewGears.Add(Reverse);       // Gear 0 is reverse
 
 FVehicleGear First;
 First.StartSpeed = 5.0f;
@@ -274,6 +152,29 @@ First.MaxTorque  = 30.0f;
 First.MinTorque  = 5.0f;
 NewGears.Add(First);
 
-// Replaces the whole table and refreshes the gear currently in use.
 Vehicle->SetGearArray(NewGears);
 ```
+
+
+
+## Fixing Engine and Transmission Problems
+
+### Vehicle Does Not Move
+
+Check that the engine is running and the shifter is in Drive. A vehicle spawns with the engine off and in Park. Then check that at least one wheel has **Is Driving Wheel** on.
+
+### Vehicle Never Reaches a Gear's End Speed
+
+Raise that gear's **Min Torque**.
+
+### Transmission Changes Up and Straight Back Down
+
+Set the gear's **Down Shift** below the previous gear's **Up Shift**.
+
+
+
+## Next Steps
+
+- [Steering](https://overtorque-creations.com/Dev/Docs/#AVS/Configuration/Steering.md): steering speed and the falloff curve.
+- [Engine Audio](https://overtorque-creations.com/Dev/Docs/#AVS/Components/Engine_Audio.md): an engine sound driven by RPM and throttle.
+- [Vehicle Settings](https://overtorque-creations.com/Dev/Docs/#AVS/Reference/Vehicle_Settings.md): every engine and transmission setting.

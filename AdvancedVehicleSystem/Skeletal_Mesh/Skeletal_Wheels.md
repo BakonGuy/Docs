@@ -143,7 +143,7 @@ The bone follows the wheel directly, with no AnimBP in between. An AnimBP reads 
 
 ## Wheels Sit or Size Wrong on a Skeletal Mesh
 
-This is usually a bone with a scale other than `1.0`. Unreal does not handle scaled bones well.
+A bone with a scale other than `1.0` causes this. This is a limitation of Unreal, not AVS.
 
 Apply the scale in your modeling software and re-export, so Unreal sees every bone at `1.0` scale.
 

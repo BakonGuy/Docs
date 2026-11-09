@@ -45,15 +45,16 @@ Smoke and skid marks change with the surface, so for the example car they go in 
 1. Select the vehicle and open **Advanced Vehicle System → Wheel Effects**.
 2. Add an entry to **Effects For Default Surface** and set its type to **Skid / Slip**.
 3. Set **Niagara System** to your smoke.
-4. Turn on **Attach To Wheel**, so the smoke follows the wheel.
-5. Play, and slide the car.
+4. Play, and slide the car.
+
+With the default placement settings, the smoke is moved to the point where the tire touches the ground every tick.
 <!-- split -->
 ![Wheel Effects section on a vehicle with an effects array expanded, showing an effect type selected](../Assets/Images/_placeholder.png "Effects are set up once on the vehicle")
 <!-- /side-by-side -->
 
-By default the effect starts at `500` cm/s of sideways speed and reaches full strength at `1500` cm/s. To make smoke appear sooner, lower **Min Skid Speed**.
+By default the effect starts at `500` cm/s of sideways speed. To make smoke appear sooner, lower **Min Skid Speed**.
 
-If your Niagara system has a parameter for how dense the smoke is, put its name in **Niagara Intensity Param**. AVS sets it from `0` to `1` as the slide gets stronger. **Parameter Intensity Range** rescales that if your system expects other numbers, such as `0` to `100`.
+The effect's intensity rises from `0` at **Min Skid Speed** to `1` at **Full Skid Speed** (`1500` cm/s). Intensity only reaches your particles through a parameter. If your Niagara system has a parameter for how dense the smoke is, put its name in **Niagara Intensity Param**. **Parameter Intensity Range** rescales the value if your system expects other numbers, such as `0` to `100`.
 
 
 
@@ -63,8 +64,9 @@ Skid marks are a second **Skid / Slip** effect in the same slot, with a differen
 
 1. Add another **Skid / Slip** entry to **Effects For Default Surface**.
 2. Set **Niagara System** to your skid mark system.
-3. Leave **Attach To Wheel** off, so the marks stay on the road as the car drives away.
-4. Leave **Use Contact Point** on, so they appear where the tire touches the ground.
+3. Leave **Use Contact Point** on, so the marks are drawn where the tire touches the ground.
+
+The Niagara system moves with the tire. Marks it leaves behind stay on the road only if its emitters simulate in world space, with **Local Space** off.
 
 Separate effects can have separate thresholds. The marks can start at a lower speed than the smoke.
 
@@ -78,11 +80,15 @@ The default, `Skid Speed (Classic)`, responds to the wheel sliding sideways, or 
 
 The other three respond to tire slip, which only raycast wheels calculate:
 
-- `X Slip` responds to wheelspin and lockup. Use it for burnout smoke.
+- `X Slip` responds to wheelspin and lockup.
 - `Y Slip` responds to sliding sideways. Use it for cornering smoke.
 - `Combined Slip` responds to both.
 
 These use **Min Slip** and **Full Slip** for their thresholds. On physics wheels they never play.
+
+Every source also needs the wheel to be moving over the ground faster than **Min Wheel Speed** (`100` cm/s).
+
+There is no built-in burnout effect. Smoke from wheels spinning on a stationary vehicle needs a [custom effect](https://overtorque-creations.com/Dev/Docs/#AVS/Wheel_Effects/Custom_Effects.md).
 
 
 
@@ -107,7 +113,7 @@ On dirt, the wheel now uses the dirt entry. On any surface without an entry, it 
 
 Without step 3, all four wheels start the loop at the same point and play in sync.
 
-Rolling sound starts at `100` cm/s and reaches full volume at `2000` cm/s. To vary pitch or volume with speed, put a parameter name in **Audio Intensity Param**.
+Rolling sound starts at `100` cm/s. Its intensity rises to `1` at `2000` cm/s, but the sound only changes with it through a parameter. To vary pitch or volume with speed, put a parameter name in **Audio Intensity Param**.
 
 
 
@@ -127,7 +133,9 @@ To silence a wheel's global effects, turn on **Override Global Effects** and lea
 
 Each wheel's surface effects stop when the wheel leaves the ground, and start fresh when it lands or moves onto a different surface.
 
-Global effects keep running, unless an effect requires contact. The built-in Roll, Skid / Slip and Bump / Impact effects all require contact, so they also stop in the air and start fresh on landing.
+Global effects keep running, unless an effect requires contact. **Brake Squeal** does not require contact. It keeps running in the air, and stays silent until the wheel has contact again. The built-in Roll, Skid / Slip and Bump / Impact effects all require contact, so they also stop in the air and start fresh on landing.
+
+All effects stop while the vehicle is passive or the wheel is detached, and they never run on a dedicated server.
 
 `ClearAllWheelEffects()` on the vehicle restarts every wheel's effects. Call it after changing effects at runtime.
 
@@ -142,10 +150,6 @@ The effect is using `X Slip`, `Y Slip` or `Combined Slip`. Those need raycast wh
 ### All Four Wheels Sound Like One
 
 Set **Random Start Time Max** to the length of the looping sound.
-
-### Skid Marks Follow the Car
-
-Turn off **Attach To Wheel** on the skid mark effect.
 
 
 

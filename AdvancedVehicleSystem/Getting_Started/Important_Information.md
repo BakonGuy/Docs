@@ -37,7 +37,7 @@ Parent calls carried over from an older project are harmless and do not need to 
 <!-- side-by-side:57 -->
 When you attach a **Skeletal Mesh** to the VehicleMesh component, **AVS will automatically disable its collisions** during construction. This is intentional.
 
-Skeletal meshes cannot weld to the root physics body, and leaving their collisions enabled can lead to unexpected or unstable physics behavior. Since skeletal meshes are typically used for **visual/cosmetic purposes only**, disabling their collision helps prevent these issues and improves performance.
+Skeletal meshes cannot weld to the root physics body, and leaving their collisions enabled can lead to unexpected or unstable physics behavior. Since skeletal meshes are typically used for **visual/cosmetic purposes only**, disabling their collision helps prevent these issues.
 
 If you **do** want a specific skeletal mesh to keep its collisions active, just add the **KeepCollision** tag to that mesh in the editor. AVS will skip disabling collision for any mesh with that tag.
 
@@ -84,17 +84,17 @@ Use **AVS_AlwaysTick** for logic that must run no matter what, or **AVS_PassiveT
 
 AVS supports every platform Unreal supports.
 
-The plugin's `PlatformDenyList` names **VisionOS**, but that is a packaging requirement rather than a limitation. FAB submission requires a non-empty deny list — without one the block is stripped when the plugin is packaged, and verification fails. VisionOS is listed because it is the least used platform.
+The plugin's `PlatformDenyList` names **VisionOS** because FAB submission requires the deny list to name at least one platform. It is not a limitation of AVS.
 
 Remove it from `VehicleSystemPlugin.uplugin` if you are targeting VisionOS.
 
-> Older guidance said iOS had to be added to a whitelist by hand. That is no longer true — the plugin denies specific platforms rather than allowing specific ones, and iOS needs no edit.
+> Older guidance said iOS had to be added to a whitelist by hand. That is no longer true. The plugin lists denied platforms, not allowed ones, so iOS needs no edit.
 
 
 
 ## Installing the Plugin to a Project Instead of the Engine
 
-AVS installs to the engine through the launcher. To have it live inside a project instead — which is what you want for source control, or for a team without the launcher install:
+AVS installs to the engine through the launcher. To keep it inside a project instead, for example for source control or for a team without the launcher install:
 
 1. Install AVS to a launcher build of the engine as normal.
 2. Copy `...\UE_5.x\Engine\Plugins\Marketplace\VehicleSystemPlugin` to `YourProject\Plugins\VehicleSystemPlugin`.

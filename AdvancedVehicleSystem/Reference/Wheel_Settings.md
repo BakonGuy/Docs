@@ -23,7 +23,7 @@ A wheel uses its first child component as its wheel mesh. AVS only creates one f
 |---|---|---|
 | **Trace Channel** | `TraceTypeQuery1` | The channel the suspension trace tests against, in both wheel modes. In a default project this is the Visibility channel. |
 | **Trace Type** | `Line` | `Line` traces a single line. `Sphere` traces a sphere of the wheel's radius. |
-| **Trace Ignore Actors** | empty | Actors the trace ignores. `AddWheelTraceIgnoreActor` adds to it at runtime. |
+| **Trace Ignore Actors** | empty | Actors the trace ignores. Editable on placed vehicles only, not in the Blueprint. `AddWheelTraceIgnoreActor` adds to it at runtime. |
 
 > `Sweep` appears in **Trace Type** but is not implemented. A wheel set to it never finds the ground.
 
@@ -57,8 +57,8 @@ See [Skeletal Wheels](https://overtorque-creations.com/Dev/Docs/#AVS/Skeletal_Me
 
 | Setting | Default | Description |
 |---|---|---|
-| **Tire Friction** | `1.4, 1.4` | Grip coefficients. X is along the wheel, for accelerating and braking. Y is across it, for cornering. Raycast mode only. |
-| **Arcade Wheel Friction** | on | Applies the friction force at the wheel's center instead of the contact point. Raycast mode only. |
+| **Tire Friction** | `1.4, 1.4` | Grip coefficients. X is along the wheel, for accelerating and braking. Y is across it, for cornering. Multiplied by the **Friction** of the ground's physical material. Raycast mode only. |
+| **Arcade Wheel Friction** | on | Applies the wheel's suspension and friction forces at the wheel's center instead of the contact point. Raycast mode only. |
 
 
 
@@ -88,7 +88,7 @@ See [Skeletal Wheels](https://overtorque-creations.com/Dev/Docs/#AVS/Skeletal_Me
 | **Is Braking Wheel** | on | Slows with the brake input. |
 | **Is Handbrake Wheel** | off | Locks completely while the handbrake is applied. |
 | **Brake Torque** | `2500` Nm | Braking force for this wheel. Setting it per wheel sets the brake balance. |
-| **Rolling Resistance** | `0.01` | Constant drag, from `0` to `1`. Applied as a minimum brake input on every wheel. |
+| **Rolling Resistance** | `0.01` | Constant drag, from `0` to `1`. Applied as a minimum brake input, scaled by this wheel's **Brake Torque**, whether or not it is a braking wheel. Raycast mode only. |
 
 Wheels also lock without these settings: driving wheels lock while the shifter is in Park, and any wheel with a braking, handbrake or driving role locks below the vehicle's **Brake Lock Speed** with the brake held at `0.95` or more.
 
@@ -98,7 +98,7 @@ Wheels also lock without these settings: driving wheels lock while the shifter i
 
 | Setting | Default | Description |
 |---|---|---|
-| **Editor Preview** | off | Draws the wheel at both ends of its travel in the viewport. |
+| **Editor Preview** | off | Draws the wheel at both ends of its travel in the viewport. Needs **Wheel Static Mesh** to be set. |
 | **Spring Length** | `25` cm | Total suspension travel, centered on the wheel component. |
 | **Spring Strength** | `25` N/mm | How hard the spring pushes back. |
 | **Spring Damping** | `1.0` kNs/m | How quickly suspension movement settles. |
@@ -143,7 +143,7 @@ Live values the simulation writes to the wheel's **Wheel Data** each physics tic
 | **Slip** | | Total tire slip. Above `1.0`, the wheel is asking for more grip than it has. |
 | **Slip2D** | | Slip split into X, along the wheel, and Y, across it. |
 | **Contact Normal Speed** | cm/s | Speed into the contact surface. |
-| **Angular Velocity** | rad/s | How fast the wheel is spinning. |
+| **Angular Velocity** | rad/s | How fast the wheel is spinning. Raycast wheels only. For physics wheels, use `GetWheelAngVelInRadians`. |
 | **Last Trace** | | The suspension trace's last result. Also available from `GetLastTouch`. |
 
 > **Slip** and **Slip2D** are only calculated for raycast wheels. A physics wheel reads zero, or the last raycast value if it was switched from raycast mode.
@@ -160,26 +160,34 @@ On each `AVS_Wheel`:
 | `Attach(ResetPosition, Force)` | Puts a detached wheel back. **Force** rebuilds its constraints. |
 | `SetWheelMode(NewMode)` | Switches between `Raycast` and `Physics`. |
 | `ChangeStaticMesh(NewMesh)` | Swaps the wheel mesh and reattaches the wheel. |
-| `SetWheelTorque(OverrideVehicle, TargetSpeed, Torque, Reverse)` | Drives the wheel directly. **TargetSpeed** is in cm/s, **Torque** in hNm. |
+| `SetWheelTorque(OverrideVehicle, TargetSpeed, Torque, Reverse)` | Drives a physics mode wheel directly. **TargetSpeed** is in cm/s. **OverrideVehicle** stops the vehicle replacing the value. Raycast wheels take drive torque from the vehicle; on them this only changes how fast the mesh spins in the air. |
+| `SetIsDrivingWheel(IsDrivingWheel)` | Sets **Is Driving Wheel**. Turning it off also clears the wheel's torque. |
 | `LockWheel(Lock)` | Locks or releases the wheel. |
-| `SetWheelPosition(Location, Rotation)` | Moves the wheel relative to its parent. |
-| `ResetPosition()` | Returns the wheel to its configured position. |
+| `SetWheelPosition(Location, Rotation)` | Moves the wheel component relative to its parent and updates its suspension and constraints. |
+| `ResetPosition()` | Moves a physics mode wheel's mesh back to the wheel component. Has no effect on raycast wheels. |
 | `ResetSteering()` | Centers the wheel's steering and clears its steering input. |
 | `ResetWheelCollisions()` | Rebuilds the wheel's collision setup. |
+| `SetSpringLength`, `SetSpringStrength`, `SetSpringDamping` | Set one suspension value and update the wheel's constraints. |
+| `SetSuspensionSettings(NewLength, NewStrength, NewDamping)` | Sets all three suspension values at once. |
 | `SetSpringDownforce(Downforce)` | Sets **Physics Downforce**. |
+| `SetIsSimulatingSuspension(NewSimulate)` | False takes the wheel out of the simulation: no suspension, grip or drive. The vehicle's `SetPhysics` sets it on every wheel, and AVS calls that at startup and in `AddWheel`. |
+| `SetSuspensionPreview(Preview)` | Sets **Editor Preview**. |
 | `ClearAllEffects()` | Stops the wheel's effects. They are rebuilt on the next tick. |
 | `AddWheelTraceIgnoreActor(Actor)` | Adds an actor to **Trace Ignore Actors**. |
 | `GetHasContact()` | Whether the trace is hitting something. |
+| `GetIsSimulatingSuspension()` | Whether the wheel is part of the simulation. |
 | `GetContactSurfaceType()` | The physical surface under the wheel. |
 | `GetIsAttached()` | Whether the wheel is attached. |
 | `GetIsLocked()` / `GetIsBrakeLocked()` | Whether the wheel is locked, and whether that lock comes from the brakes. |
 | `GetRotationSpeed()` | The wheel's surface speed, in the vehicle's **Speed Units**. |
 | `GetWheelAngVelInRadians()` | The wheel's angular velocity, in rad/s. |
 | `GetWheelVelocity(Local)` | The wheel's velocity, in world space or relative to the wheel. |
-| `GetWheelTorque()` | The wheel's current drive torque, in hNm. |
+| `GetWheelTorque()` | The torque last given to the wheel by the vehicle or `SetWheelTorque`. |
+| `GetCurrentBrakingTorque()` | **Brake Torque** multiplied by the vehicle's current brake input. |
 | `GetSuspensionSettings()` | Outputs **Spring Length**, **Spring Strength**, **Spring Damping** and **Physics Downforce**. |
 | `GetLastTouch()` | The last trace result. |
 | `GetWheelMesh()` | The wheel mesh component. |
+| `GetProjectedMesh()` | The projected mesh used by **Wheel Reprojection**. |
 
 On the vehicle:
 
@@ -195,14 +203,4 @@ On the vehicle:
 
 ## Wheel Reprojection
 
-Set on the vehicle, under **Advanced Vehicle System → Experimental**. Reprojection hides the real wheel mesh and shows a **projected mesh** in its place, aligned to the wheel every frame, so wheels do not look tilted by the physics engine.
-
-| Setting | Default | Description |
-|---|---|---|
-| **Wheel Reprojection** | off | Turns reprojection on. |
-| **Reprojection Smooth Alpha** | `0.75` | How quickly the projected mesh follows, from `0` to `1`. |
-| **Wheel Reprojection Camber** | off | Adds cosmetic camber driven by suspension compression. |
-| **Camber Compressed** | `30, 15` | Wheel height in cm, and camber angle in degrees, at the compressed end. |
-| **Camber Decompressed** | `-30, -15` | The same, at the extended end. |
-
-Camber is visual only and does not change how the wheel simulates.
+Set on the vehicle, under **Advanced Vehicle System → Experimental**. See the Experimental section of [Vehicle Settings](https://overtorque-creations.com/Dev/Docs/#AVS/Reference/Vehicle_Settings.md).

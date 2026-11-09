@@ -1,173 +1,132 @@
 # Physics
 
-Vehicle level physics — center of mass, body limits, and moving a vehicle safely. Wheel and suspension settings live on the wheel components and are covered on the [Wheels](https://overtorque-creations.com/Dev/Docs/#AVS/Components/Wheels.md) page.
+How the vehicle body responds to its wheels: mass, center of mass, drag and flipping, and how to move a vehicle without breaking its physics. The example is the compact car from the [Quick Start](https://overtorque-creations.com/Dev/Docs/#AVS/Getting_Started/Quick_Start.md).
 
-Before tuning anything here, apply the [recommended project settings](https://overtorque-creations.com/Dev/Docs/#AVS/Getting_Started/Project_Settings.md). Most "my vehicle is unstable" problems are solved there, not on this page.
+Wheel and suspension settings are on the [Wheels](https://overtorque-creations.com/Dev/Docs/#AVS/Components/Wheels.md) page. Every physics setting is listed in [Vehicle Settings](https://overtorque-creations.com/Dev/Docs/#AVS/Reference/Vehicle_Settings.md).
+
+Apply the [recommended project settings](https://overtorque-creations.com/Dev/Docs/#AVS/Getting_Started/Project_Settings.md) before tuning anything here.
 
 
 
-## Basic Understanding
+## How Vehicle Physics Works
 
-Center of mass placement affects handling more than any other single setting, and it is worth checking when a vehicle handles badly for no obvious reason.
+The vehicle mesh (`VehicleMesh`) is an ordinary Unreal physics body. Every physics tick, each wheel pushes on it with its suspension and grip forces.
 
-Everything else on this page falls into two groups. **Body limits** — angular velocity, rest threshold, flip threshold — control what the physics body is allowed to do. **Movement functions** — teleporting, repositioning, toggling simulation — are how you move a vehicle without breaking its physics state.
+How the body responds to those forces depends on its mass, its center of mass and its drag, the same as any other physics object.
+
+
+
+## Setting Vehicle Mass
+
+Mass is set on `VehicleMesh`, in Unreal's own physics settings: turn on **Mass (kg)** override and enter a value. AVS does not change it.
+
+For the example compact car, use `1100` kg. A midsize sedan is `1500` kg or more. Under `1000` kg is very light for a car.
+
+Set mass before tuning tire friction. Each wheel's grip is calculated from the load it carries, so changing mass changes how the same friction values feel.
 
 
 
 ## Setting the Center of Mass
 
 <!-- side-by-side:57 -->
-**1. Add a [Center of Mass component](https://overtorque-creations.com/Dev/Docs/#AVS/Components/Center_Of_Mass.md)** directly under `VehicleMesh`. It is a marker with no settings — you position it and AVS uses its location. Nested under any other component, it is ignored.
-
-**2. Put it slightly above wheel height**, roughly where the mass actually sits. This gives a stable but responsive feel and is a good starting point for most vehicles.
-
-**3. Turn on Visualize Center of Mass** under **Advanced Vehicle System → Debug** and check where it actually ended up. This draws the real physics COM after every offset, and it is the only reliable confirmation.
-
-**4. Adjust front to back.** Moving mass rearward adds rear grip and encourages understeer; forward does the opposite.
+1. Add a **Center of Mass** component directly under `VehicleMesh`.
+2. Move it slightly above wheel height, between the axles.
+3. Turn on **Visualize Center of Mass** under **Advanced Vehicle System → Debug**, and check where the physics body's center of mass actually is.
 <!-- split -->
-![Vehicle in the viewport with the center of mass visualizer enabled, showing the marker below the chassis](../Assets/Images/_placeholder.png "Visualize Center of Mass draws the real COM, after all offsets")
+![Vehicle in the viewport with the center of mass visualizer enabled, showing the marker below the chassis](../Assets/Images/_placeholder.png "Visualize Center of Mass draws the center of mass the body is using")
 <!-- /side-by-side -->
 
+The higher the center of mass is above the wheels, the more the body rolls in corners. At wheel height it does not roll. Below the wheels, it leans into the turn.
 
-
-## Center of Mass Height
-
-Height is a trade, not a value to minimise.
-
-Too high and the vehicle rolls over in corners. Slightly above wheel height is stable but responsive, which is the usual target. Below the wheels it resists flipping, but leans the wrong way through a corner.
-
-A vehicle that leans outward through a corner looks wrong even when it drives correctly, so placing the center of mass as low as possible is not automatically better.
+The [Center of Mass](https://overtorque-creations.com/Dev/Docs/#AVS/Components/Center_Of_Mass.md) page covers the component and the center of mass functions.
 
 
 
-## Center of Mass Precedence
+## Flipped Vehicles
 
-Three sources, in order of precedence:
+**Upside Down Angle Threshold** (`90` degrees) sets when the vehicle counts as upside down. `0` is upright and `180` is fully inverted. With the default, a vehicle counts as flipped once it tips past its side.
 
-1. `SetExactCenterOfMass` — explicit override relative to the vehicle mesh pivot. Beats everything.
-2. The Center of Mass component's location.
-3. Neither — Unreal's own center of mass, calculated from the vehicle mesh's physics bodies.
+`GetIsUpsideDown` returns the current state. **OnVehicleFlipped** fires whenever it changes, with **bIsNowUpsideDown** true when the vehicle has just flipped over.
 
-The one exception: `SetCenterOfMassOffset` with no component and no exact override measures its offset from the vehicle mesh pivot.
-
-`GetExactCenterOfMass` returns the real value with a validity flag. It is invalid until a physics body exists, so do not call it during construction.
+AVS has no built-in function for righting a vehicle. What happens after a flip is up to your own code, for example a recovery prompt started from **OnVehicleFlipped**.
 
 
 
-## SetCenterOfMassOffset
+## Moving a Vehicle
 
-`SetCenterOfMassOffset` adds a further offset on top of whichever base applies.
+`TeleportVehicle(Location, Rotation, KeepRelativeVelocity)` moves the vehicle, its wheels and any hitched trailers together.
 
-It **sets rather than accumulates**, so calling it repeatedly will not drift. This is what you want for shifting mass with cargo load.
+Physics mode wheels are separate physics bodies. Setting the actor transform directly moves the vehicle body and leaves them behind.
 
+**KeepRelativeVelocity** true keeps the vehicle's velocity, turned to match the new rotation. False arrives stopped.
 
+`SetVehiclePositionWithVirtualPivot(LocalPivot, WorldTransform, Teleport)` places the vehicle so that a point on it lands on a world transform. Use it when a spawn marker stands for something other than the vehicle's origin, such as a trailer coupler.
 
-## Vehicle Mass
-
-Mass is set on the vehicle mesh component, in Unreal's own physics settings, rather than by AVS. AVS does not modify it — it applies forces to the body you give it.
-
-Use realistic figures. A vehicle under `1000` kg is very light for a car.
-
-A compact car starts around `1100` kg, a midsize sedan around `1500`, and a pickup or van around `2000`.
-
-Set mass before tuning tire friction. Friction values that feel right on a 900 kg car will not suit the same car at 1500 kg, so tuning grip first means doing it twice.
-
-A light vehicle is a legitimate choice for arcade handling. It is only a problem when it is unintentional.
+`SetPhysics(Simulate)` turns simulation on or off for the vehicle body and all its wheels. **Start With Physics** (on) decides whether it simulates when spawned.
 
 
 
-## Vehicle Physics Settings
+## Drag
 
-| Setting | Default | What it does |
-|---|---|---|
-| **Start With Physics** | `true` | Vehicle simulates on spawn. Exposed on spawn. |
-| **Physics Material** | none | Overrides the vehicle mesh's physical material, so you do not have to edit the mesh asset. |
-| **Vehicle Max Angular Velocity** | `700` deg/s | Caps how fast the body can spin. `0` disables the limit. |
-| **Wheels Push Physics** | `true` | Whether wheels physically push other simulating objects. |
-| **Disable Skeletal Collisions** | `true` | See [Important Information](https://overtorque-creations.com/Dev/Docs/#AVS/Getting_Started/Important_Information.md). |
+AVS sets the vehicle mesh's linear damping itself on every 25 TPS tick. The value it uses while driving, **Base Linear Drag**, is taken from the mesh's **Linear Damping** when the vehicle is built. To change the vehicle's drag, change **Linear Damping** on `VehicleMesh`.
+
+When the vehicle is almost stopped with no throttle, AVS raises the damping to as much as `15` to help it settle.
+
+**Dynamic Air Drag** adds extra damping while the vehicle slides sideways. It is off by default, and is not shown in the details panel. Turn it on from Blueprint or C++.
 
 
 
 ## Wheels Push Physics
 
-**Wheels Push Physics** allows a vehicle to push loose props.
+With **Wheels Push Physics** on (the default), each wheel's force is also applied, in reverse, to the simulating object it stands on. A vehicle on a loose platform pushes the platform down.
 
-It also causes a see-saw effect when a vehicle drives onto another physics object, because the wheels push the object and the object pushes back. Turn it off if that happens.
+With raycast wheels, this can rock a vehicle back and forth on another physics object. Turning it off stops the wheels pushing on the object.
 
 
 
 ## Vehicle Max Angular Velocity
 
-**Vehicle Max Angular Velocity** limits how fast the body spins after a heavy crash.
+**Vehicle Max Angular Velocity** (`700` deg/s) limits how fast the vehicle body can spin, for example after a crash. It only applies to the vehicle mesh.
 
-It is separate from the engine's global Max Angular Velocity, which applies to wheels.
-
-> If a vehicle will not reach top speed, the engine's global setting is the one to check, not this one.
+Physics mode wheels are limited by the project's own **Max Angular Velocity** setting instead. See [Project Settings](https://overtorque-creations.com/Dev/Docs/#AVS/Getting_Started/Project_Settings.md).
 
 
 
-## Rest Velocity Threshold
+## When a Vehicle Counts as Stopped
 
-**Rest Velocity Threshold** (`25` cm/s) decides when a vehicle counts as stopped, for both passive mode and network rest state. The vehicle has to stay below it for **3 seconds** before it counts.
+A vehicle counts as at rest after its speed stays below **Rest Velocity Threshold** (`25` cm/s) for 3 seconds. Passive mode and the network rest state both use this.
 
-Raise it and slow-moving vehicles count as stopped sooner. Lower it if vehicles are treated as stopped while they should still be rolling.
-
-
-
-## Upside Down Angle Threshold
-
-**Upside Down Angle Threshold** (`90` deg) sets when the vehicle counts as flipped. `0` is upright and `180` fully inverted. The vehicle has to tip past the threshold, so the default counts it as flipped once it goes past its side.
-
-`GetIsUpsideDown` reads it, and **OnVehicleFlipped** fires when it changes, with `bIsNowUpsideDown` telling you which way.
-
-AVS detects the state and tells you about it. What happens next is yours to write — there is no built-in righting function. **OnVehicleFlipped** is where a "press R to recover" prompt belongs.
-
-
-
-## Teleporting a Vehicle
-
-> Do not set the actor transform directly on a simulating vehicle. The wheels do not follow, and the physics state ends up incorrect.
-
-`TeleportVehicle(Location, Rotation, KeepRelativeVelocity)` moves the vehicle and its wheels together.
-
-`KeepRelativeVelocity` decides whether it arrives moving or stopped — keep it for a portal, drop it for a respawn.
-
-
-
-## Aligning a Vehicle to a Marker
-
-`SetVehiclePositionWithVirtualPivot(LocalPivot, WorldTransform, bTeleport)` positions the vehicle so a chosen local pivot lands on a target world transform.
-
-Use it when your spawn marker represents something other than the vehicle origin — a wheel contact point, or a trailer coupler.
-
-
-
-## Enabling and Disabling Physics
-
-`SetPhysics(bool)` toggles simulation entirely.
-
-This is what you want before attaching a vehicle to something else or handing it to a sequencer.
-
-
-
-## Drag and Damping
-
-**Base Linear Drag** is the fallback linear damping, and **Dynamic Air Drag** enables additional slip-based damping at higher speeds.
-
-Both are runtime values rather than editor settings, so set them from Blueprint or C++ when drag should change with vehicle state — a spoiler deploying, or a load being dropped.
-
-> Damping was reworked in 1.5. Suspension damping now uses the spring's actual compression and extension instead of estimating from movement at the contact point. If you had instability around 140 MPH on an older version, that was the old approximation leaking velocity.
+A vehicle creeping slower than the threshold also counts as stopped. Lower the threshold if slow vehicles are treated as stopped while they still move.
 
 
 
 ## Reading Physics State
 
-| Function | Returns |
-|---|---|
-| `GetAirSpeed` | Actual speed, in your chosen speed unit |
-| `GetAcceleration` | Change in speed per second |
-| `GetSlip` | The vehicle's sideways speed, as `0` to `1` |
-| `AnyWheelContact` | Whether any wheel is touching a surface |
-| `GetPhysicsTickDelta` | Current Chaos substep delta |
+- `GetAirSpeed` returns the vehicle's speed, in your **Speed Units**.
+- `GetAcceleration` returns the change in speed per second.
+- `GetSlip` returns sideways speed, from `0` below 1000 cm/s to `1` at 2500 cm/s. It is not tire slip. Each wheel has its own slip in its **Wheel Data**.
+- `AnyWheelContact` returns whether any wheel is touching a surface.
 
-`GetSlip` is not tire slip. It is `0` below 1000 cm/s of sideways speed, rising to `1` at 2500 cm/s — the same value that lifts the steering limit while sliding. For tire slip, read it from the wheels.
+
+
+## Fixing Vehicle Physics Problems
+
+### Vehicle Shakes While Parked
+
+See [A Vehicle That Shakes, Jitters or Bounces](https://overtorque-creations.com/Dev/Docs/#AVS/Advanced/Debugging.md).
+
+### Vehicle Rocks Back and Forth on Another Physics Object
+
+Turn off **Wheels Push Physics**.
+
+### Physics Wheels Are Left Behind When the Vehicle Is Moved
+
+Move the vehicle with `TeleportVehicle`.
+
+
+
+## Next Steps
+
+- [Center of Mass](https://overtorque-creations.com/Dev/Docs/#AVS/Components/Center_Of_Mass.md): placing and changing the center of mass.
+- [Wheels](https://overtorque-creations.com/Dev/Docs/#AVS/Components/Wheels.md): suspension and grip.
+- [Debugging](https://overtorque-creations.com/Dev/Docs/#AVS/Advanced/Debugging.md): tools for a vehicle that does not behave.

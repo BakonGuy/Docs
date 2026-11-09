@@ -1,6 +1,6 @@
 # Engine Audio
 
-`AVS_EngineAudio` drives a looping engine sound from the vehicle's RPM and throttle, and plays a start sound on ignition.
+`AVS_EngineAudio` drives a looping engine sound from the vehicle's RPM and throttle, and plays a start sound when the engine starts.
 
 
 
@@ -20,7 +20,7 @@ The Vehicle System includes the `AVS_EngineAudio` component as an optional featu
 
 **Engine Sound** is a looping Sound Cue that takes in 2 parameters, _RPM_ and _Throttle_. These parameters are not required if your engine sound does not need to be driven dynamically.
 
-**High RPM** is the maximum RPM that the Engine Sound Cue expects, its used to clamp the input parameters preventing audio artifacts.
+**High RPM** (`7000`) is the vehicle RPM that is sent to the Sound Cue as an _RPM_ of `8000`. The vehicle's RPM is scaled by that ratio before it is sent, and is not clamped.
 
 **Engine Attenuation** is a [standard unreal audio attenuation file](https://docs.unrealengine.com/en-US/Engine/Audio/DistanceModelAttenuation/index.html)
 
@@ -30,7 +30,7 @@ The Vehicle System includes the `AVS_EngineAudio` component as an optional featu
 
 Here is an example of a setup sound cue. How to setup the cues is outside the scope of this documentation, as it is not part of the Vehicle System itself. The demo project does include many different engine setups you can use to learn from.
 
-MetaSounds work here too, and are the better choice for new work. The `RPM` and `Throttle` parameters are set the same way.
+MetaSounds also work. The `RPM` and `Throttle` parameters are set the same way.
 
 ![Sound Cue graph with Idle, Low RPM and High RPM sections, each feeding a Continuous Modulator into a final Crossfade by Param node](../Assets/Images/components-EngineAudio-02.png "Looping wave players crossfaded by RPM, then modulated by throttle")
 
@@ -38,10 +38,13 @@ MetaSounds work here too, and are the better choice for new work. The `RPM` and 
 
 ## Runtime Control
 
-The component follows the vehicle's engine state on its own, so you normally do not touch it. When you need to:
+The engine loop starts when the vehicle spawns, whether or not the engine is running. While the engine is off, the vehicle's RPM falls to `0`, and so does the _RPM_ parameter.
 
-- `SetEngineRunning(bool)` — starts or stops the engine audio, including the start sound.
-- `StopSound()` — stops playback outright.
+The start sound plays when the vehicle's engine starts, at the beginning of its **Ignition Time**. It fades out over the last three quarters of its length.
+
+`StopSound()` stops the engine loop. `SetEngineRunning(bool)` on the component currently has no effect.
+
+On a dedicated server the component removes itself.
 
 
 

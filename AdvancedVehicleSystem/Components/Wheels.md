@@ -74,7 +74,7 @@ For the rear wheel drive car, turn on **Is Steerable Wheel** for the front two w
 <!-- side-by-side:57 -->
 Front wheel drive moves **Is Driving Wheel** to the front pair instead. All wheel drive turns it on for all four.
 
-Wheels on the right side are usually the left wheel mesh turned around, so they spin backwards. Turn on **Invert Torque** for those wheels and they drive the right way.
+If you rotated a wheel component to face the opposite direction, so its wheel mesh faces outward, turn on **Invert Torque** for that wheel. Without it, the wheel drives the vehicle backwards.
 
 Rear wheels that steer need **Invert Steering**, so they turn the opposite way to the front.
 <!-- split -->
@@ -92,7 +92,7 @@ Each driving wheel receives the full torque from the gear table. All wheel drive
 Tune suspension once the car drives, and tune it while driving.
 
 <!-- side-by-side:57 -->
-1. Turn on **Editor Preview** on a wheel. The viewport shows the wheel at both ends of its travel: fully compressed above the component and fully extended below it. Check the top position stays inside the wheel arch.
+1. Turn on **Editor Preview** on a wheel. The viewport shows the wheel at both ends of its travel: fully compressed above the component and fully extended below it. Check the top position stays inside the wheel arch. The preview uses **Wheel Static Mesh**, so it only appears on wheels that have one set.
 2. Play, and open the config assist HUD. Its spring sliders change every wheel at once while you drive. Press **Shift + F1** to get the cursor.
 3. Adjust **Spring Strength** until the car sits about halfway through its travel when parked.
 4. Adjust **Spring Damping** until the car settles quickly after a bump.
@@ -114,6 +114,8 @@ Once the baseline feels right, you can give the front and rear different values.
 ## Tuning Grip
 
 **Tire Friction** has two values. **X** is grip along the wheel, for accelerating and braking. **Y** is grip across it, for cornering. Both start at `1.4`.
+
+The grip a wheel actually gets is **Tire Friction** multiplied by the **Friction** of the ground's physical material. The same tires have less grip on a surface whose physical material has lower friction.
 
 To make the example car drift, lower **Y** on the rear wheels and leave **X** alone. To make it spin its wheels on launch, lower **X** on the rear wheels.
 
