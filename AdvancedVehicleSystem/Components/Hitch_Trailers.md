@@ -1,159 +1,169 @@
 # Hitch / Trailers
 
+How to tow a trailer. This page hitches the trailer included with the plugin to the car from the [Quick Start](https://overtorque-creations.com/Dev/Docs/#AVS/Getting_Started/Quick_Start.md).
 
-
-## Basic Understanding
-
-Trailers in AVS are not their own class. They are just standard AVS vehicles that have a receiving hitch on them. This creates a super versatile workflow for creating trailers since they have access to all the same features of a standard AVS vehicle. For example, you could create a trailer that a second player can "drive" and manage the steering or engine on. This also means all the features created in future updates will translate to your trailers without any additional work.
+Every hitch setting, function and event is listed in [Component Settings](https://overtorque-creations.com/Dev/Docs/#AVS/Reference/Component_Settings.md).
 
 
 
-## Step 1: Create your trailer "vehicle"
+## How Trailers Work
+
+A trailer is an ordinary AVS vehicle with a hitch on it. It has wheels, brakes, steering and even an engine, like any other AVS vehicle. A trailer could be driven by a second player, or have its own powered axle.
+
+Hitching uses two `AVS_Hitch` components, one on each vehicle:
+
+- A **Tow Hitch** on the towing vehicle, like the ball on a real tow bar.
+- A **Trailer Hitch** on the trailer, like the coupler on a real trailer tongue.
+
+When they connect, the trailer is pulled to the tow hitch, then held there by a physics constraint that lets it turn.
+
+
+
+## Step 1: Create the Trailer
 
 <!-- side-by-side:57 -->
-Create a new vehicle, and set it up like a trailer. Use the [Creating Vehicles](https://overtorque-creations.com/Dev/Docs/#AVS/Getting_Started/Quick_Start.md) page if needed. There is a basic trailer mesh and wheel included in the plugin if you need one.
+Create a vehicle Blueprint for the trailer, the same way as the car in the Quick Start. Give it wheels, and leave **Is Driving Wheel** and **Is Steerable Wheel** off on all of them.
+
+The plugin includes a trailer mesh and wheel you can use.
 <!-- split -->
-![Checker-textured trailer with a single axle and an A-frame tongue, sitting in the Unreal viewport](../Assets/Images/components-Hitch-01.png "The trailer mesh included with the plugin")
+![Checker-textured trailer with a single axle and an A-frame tongue, sitting in the Unreal viewport](../Assets/Images/Components/Hitch_Trailers/components-Hitch-01.png "The trailer mesh included with the plugin")
 <!-- /side-by-side -->
 
 
 
-## Step 2: Add a hitch component to your trailer
+## Step 2: Add the Trailer Hitch
 
-<!-- side-by-side:65 -->
-Add a new hitch component to your trailer. The location of your hitch component defines were the trailer will be towed from, make sure the X axis (red) is facing forward in respect to the trailer mesh. If you are using the trailer mesh included with the plugin, then the hitch is at zero so you will not need to move the hitch component.
+<!-- side-by-side:57 -->
+1. Add an `AVS_Hitch` component to the trailer.
+2. Move it to the point the trailer is towed from, at the front of the tongue. On the included trailer mesh, that point is at zero, so the hitch does not need moving.
+3. Make sure its X axis (red) points forward along the trailer.
+4. Set **Hitch Type** to `Trailer Hitch`.
 <!-- split -->
-![Add Component menu filtered to "vehicle", showing Vehicle Hitch among the VehicleSystem components](../Assets/Images/components-Hitch-02.png "Add Component → Vehicle Hitch")
+![Add Component menu filtered to "vehicle", showing Vehicle Hitch among the VehicleSystem components](../Assets/Images/Components/Hitch_Trailers/components-Hitch-02.png "Adding a hitch component")
+<!-- /side-by-side -->
+
+<!-- side-by-side:57 -->
+**Hitch Type** is the only setting the trailer hitch needs. Its rotation limits are not used; the tow hitch's limits apply.
+<!-- split -->
+![Hitch - Config panel with Type set to Trailer Hitch and rotation limits of 45, 70 and 120 degrees](../Assets/Images/Components/Hitch_Trailers/components-Hitch-04.png "Hitch Type set to Trailer Hitch")
 <!-- /side-by-side -->
 
 
 
-## Step 2a: Add a collision overlap to your hitch component
+## Step 3: Add the Tow Hitch
+
+<!-- side-by-side:57 -->
+1. Open the car and add an `AVS_Hitch` component.
+2. Leave **Hitch Type** as `Tow Hitch`.
+3. Move it to where the tow ball would be, behind the rear bumper.
+4. Make sure its X axis (red) points forward along the car.
+<!-- split -->
+![Hitch component positioned behind the rear bumper of a checker-textured car, with its rotation gizmo visible](../Assets/Images/Components/Hitch_Trailers/components-Hitch-05.png "The tow hitch sits where the ball would be on a real vehicle")
+<!-- /side-by-side -->
+
+
+
+## Step 4: Add Overlap Shapes
 
 <!-- side-by-side:48 -->
-This is only necessary if you will be using the "Hitch to Overlapped" feature. This is an easy way to make nearby hitches connect to each other, and is included since it is the most common use case. Add a collision shape as a child of the hitch component that defines the suitable zone to hitch from.
+To hitch whenever the two hitches are close, add a collision shape (sphere, box or capsule) directly under each hitch. The shapes mark the area where hitching is allowed. Hitching happens when the two shapes overlap.
+
+The shapes are only needed for `HitchToOverlapped` in the next step.
 <!-- split -->
-![Component list with a Sphere collision parented under AVS_Hitch, and the sphere shown at the trailer tongue in the viewport](../Assets/Images/components-Hitch-03.png "A sphere under the hitch defines the overlap zone")
+![Component list with a Sphere collision parented under AVS_Hitch, and the sphere shown at the trailer tongue in the viewport](../Assets/Images/Components/Hitch_Trailers/components-Hitch-03.png "A sphere under the hitch marks the hitching area")
 <!-- /side-by-side -->
 
 
 
-## Step 3: Configure your hitch
+## Step 5: Hitch on a Key Press
 
-<!-- side-by-side:57 -->
-Click the hitch component and go to its details panel. Since this is our receiving hitch, change the Hitch Type to "Trailer Hitch". If you need to, you can think of the 'Tow Hitch' setting as a Tow Ball and the Trailer Hitch setting as a Coupler.
-<!-- split -->
-![Hitch - Config panel with Type set to Trailer Hitch and rotation limits of 45, 70 and 120 degrees](../Assets/Images/components-Hitch-04.png "Trailer Hitch is the coupler side of the connection")
-<!-- /side-by-side -->
-
-
-
-## Step 3a: Explanation of connect types
-
-The "Connect Types" setting is used to define your different types of hitches. A hitch can only become hitched to another if they share a Connect Type.
-
-For example, you could have a trailer with 2 connect types defined "Standard", and "Semi". This would mean it could hitch to any Tow Hitch with EITHER of those types defined.
-
-
-
-## Step 4: Add a hitch to your towing vehicle
-
-<!-- side-by-side:57 -->
-Open up the vehicle you want to be able to tow the trailer, and add a hitch component to it. Add a collision to it like in step 2a, if you are using those. Leave the hitch type as "Tow Hitch". Move the hitch to the towing location, you will want to make sure the X axis (Red) is pointing forward relative to the trailer.
-<!-- split -->
-![Hitch component positioned behind the rear bumper of a checker-textured car, with its rotation gizmo visible](../Assets/Images/components-Hitch-05.png "The tow hitch sits where the ball would be on a real vehicle")
-<!-- /side-by-side -->
-
-
-
-## Step 5: Hitch Inputs
-
-Now it's time to actually hitch these components together. There are a couple options here to do this. In your vehicle blueprint, add a keyboard event (or something of your choice) and set up one of the following options.
+In the car's Blueprint, add a key event and call one of the two hitch functions on the tow hitch:
 
 <!-- side-by-side:50 -->
-Option 1: Hitch to Overlapped
+**Hitch To Overlapped**
 
-- When called, this will run the hitch function on the 1st of any overlapping hitches. This requires a collision volume be attached to each hitch (Step 2a).
+Hitches to a nearby trailer whose overlap shape is touching the tow hitch's.
 
-![Keyboard L event wired into a Hitch to Overlapped node targeting Vehicle Hitch](../Assets/Images/components-Hitch-06.png)
+![Keyboard L event wired into a Hitch to Overlapped node targeting Vehicle Hitch](../Assets/Images/Components/Hitch_Trailers/components-Hitch-06.png)
 <!-- split -->
-Option 2: Hitch
+**Hitch**
 
-- When called, this function will attempt to hitch 2 hitches, regardless of their position in the world. This does not teleport the trailer so use wisely.
+Hitches to the trailer hitch you pass in **To**, wherever it is. The trailer is pulled to the tow hitch, however far away it is.
 
-![Keyboard L event wired into a Hitch node with a Trailer Pawn's Vehicle Hitch supplied as the To pin](../Assets/Images/components-Hitch-07.png)
+![Keyboard L event wired into a Hitch node with a Trailer Pawn's Vehicle Hitch supplied as the To pin](../Assets/Images/Components/Hitch_Trailers/components-Hitch-07.png)
 <!-- /side-by-side -->
 
-Regardless of what you choose, you will need to be mindful of how you call these. In single player games it should be safe to call them from any actor at any time. However, in multiplayer games you will only be able to call these from the owning client (the client possessing the pawn, or the server).
+**Animation Length** is how many seconds the trailer takes to be pulled into place. `Hitch` uses `2` by default. At `0`, the constraint is applied immediately, without the trailer being pulled into place first.
 
-`Unhitch` on the hitch, or `UnhitchAll` on the vehicle, releases the connection again.
+To release the trailer, call `Unhitch` on either hitch, or `UnhitchAll` on the car.
+
+In multiplayer, call these on the client that owns the car, or on the server. Calls from anywhere else are ignored.
 
 
 
-## Hitch To Overlapped Requirements
+## Connect Types
 
-`HitchToOverlapped` only connects when all of these hold:
+Two hitches can only connect if they share an entry in **Connect Types**. Every hitch starts with `Standard`.
 
-- It is called on the tow hitch. Called on a trailer hitch, it does nothing.
-- Each hitch has a collision shape (box, sphere or capsule) as a direct child. A shape nested under something else is not found.
-- The two hitches share a **Connect Type**.
+Different names keep different hitch styles apart. A trailer with both `Standard` and `Semi` can hitch to a tow hitch with either one.
 
-Trailer hitches that are already hitched are skipped. Of the rest, only the first overlapping trailer hitch is tried. If it does not share a **Connect Type**, nothing happens, even if another overlapping trailer hitch would.
+`HitchToOverlapped` only tries the first unhitched trailer hitch it finds. If that one does not share a connect type, nothing happens, even if another trailer hitch in range would.
 
 
 
 ## Hitch Rotation Limits
 
-**X Rotation Limit** (`45`), **Y Rotation Limit** (`70`) and **Z Rotation Limit** (`120`) set how far, in degrees, the trailer can rotate at the hitch: X is roll, Y is pitch and Z is yaw. `180` leaves that axis free.
+On the tow hitch, three settings limit how far the trailer can turn at the hitch, in degrees each way:
 
-Only the tow hitch's limits are used. The values on the trailer hitch have no effect.
+- **X Rotation Limit** (`45`): roll.
+- **Y Rotation Limit** (`70`): pitch, such as going over a crest.
+- **Z Rotation Limit** (`120`): yaw, turning side to side.
+
+`180` leaves that axis free.
+
+
+
+## Braking and Steering the Trailer with the Car
+
+A trailer is a full vehicle, and its inputs stay at zero unless something sets them. `SetInputHost` makes it copy the car's throttle, brake, steering and handbrake, 25 times a second:
+
+1. Bind to the tow hitch's **Hitched** event, and call `SetInputHost` on the trailer with the car.
+2. Bind to **Unhitched**, and call `SetInputHost` with nothing to stop copying. Then set the trailer's brake and handbrake as needed. Clearing the host does not reset them.
+
+With a host set, the trailer's braking wheels brake with the car, and its steerable wheels follow the car's steering. A powered trailer's driving wheels pull under the same throttle, if the trailer's engine is running.
+
+
+
+## Hitch Events
+
+- **Hitched** fires when a connection is made, with the tow hitch and the trailer hitch.
+- **Unhitched** fires when the connection is released.
+- **Hitched To Destroyed** fires when the hitch on the other end is destroyed, for example with its vehicle. The hitch then unhitches itself.
+
+`GetIsHitched` returns whether a hitch is connected. `GetHitchedTrailer` returns the trailer, and `GetHitchedVehicle` the towing vehicle.
 
 
 
 ## Trailer Chains
 
-A trailer can tow another trailer. This works in single player, but is untested in multiplayer and likely does not work there.
+A trailer can tow another trailer: give the first trailer a tow hitch as well. This works in single player. It is untested in multiplayer and likely does not work there.
 
 
 
-## Driving a Trailer's Inputs with Input Host
+## Fixing Hitch Problems
 
-A trailer is a full AVS vehicle, so it has its own throttle, brakes and steering that nothing is driving by default.
+### Hitch To Overlapped Does Nothing
 
-`SetInputHost(TowingVehicle)` on the trailer makes it copy throttle, brake, steering and handbrake from the towing vehicle, on the 25 TPS tick. This is what Input Host was built for.
+Check that:
 
-The trailer still runs its own physics, gears and wheels. Only the driver input is shared. With a host set:
-
-- The trailer's braking wheels brake when the towing vehicle brakes.
-- A powered trailer's driving wheels pull under the same throttle. The trailer's engine must be running.
-- The trailer's steerable wheels follow the towing vehicle's steering input.
-
-Set the host on **Hitched** and clear it on **Unhitched**.
-
-Clearing the host does not reset the trailer's inputs. Without resetting them on **Unhitched**, the trailer keeps the throttle, brake and handbrake it had when it was released.
+1. It is called on the tow hitch.
+2. Each hitch has its collision shape directly under it.
+3. The shapes overlap when the vehicles are close.
+4. The two hitches share a **Connect Types** entry.
 
 
 
-## Events
+## Next Steps
 
-The hitch component broadcasts three events you can bind to:
-
-| Event | Fires when |
-|---|---|
-| **Hitched** | A connection is made. Passes both the tow hitch and the trailer hitch. |
-| **Unhitched** | The connection is released. |
-| **Hitched To Destroyed** | The thing on the other end was destroyed. |
-
-**Hitched To Destroyed** fires when the hitch on the other end is destroyed while attached, for example when its vehicle is destroyed. The hitch then unhitches itself.
-
-`GetIsHitched` returns whether the hitch is connected. `GetHitchedTo` returns the hitch on the other end, and `GetHitchedVehicle` and `GetHitchedTrailer` return the towing vehicle and the trailer.
-
-
-
-## Step 6: Enjoy trailers!
-
-<!-- side-by-side:41 -->
-![A checker-textured trailer parked beside a checker-textured car, both rendered in-engine](../Assets/Images/components-Hitch-08.png)
-<!-- split -->
-That's all there is to it! I put a lot of effort in making this possible so I hope you enjoy it. If you have any questions for me or suggestions to add to this page, you can message me on the discord server or by email. Thanks for using AVS!
-<!-- /side-by-side -->
+- [Networking](https://overtorque-creations.com/Dev/Docs/#AVS/Advanced/Networking.md): how trailers replicate.
+- [Component Settings](https://overtorque-creations.com/Dev/Docs/#AVS/Reference/Component_Settings.md): every hitch setting and function.

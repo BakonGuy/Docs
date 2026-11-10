@@ -1,87 +1,44 @@
 # Recommended Project Settings
 
-None of this is required, but physics wheel mode in particular is noticeably more stable with these changes made.
+Changes to Unreal's physics settings that make AVS vehicles more stable. None of them are required. All are under **Project Settings → Physics**.
 
-
-
-## Min/Max Contact Settings
-
-<!-- side-by-side:41 -->
-![Engine - Physics settings with Contact Offset Multiplier 0.001, Min Contact Offset 0.0001 and Max Contact Offset 0.001](../Assets/Images/general-project-settings-01.png "Contact offsets dropped to Unreal's minimums")
-<!-- split -->
-When using **Physics Wheels** (not Raycast Wheels), it's strongly recommended to lower the engine's **Physics Contact Offset** values to the minimum values Unreal allows.
-
-By default, Unreal applies a small invisible gap between physics bodies during collision to improve stability. However, for rolling wheels, this can cause an unwanted side effect: **wheels will bounce when crossing between separate surfaces**, even if the surfaces are perfectly level and aligned. The faster the vehicle moves, the more noticeable and disruptive this bounce becomes.
-
-Reducing both the **Min Contact Offset** and **Max Contact Offset** values in the Physics settings (under _Project Settings → Physics_) significantly reduces or eliminates this behavior.
-
-> Note: This issue only applies to **Physics Wheel mode**. **Raycast Wheels are unaffected** by contact offset settings.
-<!-- /side-by-side -->
-
-
-
-## Max Terminal and Angular Velocities
-
-<!-- side-by-side:41 -->
-![Engine - Physics settings with Default Terminal Velocity 7600 and Max Angular Velocity 10000](../Assets/Images/general-project-settings-02.png)
-<!-- split -->
-Unreal Engine applies limits to how fast physics objects can move and spin. These defaults are too low for realistic vehicles, and may prevent wheels from reaching the speeds they're physically capable of.
-
-For reference:
-
-A wheel with a **35 cm radius** spinning at **10000 degrees per second** reaches a linear surface speed of about **6109 cm/s (≈ 137 MPH)**.
-
-This means if your wheels need to push past that speed, you'll need to increase this value further.
-<!-- /side-by-side -->
-
-Update these settings in Project Settings → Physics:
-
-| Setting | Value |
-|---|---|
-| **Default Terminal Velocity** | 7600 cm/s (≈ 170 MPH) |
-| **Max Angular Velocity** | 10000 deg/s |
-
-To calculate:
-
-```text
-Linear Speed (cm/s) = (Angular Velocity in deg/s × (π / 180)) × Radius in cm
-```
-
-Set your value high enough that wheels never hit the ceiling under normal operation.
-
-> The vehicle itself also has its own **Vehicle Max Angular Velocity** setting (default 700 deg/s) which limits how fast the body can spin. That one is separate from the engine limit above, and is covered on the [Physics](https://overtorque-creations.com/Dev/Docs/#AVS/Configuration/Physics.md) page.
+The physics tick settings help every vehicle. The contact offset and velocity settings only matter for physics mode wheels.
 
 
 
 ## Physics Tick Settings
 
-It is highly recommended to choose one of the options below. These options help ensure the physics run at a consistent and stable frame rate. This will dramatically decrease physics errors and allow vehicles to be stable at low frame rates.
+By default, Unreal runs physics once per frame, so at a low frame rate each physics step covers a long time and vehicles become unstable. Substepping or async physics keeps the physics step short whatever the frame rate. Choose one.
 
 ### Option 1: Substepping
 
 <!-- side-by-side:41 -->
-![Engine - Physics framerate settings with Substepping enabled, Max Substep Delta Time 0.016667 and Max Substeps 6](../Assets/Images/general-project-settings-03.png "The 60 FPS physics configuration from the table below")
+![Engine - Physics framerate settings with Substepping enabled, Max Substep Delta Time 0.016667 and Max Substeps 6](../Assets/Images/Getting_Started/Project_Settings/general-project-settings-03.png "The 60 FPS physics setup from the table below")
 <!-- split -->
-Substepping divides a single game frame into multiple physics ticks. This means that physics will tick multiple times per frame to reach its target FPS. This is a great option if you want your physics to match the game's FPS in most cases but still stabilize at lower frame rates.
+Substepping splits a slow frame into several physics steps.
 
-When using substepping, physics will always be locked to your game's FPS when it's above the target. When below the target, substepping will get as close as it can to the target FPS, utilizing the resources you allow it.
+Above the target rate, physics runs once per frame, matching the game. Below it, physics runs several steps per frame to get as close to the target as **Max Substeps** allows.
+
+Turn on **Substepping**, then set **Max Substep Delta Time** and **Max Substeps** from the table.
 <!-- /side-by-side -->
 
-| MaxDelta / MaxSteps | Physics | Stable at |
-|---|---|---|
-| `0.016667` / 6 | 60 FPS Physics | 15 / 30 FPS |
-| `0.013000` / 6 | 90 FPS Physics | 15 / 30 / 60 FPS |
-| `0.009400` / 8 | 120 FPS Physics | 15 / 30 / 60 / 90 FPS |
+| Max Substep Delta Time | Max Substeps | Physics rate | Stable at |
+|---|---|---|---|
+| `0.016667` | `6` | 60 FPS | 15 and 30 FPS |
+| `0.013000` | `6` | 90 FPS | 15, 30 and 60 FPS |
+| `0.009400` | `8` | 120 FPS | 15, 30, 60 and 90 FPS |
 
 ### Option 2: Async Physics
 
 <!-- side-by-side:48 -->
-Async physics completely decouples physics from the FPS. Physics are calculated on a separate thread, sent back to the game thread, then interpolated for visual smoothness. If you need the best absolute consistency, this is the option to choose.
+Async physics runs physics on its own thread at a fixed rate, separate from the frame rate. The results are interpolated for display. It gives the most consistent physics.
+
+Turn on **Tick Physics Async**, then set **Async Fixed Time Step Size** from the table.
 <!-- split -->
-![Tick Physics Async enabled with Async Fixed Time Step Size 0.011111, with an on-screen readout of 91 physics FPS against 60 game FPS](../Assets/Images/general-project-settings-04.png "Physics running at 90 while the game renders at 60")
+![Tick Physics Async enabled with Async Fixed Time Step Size 0.011111, with an on-screen readout of 91 physics FPS against 60 game FPS](../Assets/Images/Getting_Started/Project_Settings/general-project-settings-04.png "Physics running at 90 while the game renders at 60")
 <!-- /side-by-side -->
 
-| Async Fixed Time Step Size | Physics |
+| Async Fixed Time Step Size | Physics rate |
 |---|---|
 | `0.033333` | 30 FPS |
 | `0.016667` | 60 FPS |
@@ -90,8 +47,52 @@ Async physics completely decouples physics from the FPS. Physics are calculated 
 
 
 
+## Contact Offsets
+
+<!-- side-by-side:41 -->
+![Engine - Physics settings with Contact Offset Multiplier 0.001, Min Contact Offset 0.0001 and Max Contact Offset 0.001](../Assets/Images/Getting_Started/Project_Settings/general-project-settings-01.png "Contact offsets set to Unreal's minimums")
+<!-- split -->
+Unreal keeps a small gap between colliding physics bodies. For a physics mode wheel, this gap makes the wheel bounce when it rolls from one surface onto another, even when the two are perfectly level. The faster the vehicle, the bigger the bounce.
+
+Set **Contact Offset Multiplier**, **Min Contact Offset** and **Max Contact Offset** to the lowest values Unreal allows, as in the image.
+
+Raycast wheels are not affected.
+<!-- /side-by-side -->
+
+
+
+## Terminal Velocity and Max Angular Velocity
+
+<!-- side-by-side:41 -->
+![Engine - Physics settings with Default Terminal Velocity 7600 and Max Angular Velocity 10000](../Assets/Images/Getting_Started/Project_Settings/general-project-settings-02.png)
+<!-- split -->
+Unreal limits how fast physics bodies can move and spin. A physics mode wheel spinning at the limit cannot get any faster, which caps the vehicle's top speed.
+
+| Setting | Value |
+|---|---|
+| **Default Terminal Velocity** | `7600` cm/s (about 170 mph) |
+| **Max Angular Velocity** | `10000` deg/s |
+<!-- /side-by-side -->
+
+A wheel's top surface speed is its spin limit times its radius:
+
+```text
+Speed (cm/s) = Max Angular Velocity (deg/s) × (π / 180) × Wheel Radius (cm)
+```
+
+A 35 cm wheel at `10000` deg/s reaches about 6109 cm/s, or about 137 mph. For a faster vehicle, or bigger wheels, raise **Max Angular Velocity** until the wheels never reach it.
+
+The vehicle body has its own spin limit, **Vehicle Max Angular Velocity**, set on the vehicle. See [Physics](https://overtorque-creations.com/Dev/Docs/#AVS/Configuration/Physics.md).
+
+
+
 ## Niagara
 
-AVS requires the **Niagara** plugin, which is enabled by default in Unreal. Wheel effects use Niagara systems for particles, so if you have disabled it in your project you will need to turn it back on.
+AVS needs the **Niagara** plugin, which is on by default in Unreal. If you turned it off, turn it back on.
 
-That should be it! The Vehicle System should internally take care of any other settings where possible.
+
+
+## Next Steps
+
+- [Quick Start](https://overtorque-creations.com/Dev/Docs/#AVS/Getting_Started/Quick_Start.md): build a drivable car.
+- [Important Information](https://overtorque-creations.com/Dev/Docs/#AVS/Getting_Started/Important_Information.md): behavior to know before going further.

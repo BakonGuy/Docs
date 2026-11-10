@@ -23,7 +23,7 @@ A light set to an intensity of `0` is also hidden. At the start, every group is 
 ## The Example Vehicle
 
 <!-- side-by-side:50 -->
-![Muscle car blueprint with BrakeLights, BlinkerLeft, BlinkerRight and HeadLights controllers, and a Light Controller Config listing HeadLights at intensity 10 and BlinkerLeft at intensity 50](../Assets/Images/components-LightController-01.png "The BlinkerLeft controller defines two relations: HeadLights at 10, BlinkerLeft at 50")
+![Muscle car blueprint with BrakeLights, BlinkerLeft, BlinkerRight and HeadLights controllers, and a Light Controller Config listing HeadLights at intensity 10 and BlinkerLeft at intensity 50](../Assets/Images/Components/Lights/components-LightController-01.png "The BlinkerLeft controller defines two relations: HeadLights at 10, BlinkerLeft at 50")
 <!-- split -->
 The muscle car has four light controllers, one for each set of lights: `HeadLights`, `BrakeLights`, `BlinkerLeft` and `BlinkerRight`.
 
@@ -67,7 +67,7 @@ If none of a controller's relations has its group on, its lights are set to `0` 
 ## Turning Light Groups On and Off
 
 <!-- side-by-side:41 -->
-![Toggle Lights Active, Set Lights Active and Get Lights Active nodes with Light Group set to BlinkerLeft and BlinkerRight](../Assets/Images/components-LightController-02.png)
+![Toggle Lights Active, Set Lights Active and Get Lights Active nodes with Light Group set to BlinkerLeft and BlinkerRight](../Assets/Images/Components/Lights/components-LightController-02.png)
 <!-- split -->
 These functions are on the vehicle:
 
@@ -104,7 +104,7 @@ After `UpdateLights` sets a controller's intensity, the vehicle fires **UpdateLi
 Use it for anything that should change with the lights besides the light components themselves, such as emissive materials on the vehicle mesh, or a blinker click sound.
 
 <!-- side-by-side:50 -->
-![Event Update Light Decorations wired through a Sequence node into Set Brake Material, Set Headlight Mat and Set Blinkers Mat collapsed graphs](../Assets/Images/components-LightController-03.png "One event per light controller, fanned out to per-material handlers")
+![Event Update Light Decorations wired through a Sequence node into Set Brake Material, Set Headlight Mat and Set Blinkers Mat collapsed graphs](../Assets/Images/Components/Lights/components-LightController-03.png "One event per light controller, fanned out to per-material handlers")
 <!-- split -->
 Two functions on the controller tell you its state:
 
@@ -114,7 +114,7 @@ Two functions on the controller tell you its state:
 Compare the event's controller with your own controller components to tell which one is updating.
 <!-- /side-by-side -->
 
-![Graph using Has Active Lights and Get Intensity on a controller to branch between the tail lights high, low and off materials](../Assets/Images/components-LightController-04.png "Brake light materials chosen from the controller's active state and intensity")
+![Graph using Has Active Lights and Get Intensity on a controller to branch between the tail lights high, low and off materials](../Assets/Images/Components/Lights/components-LightController-04.png "Brake light materials chosen from the controller's active state and intensity")
 
 
 

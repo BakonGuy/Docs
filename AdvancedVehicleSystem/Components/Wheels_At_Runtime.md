@@ -138,7 +138,7 @@ Removing a driving wheel takes away that wheel's drive torque. Removing a wheel 
 
 Call `SetWheelMode` on each wheel. To switch the whole vehicle, loop `GetWheels`.
 
-![Blueprint looping every wheel and calling Set Wheel Mode, one key setting Raycast and another setting Physics](../Assets/Images/components-Wheels-ModeSwitch-01.png "Loop the wheels and call Set Wheel Mode on each")
+![Blueprint looping every wheel and calling Set Wheel Mode, one key setting Raycast and another setting Physics](../Assets/Images/Components/Wheels_At_Runtime/components-Wheels-ModeSwitch-01.png "Loop the wheels and call Set Wheel Mode on each")
 
 A physics wheel's collision is part of the simulation and cannot be turned off. Raycast wheels ignore wheel mesh collision completely. Switching to raycast mode is how you drive a vehicle with its wheel collision effectively disabled.
 
@@ -148,7 +148,7 @@ A physics wheel's collision is part of the simulation and cannot be turned off. 
 
 For raycast wheels, set **Tire Friction** on the wheel's **Wheel Config**. For physics wheels, swap the wheel mesh's physical material with `SetPhysMaterialOverride`.
 
-![Blueprint showing both paths: a physics wheel using Get Wheel Mesh into Set Physical Material Override, and a raycast wheel setting Tire Friction on the wheel's Wheel Config struct](../Assets/Images/components-Wheels-RuntimeFriction-01.png "Physics wheels swap the physical material; raycast wheels set Tire Friction")
+![Blueprint showing both paths: a physics wheel using Get Wheel Mesh into Set Physical Material Override, and a raycast wheel setting Tire Friction on the wheel's Wheel Config struct](../Assets/Images/Components/Wheels_At_Runtime/components-Wheels-RuntimeFriction-01.png "Physics wheels swap the physical material; raycast wheels set Tire Friction")
 
 Friction changed this way does not need replicating, as long as every machine calculates the same value. For example, from a curve based on speed.
 
@@ -177,7 +177,7 @@ Wheel->SetWheelTorque(/*OverrideVehicle*/ true, /*TargetSpeed*/ 2000.0f, /*Torqu
 
 > Raycast wheels do not use `SetWheelTorque` for driving. They take their drive torque from the vehicle. On a raycast wheel, it only changes how fast the wheel mesh spins while in the air. To drive raycast wheels individually, override the drivetrain in C++. See [Drivetrain and Physics Overrides](https://overtorque-creations.com/Dev/Docs/#AVS/Advanced/Physics_Overrides.md).
 
-![Blueprint with two examples: a throttle axis looping every wheel into Set Wheel Torque with Override Vehicle enabled, and a key press calling Lock Wheel on the two right hand wheels](../Assets/Images/components-Wheels-PerWheelControl-01.png "Driving torque per wheel, and locking individual wheels")
+![Blueprint with two examples: a throttle axis looping every wheel into Set Wheel Torque with Override Vehicle enabled, and a key press calling Lock Wheel on the two right hand wheels](../Assets/Images/Components/Wheels_At_Runtime/components-Wheels-PerWheelControl-01.png "Driving torque per wheel, and locking individual wheels")
 
 
 

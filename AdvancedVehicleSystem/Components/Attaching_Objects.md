@@ -79,7 +79,7 @@ For each wheel of the carried vehicle:
 
 `GetWheels` returns the carried vehicle's wheels, and `GetWheelMesh` on each one returns the mesh to constrain.
 
-![Blueprint looping the carried vehicle's wheels, adding a physics constraint component per wheel, setting its world location to the wheel mesh, and constraining the wheel mesh to the vehicle mesh with all axes locked](../Assets/Images/components-Attaching-WheelConstraints-01.png "One constraint per wheel, placed at the wheel mesh, with every axis locked")
+![Blueprint looping the carried vehicle's wheels, adding a physics constraint component per wheel, setting its world location to the wheel mesh, and constraining the wheel mesh to the vehicle mesh with all axes locked](../Assets/Images/Components/Attaching_Objects/components-Attaching-WheelConstraints-01.png "One constraint per wheel, placed at the wheel mesh, with every axis locked")
 
 The wheel is held in place. The carried vehicle's suspension provides the movement.
 

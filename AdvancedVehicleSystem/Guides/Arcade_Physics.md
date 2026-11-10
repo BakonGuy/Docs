@@ -1,79 +1,70 @@
 # Tuning AVS for Arcade-Style Vehicles
 
-AVS is designed for realistic vehicle physics, but with the right tuning, it can be adapted to feel more arcade-like. Below are some common adjustments to help achieve snappier, more forgiving vehicle behavior.
+AVS is built for realistic vehicle physics. These changes make a vehicle quicker to respond and more forgiving, for arcade-style handling. Each one can be used on its own.
 
 
 
-## Increase Tire Friction
+## More Grip
 
-Use a **higher friction** value on your wheels. This gives the vehicle more grip, which:
+Raise the wheels' grip, so the vehicle accelerates harder and turns more sharply.
 
-- Increases acceleration responsiveness
-- Makes turning sharper and more immediate
+- Raycast wheels: raise **Tire Friction** on each wheel. X is grip for accelerating and braking, Y for cornering.
+- Physics wheels: raise **Friction** on the wheels' physical material.
 
-> _Note:_ When using Physics Wheels, this is done in your Physics Material. When using Raycast Wheels, this is done by setting the "TireFriction" variable ( X = Longitudinal, Y = Lateral )
-
-
-
-## Adjust Steering Responsiveness
-
-Arcade-style handling benefits from faster, more exaggerated steering.
-
-**Steering Curve**
-
-This is a mapping from Air Speed → Max Steering Input. Increase the curve values to allow stronger steering input at higher speeds.
-
-**Steering Speed**
-
-Controls how quickly the vehicle responds to steering changes. Increase this for snappier response.
-
-**Steering Recenter Speed**
-
-Controls how fast the steering returns toward center when the input moves back toward center or is released. Raising this can make the steering feel tighter and more controlled.
+Raycast tire friction well above the default `1.4` can make a vehicle shake while parked. Raise it in small steps and check the vehicle still sits still.
 
 
 
-## Lower the Center of Mass
+## Faster Steering
 
-Use the included [**Center of Mass** component](https://overtorque-creations.com/Dev/Docs/#AVS/Components/Center_Of_Mass.md) to shift the vehicle's center of gravity downward:
+Under **Advanced Vehicle System → Steering** on the vehicle:
 
-- A center of mass just slightly above wheel height provides a stable but responsive feel.
-- Placing the center below the wheels can reduce flipping, but may cause the vehicle to lean in the wrong direction when turning.
+- Raise the **Steering Falloff Curve**'s values at higher speeds, to allow more steering at speed.
+- Raise **Steering Speed**, so the wheels turn in faster.
+- Raise **Steering Recenter Speed**, so the wheels straighten faster when the input is released.
 
-
-
-## Boost Engine Power
-
-- Raise the **Max Torque** values for each gear to deliver more aggressive acceleration. Arcade-style vehicles typically benefit from immediate throttle response.
-- _It is possible to raise the MaxTorque too high when using physics wheels. You will have to find the value that is right for you by playing around._
+See [Steering](https://overtorque-creations.com/Dev/Docs/#AVS/Configuration/Steering.md).
 
 
 
-## Reduce Vehicle Mass
+## Less Body Roll
 
-- Lower the Mass value on the VehicleMesh component to make the vehicle feel lighter and more nimble. This can amplify acceleration and make turning more responsive.
-- _Going too low will effect traction and make your vehicle slide_
+Move the [Center of Mass](https://overtorque-creations.com/Dev/Docs/#AVS/Components/Center_Of_Mass.md) component down, toward wheel height. The lower it is, the less the body rolls in corners. At wheel height the body does not roll.
 
-
-
-## Add Drifty Handling
-
-When using raycast wheels, you can reduce lateral friction in the wheel config to allow more sliding during turns
+Below wheel height, the body leans into turns, the opposite way to a real car.
 
 
 
-## See Also
+## More Engine Power
 
-- [Steering](https://overtorque-creations.com/Dev/Docs/#AVS/Configuration/Steering.md): the falloff curve and smoothing modes in detail
-- [Wheels](https://overtorque-creations.com/Dev/Docs/#AVS/Components/Wheels.md): tire friction, arcade wheel friction, and brakes
-- [Engine and Transmission](https://overtorque-creations.com/Dev/Docs/#AVS/Configuration/Engine_And_Transmission.md): gear torque values
-- [Physics](https://overtorque-creations.com/Dev/Docs/#AVS/Configuration/Physics.md): center of mass and body limits
+Raise **Max Torque** on each gear, for harder acceleration. See [Engine and Transmission](https://overtorque-creations.com/Dev/Docs/#AVS/Configuration/Engine_And_Transmission.md).
+
+With physics wheels, too much torque makes the vehicle misbehave. Raise it in steps until it feels right.
+
+
+
+## Lighter Vehicle
+
+Lower **Mass (kg)** on `VehicleMesh`. A lighter vehicle accelerates and turns more quickly.
+
+Too light, and the wheels lose traction and the vehicle slides. Under about `1000` kg, a car can also shake.
+
+
+
+## Drifting
+
+For raycast wheels, lower the Y value of **Tire Friction** on the rear wheels. The rear slides more in turns.
 
 
 
 ## Scaled Down Vehicles
 
-A scaled down vehicle, such as an RC car or a toy, is still simulated at its real size, so it behaves differently from the full size version.
+A scaled down vehicle, such as an RC car or a toy, is simulated at its real size, so it behaves differently from the full size version. Tune it at the size it is played at.
 
-It has to be tuned at the size it will be played at.
 
+
+## Next Steps
+
+- [Wheels](https://overtorque-creations.com/Dev/Docs/#AVS/Components/Wheels.md): tire friction and suspension.
+- [Steering](https://overtorque-creations.com/Dev/Docs/#AVS/Configuration/Steering.md): the falloff curve and smoothing.
+- [Physics](https://overtorque-creations.com/Dev/Docs/#AVS/Configuration/Physics.md): mass and center of mass.

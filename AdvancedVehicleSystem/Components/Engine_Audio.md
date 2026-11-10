@@ -1,55 +1,64 @@
 # Engine Audio
 
-`AVS_EngineAudio` drives a looping engine sound from the vehicle's RPM and throttle, and plays a start sound when the engine starts.
+`AVS_EngineAudio` plays an engine sound that follows the vehicle's RPM and throttle, and a start sound when the engine starts. This page adds engine sound to the car from the [Quick Start](https://overtorque-creations.com/Dev/Docs/#AVS/Getting_Started/Quick_Start.md).
+
+The component is optional. Every setting is listed in [Component Settings](https://overtorque-creations.com/Dev/Docs/#AVS/Reference/Component_Settings.md).
 
 
 
-## Setting up Engine Sounds for your Vehicle
+## How Engine Audio Works
 
-<!-- side-by-side:32 -->
-The Vehicle System includes the `AVS_EngineAudio` component as an optional feature for quick vehicle setups. To use it add the component to your vehicle and position it where the audio source should be.
+The component plays **Engine Sound** in a loop. Every frame, it sends the sound two parameters:
+
+- **RPM**: the vehicle's RPM, scaled so that **High RPM** arrives as `8000`.
+- **Throttle**: the vehicle's throttle, from `0` to `1`.
+
+Your Sound Cue or MetaSound uses those two parameters to change the sound. RPM comes from the gear table's **Low RPM** and **High RPM**. See [Engine and Transmission](https://overtorque-creations.com/Dev/Docs/#AVS/Configuration/Engine_And_Transmission.md).
+
+
+
+## Adding Engine Sound
+
+<!-- side-by-side:40 -->
+1. Add an `AVS_EngineAudio` component to the car, and place it where the engine sound should come from, such as under the hood.
+2. Set **Engine Sound** to a looping Sound Cue or MetaSound.
+3. Set **Engine Start Sound** to a sound to play when the engine starts. It is optional.
+4. Set **High RPM** to the highest RPM the car reaches. The default is `7000`.
 <!-- split -->
-![Engine audio component positioned over the hood of a muscle car, with its Config section showing Engine Start Sound, Engine Sound, High RPM and Engine Attenuation](../Assets/Images/components-EngineAudio-01.png "The component's transform sets where the engine is heard from")
+![Engine audio component positioned over the hood of a muscle car, with its Config section showing Engine Start Sound, Engine Sound, High RPM and Engine Attenuation](../Assets/Images/Components/Engine_Audio/components-EngineAudio-01.png "The component's position sets where the engine is heard from")
+<!-- /side-by-side -->
+
+**Engine Attenuation** controls how the sound fades with distance. It uses the plugin's `Engine_Att` by default.
+
+
+
+## Building the Engine Sound
+
+<!-- side-by-side:50 -->
+The example Sound Cue has idle, low RPM and high RPM loops. It crossfades between them with the **RPM** parameter, then changes their volume and pitch with **Throttle**.
+
+The demo project includes several engine sounds to learn from. Building Sound Cues and MetaSounds is covered in Unreal's own documentation.
+
+A sound that ignores the two parameters plays unchanged.
+<!-- split -->
+![Sound Cue graph with Idle, Low RPM and High RPM sections, each feeding a Continuous Modulator into a final Crossfade by Param node](../Assets/Images/Components/Engine_Audio/components-EngineAudio-02.png "Looping wave players crossfaded by RPM, then modulated by throttle")
 <!-- /side-by-side -->
 
 
 
-## Engine Audio Settings
+## When the Sounds Play
 
-**Engine Start Sound** is a simple audio file, it will be blended into the Engine Sound Loop.
+The engine loop starts when the vehicle spawns, whether or not the engine is running. While the engine is off, the vehicle's RPM falls to `0`, and so does the **RPM** parameter.
 
-**Engine Sound** is a looping Sound Cue that takes in 2 parameters, _RPM_ and _Throttle_. These parameters are not required if your engine sound does not need to be driven dynamically.
+The start sound plays when the engine starts, at the beginning of the vehicle's **Ignition Time**. It fades out from a quarter of the way through to its end.
 
-**High RPM** (`7000`) is the vehicle RPM that is sent to the Sound Cue as an _RPM_ of `8000`. The vehicle's RPM is scaled by that ratio before it is sent, and is not clamped.
+`StopSound()` stops the engine loop.
 
-**Engine Attenuation** is a [standard unreal audio attenuation file](https://docs.unrealengine.com/en-US/Engine/Audio/DistanceModelAttenuation/index.html)
-
-
-
-## Setting up the Sound Cue
-
-Here is an example of a setup sound cue. How to setup the cues is outside the scope of this documentation, as it is not part of the Vehicle System itself. The demo project does include many different engine setups you can use to learn from.
-
-MetaSounds also work. The `RPM` and `Throttle` parameters are set the same way.
-
-![Sound Cue graph with Idle, Low RPM and High RPM sections, each feeding a Continuous Modulator into a final Crossfade by Param node](../Assets/Images/components-EngineAudio-02.png "Looping wave players crossfaded by RPM, then modulated by throttle")
+While the vehicle is passive, the component stops sending new RPM and throttle values. On a dedicated server, the component removes itself.
 
 
 
-## Runtime Control
+## Next Steps
 
-The engine loop starts when the vehicle spawns, whether or not the engine is running. While the engine is off, the vehicle's RPM falls to `0`, and so does the _RPM_ parameter.
-
-The start sound plays when the vehicle's engine starts, at the beginning of its **Ignition Time**. It fades out over the last three quarters of its length.
-
-`StopSound()` stops the engine loop. `SetEngineRunning(bool)` on the component currently has no effect.
-
-On a dedicated server the component removes itself.
-
-
-
-## Engine Audio and Passive Mode
-
-Engine audio stops ticking its RPM and throttle updates while the vehicle is passive, which is handled automatically.
-
-See [Tick and Performance](https://overtorque-creations.com/Dev/Docs/#AVS/Advanced/Tick_And_Performance.md).
+- [Engine and Transmission](https://overtorque-creations.com/Dev/Docs/#AVS/Configuration/Engine_And_Transmission.md): RPM and the gear table.
+- [Exhaust](https://overtorque-creations.com/Dev/Docs/#AVS/Components/Exhaust.md): exhaust smoke driven by RPM and throttle.

@@ -17,7 +17,7 @@ The HUD shows speed, shifter position, current gear and torque. A vehicle in Par
 
 Press **Shift + F1** to get the mouse cursor, so you can use the sliders.
 <!-- split -->
-![In-game vehicle with the setup HUD showing air speed, shifter position, current gear, torque and live spring sliders](../Assets/Images/tutorials-Creating-Vehicles-16.png "The config assist HUD running in game")
+![In-game vehicle with the setup HUD showing air speed, shifter position, current gear, torque and live spring sliders](../Assets/Images/Getting_Started/Quick_Start/tutorials-Creating-Vehicles-16.png "The config assist HUD running in game")
 <!-- /side-by-side -->
 
 The spring sliders set every wheel at once, replacing each wheel's own values. They are not saved. Copy the values back into the wheel components when you are done.

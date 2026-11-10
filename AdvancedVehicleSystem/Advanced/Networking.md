@@ -42,7 +42,7 @@ To change a vehicle from a client that does not own it, such as starting the eng
 
 Put a Server RPC on the player's own pawn or controller. The server then makes the change on the vehicle, and multicasts the result if clients need to react.
 
-![Blueprint showing a client key press calling a reliable Server RPC on the owned character, the server finding the AVS vehicle and calling Start Engine, then a multicast telling all clients to disable passive mode](../Assets/Images/advanced-Networking-ServerRPC-01.png "Client to server through an owned actor, then the server acts on the vehicle")
+![Blueprint showing a client key press calling a reliable Server RPC on the owned character, the server finding the AVS vehicle and calling Start Engine, then a multicast telling all clients to disable passive mode](../Assets/Images/Advanced/Networking/advanced-Networking-ServerRPC-01.png "Client to server through an owned actor, then the server acts on the vehicle")
 
 
 
@@ -116,7 +116,7 @@ Server side relevancy is an alternative:
 2. Set your player controller to use it.
 3. Turn off **Use Client Side Camera Updates** on it.
 
-![Player Camera Manager details panel with the Use Client Side Camera Updates checkbox unticked and highlighted](../Assets/Images/advanced-Networking-CameraUpdates-01.png "Use Client Side Camera Updates, on the Player Camera Manager")
+![Player Camera Manager details panel with the Use Client Side Camera Updates checkbox unticked and highlighted](../Assets/Images/Advanced/Networking/advanced-Networking-CameraUpdates-01.png "Use Client Side Camera Updates, on the Player Camera Manager")
 
 The server then works out relevancy itself, for every pawn type.
 

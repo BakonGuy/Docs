@@ -54,7 +54,7 @@ The car in this example uses raycast wheels.
 
 Do this for all four corners.
 <!-- split -->
-![Vehicle Wheel - Config panel showing Wheel Mode Raycast, wheel mass and tire friction, plus the Drive/Steer, Brakes and Suspension sections](../Assets/Images/tutorials-Creating-Vehicles-10.png "Every wheel carries its own full configuration")
+![Vehicle Wheel - Config panel showing Wheel Mode Raycast, wheel mass and tire friction, plus the Drive/Steer, Brakes and Suspension sections](../Assets/Images/Getting_Started/Quick_Start/tutorials-Creating-Vehicles-10.png "Every wheel carries its own full configuration")
 <!-- /side-by-side -->
 
 With no mesh assigned, AVS uses a sphere instead, which is enough for prototyping.

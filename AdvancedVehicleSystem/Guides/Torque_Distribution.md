@@ -20,7 +20,7 @@ This page divides that torque across the driving wheels, so the gear table descr
 2. Write a function that loops the copy, divides each gear's **Max Torque** and **Min Torque** by the current number of driving wheels, and writes the result to the vehicle with `SetGearItem` or `SetGearArray`.
 3. Call it at startup and whenever the number of driving wheels changes.
 
-![Blueprint function looping the original gear values, dividing Max Torque and Min Torque by the driving wheel count with Safe Divide, and writing each gear back with Set Array Elem](../Assets/Images/configuration-Transmission-TorqueSpread-01.png "Divide the authored torque across the driving wheels, and re-run it whenever the count changes")
+![Blueprint function looping the original gear values, dividing Max Torque and Min Torque by the driving wheel count with Safe Divide, and writing each gear back with Set Array Elem](../Assets/Images/Guides/Torque_Distribution/configuration-Transmission-TorqueSpread-01.png "Divide the authored torque across the driving wheels, and re-run it whenever the count changes")
 
 > Use a safe divide. A vehicle with no driving wheels would otherwise divide by zero.
 

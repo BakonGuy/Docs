@@ -1,176 +1,173 @@
 # Vehicle Quick Start Guide
 
+This guide builds a drivable rear wheel drive car from an empty project. Other pages in these docs use this car as their example.
 
-
-## Download
-
-A simple template is available here. It is still recommended to follow the tutorial if this is your first time setting up a vehicle, in order to understand the workings of the plugin.
-
-[AVS Template v2 Download](https://drive.google.com/file/d/1EoGBkDWFwpZS5OzPvTGfFD1YEx8MsbHG/view?usp=sharing)
+A finished template is also available: [AVS Template v2 Download](https://drive.google.com/file/d/1EoGBkDWFwpZS5OzPvTGfFD1YEx8MsbHG/view?usp=sharing). Following the guide once is still the quickest way to learn how the parts fit together.
 
 
 
-## Requirements
+## Before You Start
 
-- **A Static Mesh or Skeletal Mesh for the chassis and wheels of a vehicle**
-  - Static Meshes will need a separate wheel mesh (A basic static mesh body and wheel are included in the plugin for demo purposes, you must check "Show Plugin Content" in the view options to see it)
-  - Skeletal Meshes should be setup for or similar to Unreal's _WheeledVehicle_ system
-- **Own the Advanced Vehicle System Plugin**
-- **A basic understanding of Unreal Engine, some steps in this tutorial will expect you to know how to create or set up things without guidance**
+You need:
 
-> Check the [FAB listing](https://www.fab.com/listings/e1457ad1-297b-4a70-aecb-5c6716d9494f) for the engine versions the current release supports.
->
-> Still on AVS 1.4 or earlier? Use the [Legacy documentation](https://overtorque-creations.com/Dev/Docs/#AVS_Legacy/README.md) instead. A lot changed in 1.5.
+- The Advanced Vehicle System plugin, enabled in your project. The [FAB listing](https://www.fab.com/listings/e1457ad1-297b-4a70-aecb-5c6716d9494f) lists the supported engine versions.
+- A static mesh for the car body and one for a wheel. The plugin includes a basic body and wheel you can use.
+- A basic understanding of Unreal Engine. Some steps expect you to create Blueprints and input mappings without step-by-step help.
 
+To see the plugin's content in the content browser, turn on **Show Engine Content** if the plugin is installed to the engine, or **Show Plugin Content** if it is installed to the project.
 
+Applying the [recommended project settings](https://overtorque-creations.com/Dev/Docs/#AVS/Getting_Started/Project_Settings.md) first is optional. They make physics more stable.
 
-## Step 0: Optional - Configure Project Settings
-
-Consider making the recommended changes from the [Project Settings page](https://overtorque-creations.com/Dev/Docs/#AVS/Getting_Started/Project_Settings.md), they will dramatically increase physics stability, and top speed in the physics wheel mode.
+> Using AVS 1.4 or earlier? Use the [Legacy documentation](https://overtorque-creations.com/Dev/Docs/#AVS_Legacy/README.md). A lot changed in 1.5.
 
 
 
-## Step 1: Configure your Inputs
+## Step 1: Create the Inputs
 
 <!-- side-by-side:41 -->
-![Unreal input settings with Handbrake, ShifterUp and ShifterDown action mappings, plus VehicleForward, VehicleBrake and VehicleSteering axis mappings](../Assets/Images/tutorials-Creating-Vehicles-01.png "Action and axis mappings used throughout this guide")
+![Unreal input settings with Handbrake, ShifterUp and ShifterDown action mappings, plus VehicleForward, VehicleBrake and VehicleSteering axis mappings](../Assets/Images/Getting_Started/Quick_Start/tutorials-Creating-Vehicles-01.png "Action and axis mappings used throughout this guide")
 <!-- split -->
-Before we can setup the vehicle, we need to know what our inputs are. So head into your Project Settings > Input and set up something similar to this image.
+Create these inputs, with Enhanced Input or the older input mappings:
+
+- **VehicleForward**: an axis from `0` to `1`, for throttle.
+- **VehicleBrake**: an axis from `0` to `1`, for the brake.
+- **VehicleSteering**: an axis from `-1` to `1`.
+- **Handbrake**: a button.
+- **ShifterUp** and **ShifterDown**: buttons.
 <!-- /side-by-side -->
 
 
 
-## Step 2: Create the Base Vehicle
+## Step 2: Create a Base Vehicle Blueprint
+
+A base Blueprint holds what every vehicle in your project shares, such as the camera and the input handling. Each actual vehicle is a child of it.
 
 <!-- side-by-side:50 -->
-![Pick Parent Class dialog filtered to AVS_, with AVS_Vehicle selected under Pawn > VehicleSystemBase](../Assets/Images/tutorials-Creating-Vehicles-02.png "AVS_Vehicle lives under Pawn → VehicleSystemBase")
+![Pick Parent Class dialog filtered to AVS_, with AVS_Vehicle selected under Pawn > VehicleSystemBase](../Assets/Images/Getting_Started/Quick_Start/tutorials-Creating-Vehicles-02.png "AVS_Vehicle lives under Pawn → VehicleSystemBase")
 <!-- split -->
-**2A**
-
-Create a new blueprint and choose the base class "AVS_Vehicle" as the parent class.
-
-It is recommended to name this blueprint "ProjectName_Vehicle" to facilitate sharing code, settings, and components among all vehicles in your project.
-
-**2B**
-
-- Open the newly created vehicle blueprint.
-- Within the Blueprint Editor, locate the "Components" section and add a "SpringArm" component to the blueprint.
-- Next, attach a camera to the "SpringArm" component. This camera will serve as the viewpoint for the vehicle.
-- As this tutorial won't cover camera input setup, consider rotating the "SpringArm" slightly to the side. This adjustment will allow you to view the vehicle's wheels as you drive it.
+1. Create a new Blueprint class with `AVS_Vehicle` as its parent. Name it after your project, such as `MyProject_Vehicle`.
+2. Open it, and add a **Spring Arm** component.
+3. Add a **Camera** component under the spring arm.
+4. Rotate the spring arm a little to the side, so you can see the wheels while you drive.
 <!-- /side-by-side -->
 
-> For anything beyond a fixed camera, use the [Camera Pivot component](https://overtorque-creations.com/Dev/Docs/#AVS/Components/Camera_Pivot.md) instead of building a rig by hand. It handles look input, flipping, lag, and G-force movement for you.
+This camera is fixed. For look input, lag and G-force movement, see [Camera Pivot](https://overtorque-creations.com/Dev/Docs/#AVS/Components/Camera_Pivot.md) once the car drives.
+
+
+
+## Step 3: Start the Engine on BeginPlay
+
+A vehicle spawns with the engine off and the shifter in Park, so it does not move. To drive straight away, start the engine and shift into Drive when the game begins.
 
 <!-- side-by-side:48 -->
-**2C**
+In the base Blueprint's event graph:
 
-Open the Event Graph.
-
-By default, the vehicle is not running and in park. For simplicity, we will start the engine and shift into drive on BeginPlay so the vehicle is ready to drive later when we press play.
+1. From **Event BeginPlay**, call **Start Engine**.
+2. Then call **Set Shifter Input** with **Drive**.
 <!-- split -->
-![Event BeginPlay wired into Start Engine and Set Shifter Position set to Drive](../Assets/Images/tutorials-Creating-Vehicles-03.png "The Parent: BeginPlay node shown here is no longer required in 1.5")
+![Event BeginPlay wired into Start Engine and Set Shifter Position set to Drive](../Assets/Images/Getting_Started/Quick_Start/tutorials-Creating-Vehicles-03.png)
 <!-- /side-by-side -->
 
-> **Changed in 1.5:** you no longer need to add a call to the parent function on Blueprint events. AVS is native C++ now, and its code runs whether or not your event calls the parent. Older screenshots and tutorials still show those nodes. They are harmless, just unnecessary.
+Older screenshots and tutorials show a call to the parent function on Blueprint events. AVS 1.5 does not need it. It does no harm if it is there.
+
+
+
+## Step 4: Connect the Inputs
 
 <!-- side-by-side:48 -->
-**2D**
+In the same event graph, connect each input to a vehicle function:
 
-While we are in the event graph, we'll also setup the vehicle inputs.
+| Input | Vehicle function |
+|---|---|
+| VehicleForward | **Set Throttle Input** |
+| VehicleBrake | **Set Brake Input** |
+| VehicleSteering | **Set Steering Input** |
+| Handbrake pressed / released | **Set Handbrake Input** (true / false) |
+| ShifterUp | **Move Shifter Input**, **Move Up** true |
+| ShifterDown | **Move Shifter Input**, **Move Up** false |
 <!-- split -->
-![Blueprint graph grouped into Shifter, Brakes and Throttle/Steering sections, wiring input events into Move Shifter Position, Set Brake Input, Set Handbrake Input, Set Throttle Input and Set Steering Input](../Assets/Images/tutorials-Creating-Vehicles-04.png "The full input graph, grouped by function")
+![Blueprint graph grouped into Shifter, Brakes and Throttle/Steering sections, wiring input events into Move Shifter Position, Set Brake Input, Set Handbrake Input, Set Throttle Input and Set Steering Input](../Assets/Images/Getting_Started/Quick_Start/tutorials-Creating-Vehicles-04.png "The full input graph, grouped by function")
 <!-- /side-by-side -->
 
-### (Optional) Set up Automatic Shifting
+The shifter goes Park, Reverse, Neutral, Drive. **Move Up** true moves toward Park.
+
+
+
+## Optional: Automatic Shifting
+
+With **Automatic Shifter Positon**, the car selects Drive and Reverse by itself, so the player never shifts. Pressing throttle from a stop selects Drive, and pressing brake from a stop selects Reverse.
 
 <!-- side-by-side:50 -->
-![Advanced Vehicle System → Transmission category with Automatic Shifter Positon enabled alongside Automatic Transmission](../Assets/Images/tutorials-Creating-Vehicles-05.png "Enable Automatic Shifter Positon on the vehicle")
+![Advanced Vehicle System → Transmission category with Automatic Shifter Positon enabled alongside Automatic Transmission](../Assets/Images/Getting_Started/Quick_Start/tutorials-Creating-Vehicles-05.png "Enable Automatic Shifter Positon on the vehicle")
 <!-- split -->
-With automatic shifter positions the vehicle moves itself between Drive and Reverse based on your input, instead of making the player shift manually. If you would like to use this feature you will need to slightly change the configuration above.
+1. On the base Blueprint, turn on **Automatic Shifter Positon** under **Advanced Vehicle System → Transmission**.
+2. Remove the **VehicleBrake** input, and add the brake keys to **VehicleForward** with a scale of `-1`.
+3. In the event graph, remove the brake input, and replace **Set Throttle Input** with **Set Throttle And Brake Input**.
 <!-- /side-by-side -->
 
-<!-- side-by-side:46 -->
-- Open your project input settings and remove the VehicleBrake input. Open your VehicleForward input and add your brake keys with a value of ( -1.0 )
+<!-- side-by-side:50 -->
+![Input axis mapping named VehicleThrottle with W and gamepad right trigger at 1.0, and S and left trigger at -1.0](../Assets/Images/Getting_Started/Quick_Start/tutorials-Creating-Vehicles-06.png "One axis carrying both throttle and brake")
 <!-- split -->
-![Input axis mapping named VehicleThrottle with W and gamepad right trigger at 1.0, and S and left trigger at -1.0](../Assets/Images/tutorials-Creating-Vehicles-06.png "One axis carrying both throttle and brake")
+![InputAxis VehicleThrottle wired into a Set Throttle and Brake Input node](../Assets/Images/Getting_Started/Quick_Start/tutorials-Creating-Vehicles-07.png)
 <!-- /side-by-side -->
 
-<!-- side-by-side:46 -->
-- In your event graph from step 2, remove the old brake input. Replace the 'SetThrottleInput' node with the new 'SetThrottleAndBrakeInput' node. This node is required for Automatic Shifting to function correctly.
-<!-- split -->
-![InputAxis VehicleThrottle wired into a Set Throttle and Brake Input node](../Assets/Images/tutorials-Creating-Vehicles-07.png)
-<!-- /side-by-side -->
+**Set Throttle And Brake Input** treats negative values as brake, or as throttle while in Reverse. Automatic shifting needs it.
 
 
 
-## Step 3: Creating a Vehicle
+## Step 5: Create the Car
 
 <!-- side-by-side:32 -->
-![Blueprint context menu with Create Child Blueprint Class highlighted](../Assets/Images/tutorials-Creating-Vehicles-08.png)
+![Blueprint context menu with Create Child Blueprint Class highlighted](../Assets/Images/Getting_Started/Quick_Start/tutorials-Creating-Vehicles-08.png)
 <!-- split -->
-**3A**
-
-Right click on your base vehicle blueprint and select "Create Child Blueprint Class", this will be your actual vehicle so you can name it accordingly. For the tutorial I will name mine "Car".
-
-**3B**
-
-Open your new vehicle blueprint, then select the VehicleMesh component from the list and set it to your desired mesh. AVS comes with a placeholder mesh in it's content.
-
-_Note: (If the plugin is installed to the engine) you'll have to check "Show Engine Content" in the content drawer in order to view the plugin content. (If the plugin is installed to the project) you'll have to check "Show Plugin Content" in the content drawer in order to view the plugin content._
+1. Right-click the base Blueprint and choose **Create Child Blueprint Class**. Name it `Car`.
+2. Open `Car`, select the **VehicleMesh** component, and set its static mesh to your car body.
+3. Under **Physics** on the same component, turn on **Mass (kg)** and set it to `1100`. A car much lighter than `1000` kg can shake and handle badly.
 <!-- /side-by-side -->
+
+**VehicleMesh** is the car's physics body. Its collision is the car's collision.
+
+
+
+## Step 6: Add the Wheels
 
 <!-- side-by-side:48 -->
-**3C**
-
-Wheels in AVS are separate components called "AVS_Wheel". Each wheel component holds the data for the wheel its representing, so you can configure every wheel individually.
-
-You'll need to add one for each wheel you need on the vehicle. Then reposition each component to its appropriate location on the vehicle.
-
-For better productivity and organization, it is advisable to name the components based on their specific locations on the vehicle.
+1. Add four `AVS_Wheel` components under **VehicleMesh**. Name them after their corners, such as `WheelFrontLeft`.
+2. Move each one to the center of its wheel, halfway through the wheel's suspension travel.
+3. On each wheel, under **Advanced Vehicle System**, set **Wheel Static Mesh** to your wheel mesh.
 <!-- split -->
-![Components list with WheelFrontPassenger, WheelFrontDriver, WheelRearPassenger and WheelRearDriver, and four wheel gizmos positioned under the chassis in the viewport](../Assets/Images/tutorials-Creating-Vehicles-09.png "One component per wheel, named by position")
+![Components list with WheelFrontPassenger, WheelFrontDriver, WheelRearPassenger and WheelRearDriver, and four wheel gizmos positioned under the chassis in the viewport](../Assets/Images/Getting_Started/Quick_Start/tutorials-Creating-Vehicles-09.png "One component per wheel, named by position")
 <!-- /side-by-side -->
+
+AVS creates the wheel mesh from **Wheel Static Mesh** and measures the wheel's radius from it. Without a mesh, it uses a sphere.
 
 <!-- side-by-side:57 -->
-**3D**
+Then give the wheels their roles. For a rear wheel drive car:
 
-Now you'll want to configure your wheel components.
+- Front wheels: turn on **Is Steerable Wheel**.
+- Rear wheels: turn on **Is Driving Wheel** and **Is Handbrake Wheel**.
 
-Select one of your wheels from the details panel, then open the "Advanced Vehicle System" section.
+**Is Braking Wheel** is on for every wheel by default. Leave it on.
 
-**Wheel Static Mesh:**
-
-- You have the option to choose a specific wheel mesh if you have one available. If no mesh is selected, the system will use a sphere collision with the specified wheel radius size as a default.
-- In "Raycast" wheel mode, the selected mesh's collision does not affect the behavior, unless you plan to use the "detach wheel" feature.
-- In "Physics" wheel mode, the wheel will inherit collision properties from the selected wheel mesh. For regular wheels it is recommended to use a simple sphere collision, as convex collisions do not roll smoothly at speed.
-
-**Drive/Steer:**
-
-- In this section, configure each wheel as a driving or steering wheel, depending on its location and your desired vehicle setup.
-- Keep in mind that torque may need to be inverted for wheels that are flipped 180 degrees.
-- For steering wheels located at the rear of the vehicle, you might need to invert the steering configuration.
+If you rotated a wheel component 180 degrees so its mesh faces outward, turn on **Invert Torque** on it, or it drives the car backward.
 <!-- split -->
-![Vehicle Wheel - Config panel showing Wheel Mode Raycast, wheel mass and tire friction, plus the Drive/Steer, Brakes and Suspension sections](../Assets/Images/tutorials-Creating-Vehicles-10.png "Every wheel carries its own full configuration")
+![Vehicle Wheel - Config panel showing Wheel Mode Raycast, wheel mass and tire friction, plus the Drive/Steer, Brakes and Suspension sections](../Assets/Images/Getting_Started/Quick_Start/tutorials-Creating-Vehicles-10.png "Every wheel carries its own settings")
 <!-- /side-by-side -->
 
-Setting up and tuning wheels is covered on the [Wheels](https://overtorque-creations.com/Dev/Docs/#AVS/Components/Wheels.md) page, and every wheel setting is listed in [Wheel Settings](https://overtorque-creations.com/Dev/Docs/#AVS/Reference/Wheel_Settings.md).
+Leave **Wheel Mode** on `Raycast`. The [Wheels](https://overtorque-creations.com/Dev/Docs/#AVS/Components/Wheels.md) page explains the wheel modes, suspension and grip.
 
 
 
-## Step 4: Configure your Vehicle
-
-**4A**
-
-Select ClassName(self) in the components list or press the "Class Defaults" button, you will notice in the details panel there is an "Advanced Vehicle System" category pinned to the top, holding sections like General, Engine, Transmission, Steering and Physics. These are where you configure values related to the vehicle as a whole. For now we just want to edit the transmission values, so open "Advanced Vehicle System → Transmission".
+## Step 7: Build the Gear Table
 
 <!-- side-by-side:48 -->
-**4B**
+1. Select `Car (self)` at the top of the components list, or press **Class Defaults**.
+2. Open **Advanced Vehicle System → Transmission** and expand **Gears**. It has two gears to start with.
+3. Add two more, and enter the values from the table below.
 
-In the "Gears" section you will see there are 2 gears by default. Gear 0 will always be the reverse gear, and then everything after is a forward gear.
-
-Add 2 more gears, then configure them similar to the following image.
+Gear `0` is reverse. Every gear after it is a forward gear.
 <!-- split -->
-![Gears array with four elements expanded, showing the end speed, start speed, shift points, RPM and torque values from the table below](../Assets/Images/tutorials-Creating-Vehicles-11.png "The same four gears in the details panel")
+![Gears array with four elements expanded, showing the end speed, start speed, shift points, RPM and torque values from the table below](../Assets/Images/Getting_Started/Quick_Start/tutorials-Creating-Vehicles-11.png "The same four gears in the details panel")
 <!-- /side-by-side -->
 
 | | Gear 0 (reverse) | Gear 1 | Gear 2 | Gear 3 |
@@ -184,66 +181,39 @@ Add 2 more gears, then configure them similar to the following image.
 | Max Torque | 30.0 | 30.0 | 30.0 | 30.0 |
 | Min Torque | 5.0 | 5.0 | 5.0 | 5.0 |
 
-Every gear variable is explained on the [Engine and Transmission](https://overtorque-creations.com/Dev/Docs/#AVS/Configuration/Engine_And_Transmission.md) page. The short version: speeds use the vehicle's Speed Units setting, torque is in hectonewton meters (a value of 50 equals 5000 Nm at the wheel), and the RPM values are purely cosmetic.
+Speeds are in the vehicle's **Speed Units** (`MPH` by default). Torque is in hectonewton meters: `30` is 3000 Nm at each driving wheel. RPM only affects engine sound and the HUD. [Engine and Transmission](https://overtorque-creations.com/Dev/Docs/#AVS/Configuration/Engine_And_Transmission.md) explains every value.
 
 
 
-## Step 5: Setup the config assist HUD
+## Step 8: Turn On the Config Assist HUD
 
-_The plugin includes a basic HUD to assist in the creation of vehicles. This step is not required but is recommended if you are not extremely familiar with Unreal Engine._
+AVS includes a HUD that shows the car's speed, shifter, gear and torque, with sliders for the suspension.
 
-> As of 1.5, the HUD can also be shown without a player controller: turn on **Display Debug Menu** under **Advanced Vehicle System → Debug** on the vehicle. It appears while a local player possesses the vehicle. See [Debugging](https://overtorque-creations.com/Dev/Docs/#AVS/Advanced/Debugging.md).
+On the base Blueprint, turn on **Display Debug Menu** under **Advanced Vehicle System → Debug**. The HUD appears whenever a local player possesses the car.
 
-<!-- side-by-side:48 -->
-**5A**
 
-Create both a player controller blueprint and a game mode blueprint.
+
+## Step 9: Drive the Car
+
+1. Place a `Car` in your level, and set **Auto Possess Player** to **Player 0** in its details panel. Or set `Car` as the **Default Pawn Class** in your game mode.
+2. Press Play.
+
+The car starts in Drive. **ShifterUp** and **ShifterDown** move the shifter through Park, Reverse, Neutral and Drive, and the HUD shows the change.
+
+<!-- side-by-side:57 -->
+Press **Shift + F1** to get the mouse cursor and use the HUD's sliders. The spring sliders change every wheel at once while you drive. They are not saved, so copy the values you like back into the wheel components.
 <!-- split -->
-![Pick Parent Class dialog with Player Controller and Game Mode Base circled](../Assets/Images/tutorials-Creating-Vehicles-12.png)
+![In-game buggy with the vehicle setup HUD showing air speed, shifter position, current gear, torque and live spring sliders](../Assets/Images/Getting_Started/Quick_Start/tutorials-Creating-Vehicles-16.png "The config assist HUD running in game")
 <!-- /side-by-side -->
 
-<!-- side-by-side:48 -->
-**5B**
-
-Open the new player controller, drag off the execution pin on Event Begin Play. Then type "Create Widget" in the box, and press Enter. Set the new Create widget node to the VehicleSetup HUD. Then grab the return value and use it to create the "Add to Viewport" Node. Lastly set the owning player to Self.
-
-_Note: (If the plugin is installed to the engine) you'll have to check "Show Engine Content" in the content drawer in order to view the plugin content. (If the plugin is installed to the project) you'll have to check "Show Plugin Content" in the content drawer in order to view the plugin content._
-<!-- split -->
-![Animated walkthrough of creating the Vehicle Setup HUD widget and adding it to the viewport on BeginPlay](../Assets/Images/tutorials-Creating-Vehicles-13.gif)
-<!-- /side-by-side -->
-
-<!-- side-by-side:40 -->
-If you need multiplayer, add a check to see if we are on the local controller.
-<!-- split -->
-![Event BeginPlay branching on Is Local Player Controller before creating the Vehicle Setup HUD widget and adding it to viewport](../Assets/Images/tutorials-Creating-Vehicles-14.png "Gate the HUD behind Is Local Player Controller")
-<!-- /side-by-side -->
-
-<!-- side-by-side:40 -->
-**5C**
-
-Now open your level, and click the blueprints button. You need to set your gamemode to the one you created, and then set your PlayerController within that game mode.
-<!-- split -->
-![Two-part screenshot: selecting the Tutorial_GameMode class, then selecting Tutorial_PlayerController inside it](../Assets/Images/tutorials-Creating-Vehicles-15.png "Set the game mode first, then the player controller inside it")
-<!-- /side-by-side -->
-
-
-
-## Step 6: Test what you have so far
-
-If you have successfully followed along, you should now be able to drive your vehicle. Either **set the default pawn in your GameMode** to your new vehicle, or **place one in your level and set "Auto Possess Player 0" in the details panel.**
-
-Once you are in the game, you can use your ShiftUp and ShiftDown inputs to move the shifter (PRND not gears), you will see it change on the HUD. However if you're using the "Automatic Shifter Positon" feature this will happen automatically.
-
-If you want to use the buttons and sliders, press **'SHIFT + F1'** to bring your mouse cursor up. You can also use the HUD to play with different values for your springs and find the best values. The new springs values will be applied to every wheel, overriding whatever you had set before.
-
-![In-game buggy with the vehicle setup HUD showing air speed, shifter position, current gear, torque and live spring sliders](../Assets/Images/tutorials-Creating-Vehicles-16.png "The config assist HUD running in game")
+If the car does not move, check that the engine started and the shifter is in Drive, then that the rear wheels have **Is Driving Wheel** on.
 
 
 
 ## Next Steps
 
-- [Wheels](https://overtorque-creations.com/Dev/Docs/#AVS/Components/Wheels.md): setting up and tuning wheels, including suspension
-- [Wheels at Runtime](https://overtorque-creations.com/Dev/Docs/#AVS/Components/Wheels_At_Runtime.md): detaching, adding and changing wheels while the game runs
-- [Wheel Effects](https://overtorque-creations.com/Dev/Docs/#AVS/Wheel_Effects/Overview.md): skid marks, smoke, and tire audio
-- [Camera Pivot](https://overtorque-creations.com/Dev/Docs/#AVS/Components/Camera_Pivot.md): a camera rig with look input, lag and G-force movement
-- [Arcade Physics](https://overtorque-creations.com/Dev/Docs/#AVS/Guides/Arcade_Physics.md): tuning toward snappier, more forgiving handling
+- [Important Information](https://overtorque-creations.com/Dev/Docs/#AVS/Getting_Started/Important_Information.md): behavior to know before going further.
+- [Wheels](https://overtorque-creations.com/Dev/Docs/#AVS/Components/Wheels.md): suspension and grip.
+- [Engine and Transmission](https://overtorque-creations.com/Dev/Docs/#AVS/Configuration/Engine_And_Transmission.md): tuning the gear table.
+- [Camera Pivot](https://overtorque-creations.com/Dev/Docs/#AVS/Components/Camera_Pivot.md): a camera with look input, lag and G-force movement.
+- [Wheel Effects](https://overtorque-creations.com/Dev/Docs/#AVS/Wheel_Effects/Overview.md): tire smoke, skid marks and rolling sound.

@@ -1,82 +1,70 @@
 # Important Information
 
+Behavior to know before going far into a project. Each of these has caused confusion that is hard to trace back later.
 
 
-## Wheel Mesh Collisions
+
+## Physics Wheels Need Sphere Collision
 
 <!-- side-by-side:48 -->
-When using **Physics Wheels** (not Raycast Wheels), you must pay careful attention to the shape of the collision on your wheel mesh. AVS supports any collision shape, but **for best results—especially at high speeds—you should use a simple sphere collision.**
+A wheel in physics mode rolls on its wheel mesh's collision. Unreal's Chaos physics has no true cylinder shape, and a convex shape made to look like a cylinder is not perfectly round. At speed, it makes the wheel bounce and shake.
 
-Unreal Engine does **not** support true cylinder collisions in Chaos.
+Give physics mode wheels a simple sphere collision. Other shapes are allowed, and only behave well at low speed.
 
-Faking a cylinder using convex collision may _look_ correct, but it will not behave correctly—these approximated shapes are not perfectly round, and they will cause the wheels to bounce or behave erratically when driving fast.
-
-While unconventional setups are allowed, **a sphere is the most stable and recommended option** for typical vehicles using physics-based wheels.
-
-**Raycast Wheels are not affected by this limitation**. You can use any collision shape for them, since the collision shape does not influence their simulation behavior.
+Raycast wheels do not use the wheel mesh's collision, so any shape works for them. It only matters when a raycast wheel is detached and becomes a loose physics body.
 <!-- split -->
-![Wheel with convex collision bouncing erratically at speed compared to a sphere collision](../Assets/Images/general-important-information-01.gif)
+![Wheel with convex collision bouncing erratically at speed compared to a sphere collision](../Assets/Images/Getting_Started/Important_Information/general-important-information-01.gif)
 <!-- /side-by-side -->
 
 
 
 ## Blueprint Events No Longer Need a Parent Call
 
-If you used AVS 1.4 or earlier, you had to right click certain Blueprint events and add a call to the parent function, or the vehicle would not work correctly.
+In AVS 1.4 and earlier, several Blueprint events needed a call to the parent function, or the vehicle did not work.
 
-**That is no longer necessary.** As of 1.5 the entire plugin is native C++, and the native code runs whether or not your Blueprint event calls its parent. Construction Script, BeginPlay, Destroyed, OnPossessed, and Unpossessed all work without any extra wiring.
+AVS 1.5 is written in C++, and its code runs whether or not your event calls the parent. Construction Script, BeginPlay, Destroyed, OnPossessed and Unpossessed all work without it.
 
-Parent calls carried over from an older project are harmless and do not need to be removed. New vehicles do not need them at all.
-
-> This is the largest difference when following older tutorials or community posts. If a guide tells you to add a call to the parent function, it was written for 1.4 or earlier.
+A guide that tells you to add a parent call was written for 1.4 or earlier. Parent calls left over in an older project do no harm.
 
 
 
-## Skeletal Mesh Collisions Are Disabled by Default
+## Skeletal Mesh Collision Is Turned Off
 
 <!-- side-by-side:57 -->
-When you attach a **Skeletal Mesh** to the VehicleMesh component, **AVS will automatically disable its collisions** during construction. This is intentional.
+When the vehicle is constructed, AVS turns off collision on every skeletal mesh component on it. Skeletal meshes cannot weld to the vehicle's physics body, and their collision can make the vehicle's physics unstable.
 
-Skeletal meshes cannot weld to the root physics body, and leaving their collisions enabled can lead to unexpected or unstable physics behavior. Since skeletal meshes are typically used for **visual/cosmetic purposes only**, disabling their collision helps prevent these issues.
+To keep collision on one skeletal mesh, add the tag `KeepCollision` to its **Component Tags**.
 
-If you **do** want a specific skeletal mesh to keep its collisions active, just add the **KeepCollision** tag to that mesh in the editor. AVS will skip disabling collision for any mesh with that tag.
-
-To turn the behavior off entirely, set **Disable Skeletal Collisions** to false under _Advanced Vehicle System → Physics_.
+To turn this off for the whole vehicle, turn off **Disable Skeletal Collisions** under **Advanced Vehicle System → Physics**.
 <!-- split -->
-![Details panel showing a Component Tags array with a single KeepCollision entry](../Assets/Images/general-important-information-03.png "Add KeepCollision to Component Tags to opt a mesh out")
+![Details panel showing a Component Tags array with a single KeepCollision entry](../Assets/Images/Getting_Started/Important_Information/general-important-information-03.png "Add KeepCollision to Component Tags to keep a mesh's collision")
 <!-- /side-by-side -->
 
+For collision that should affect the vehicle, see [Attaching Objects](https://overtorque-creations.com/Dev/Docs/#AVS/Components/Attaching_Objects.md).
 
 
-## Avoid Physics Constraints in Skeletal Mesh Physics Assets
+
+## Keep Physics Constraints Out of Physics Assets
 
 <!-- side-by-side:48 -->
-If you're using a **Skeletal Mesh** as part of your vehicle setup and need to add **physics constraints**, do **not** place those constraints inside the mesh's Physics Asset—especially if they rely on the skeletal mesh's root body.
+Physics constraints for a skeletal mesh's parts, such as doors or a hood, go in the vehicle Blueprint, connected to `VehicleMesh`. Do not put them in the skeletal mesh's Physics Asset.
 
-Instead, create all such constraints **directly in the vehicle blueprint**, and connect them to the **VehicleMesh** component (the AVS root). This avoids a class of difficult-to-debug issues where constraints behave erratically—typically showing stuttery or jittery motion in parts of the mesh that are meant to simulate.
+Constraints inside the Physics Asset can receive out-of-date positions, because the skeletal mesh is not welded to the vehicle's body. The constrained parts then jitter violently.
 
-This behavior stems from how Unreal updates transforms for components that aren't welded to the root. Constraints defined inside skeletal mesh assets may receive outdated transform data, especially when mixing simulated and non-simulated bodies. The result is **inconsistent, unstable physics behavior**, usually visible as violent jittering of constrained parts.
-
-To prevent this entirely, set up all physics constraints externally in your vehicle blueprint where they can reference the true root of the simulation.
-
-A demonstration of this issue can be seen in the video to the right.
+[Video: constraint jitter caused by constraints in the Physics Asset](https://drive.google.com/file/d/1qQbSTNSwgUVjdT_krVEZ9wILCqH5RnGQ/preview)
 <!-- split -->
-![Constraint component in a vehicle Blueprint with Component Name 1 set to SK_Mesh and Component Name 2 set to VehicleMesh](../Assets/Images/general-important-information-05.png "Constraints live in the vehicle Blueprint and reference VehicleMesh directly")
-
-[Video: constraint jitter caused by constraints defined inside the Physics Asset](https://drive.google.com/file/d/1qQbSTNSwgUVjdT_krVEZ9wILCqH5RnGQ/preview)
+![Constraint component in a vehicle Blueprint with Component Name 1 set to SK_Mesh and Component Name 2 set to VehicleMesh](../Assets/Images/Getting_Started/Important_Information/general-important-information-05.png "The constraint is in the vehicle Blueprint and references VehicleMesh directly")
 <!-- /side-by-side -->
 
 
 
-## Passive Mode and the Tick Event
+## Tick Stops When a Vehicle Parks
 
-By default a vehicle enters **passive mode** once it comes to rest. This is a low resource mode that massively improves performance when you have a lot of parked or idle vehicles in a level, and it is why a hundred stationary vehicles cost far less than a hundred moving ones.
+When a vehicle comes to rest, AVS puts it in passive mode to save work. In passive mode, the vehicle's Tick event stops, so Blueprint logic on Tick stops running while the vehicle is parked.
 
-The catch is that passive mode gatekeeps the standard Tick event. If you have Blueprint logic on Tick that needs to keep running while the vehicle sits still, it will stop running.
+Put logic that must keep running on **AVS_AlwaysTick** instead.
 
-Use **AVS_AlwaysTick** for logic that must run no matter what, or **AVS_PassiveTick** for logic that only matters while resting. Both are covered on the [Tick and Performance](https://overtorque-creations.com/Dev/Docs/#AVS/Advanced/Tick_And_Performance.md) page.
-
-> Possessed vehicles are already covered: a vehicle controlled by a player or an AI controller never goes passive. The case to watch is a vehicle moved **without** being possessed, such as by a sequencer or your own movement code. For those, set **Allow Passive Mode** to false or override **Determine Passive State**.
+A vehicle possessed by a player or AI never goes passive. A vehicle moved without being possessed, such as by a sequencer, can. See [Tick and Performance](https://overtorque-creations.com/Dev/Docs/#AVS/Advanced/Tick_And_Performance.md).
 
 
 
@@ -84,19 +72,17 @@ Use **AVS_AlwaysTick** for logic that must run no matter what, or **AVS_PassiveT
 
 AVS supports every platform Unreal supports.
 
-The plugin's `PlatformDenyList` names **VisionOS** because FAB submission requires the deny list to name at least one platform. It is not a limitation of AVS.
+The plugin's deny list names VisionOS only because FAB requires the list to name at least one platform. To build for VisionOS, remove it from `PlatformDenyList` in `VehicleSystemPlugin.uplugin`.
 
-Remove it from `VehicleSystemPlugin.uplugin` if you are targeting VisionOS.
-
-> Older guidance said iOS had to be added to a whitelist by hand. That is no longer true. The plugin lists denied platforms, not allowed ones, so iOS needs no edit.
+Older guidance said iOS had to be added to an allow list. That is no longer needed.
 
 
 
-## Installing the Plugin to a Project Instead of the Engine
+## Installing the Plugin to a Project
 
-AVS installs to the engine through the launcher. To keep it inside a project instead, for example for source control or for a team without the launcher install:
+The launcher installs AVS to the engine. To keep it inside a project instead, for source control or for a team without the launcher:
 
-1. Install AVS to a launcher build of the engine as normal.
+1. Install AVS to an engine through the launcher.
 2. Copy `...\UE_5.x\Engine\Plugins\Marketplace\VehicleSystemPlugin` to `YourProject\Plugins\VehicleSystemPlugin`.
 
-It behaves the same as the engine install, except the project will likely recompile the plugin the first time it opens.
+The project may recompile the plugin the first time it opens.

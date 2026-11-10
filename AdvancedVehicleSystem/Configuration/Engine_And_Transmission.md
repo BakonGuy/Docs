@@ -50,7 +50,7 @@ The example car uses the automatic mode.
 3. Gear `0` is reverse. Every gear after it is a forward gear. Add gears until there are four.
 4. Enter the values from the table below.
 <!-- split -->
-![Gears array with four elements expanded, showing end speed, start speed, shift points, RPM and torque values](../Assets/Images/tutorials-Creating-Vehicles-11.png "Gear 0 is always reverse; everything after it is forward")
+![Gears array with four elements expanded, showing end speed, start speed, shift points, RPM and torque values](../Assets/Images/Getting_Started/Quick_Start/tutorials-Creating-Vehicles-11.png "Gear 0 is always reverse; everything after it is forward")
 <!-- /side-by-side -->
 
 | | Gear 0 (reverse) | Gear 1 | Gear 2 | Gear 3 |
