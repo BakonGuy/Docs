@@ -2,7 +2,12 @@
 
 This guide builds a drivable rear wheel drive car from an empty project. Other pages in these docs use this car as their example.
 
-A finished template is also available: [AVS Template v2 Download](https://drive.google.com/file/d/1EoGBkDWFwpZS5OzPvTGfFD1YEx8MsbHG/view?usp=sharing). Following the guide once is still the quickest way to learn how the parts fit together.
+Two ready-made projects are available:
+
+- The [AVS Template v3](https://drive.google.com/file/d/1PniU5KLitjbEVJ8-yfBVYLvvDHCoCT3n/view?usp=sharing) is a small, minimal project to get you started. It needs Unreal 5.7 or later and AVS 1.5 or later.
+- The [playable demo](https://overtorque-creations.com/Dev/AdvancedVehicleSystem/Demo/) is a much larger project that shows many of AVS's features. Its page also links to the demo's source project.
+
+Following this guide once is still the quickest way to learn how the parts fit together.
 
 
 
