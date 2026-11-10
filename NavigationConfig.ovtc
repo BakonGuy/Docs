@@ -1,5 +1,10 @@
+# Versioned docs: assets with the same group are one product. Each covers AVS from
+# its `since` version up to the next asset's `since`. New releases need no change
+# here unless they get their own docs.
 [asset "Advanced Vehicle System"]
 id = AVS
+group = AVS
+since = 1.5
 dir = AdvancedVehicleSystem
 default = README.md
 
@@ -18,6 +23,8 @@ dir "Reference" -> Reference recursive
 
 [asset "Advanced Vehicle System (Legacy)"]
 id = AVS_Legacy
+group = AVS
+since = 1.2
 dir = AdvancedVehicleSystem_Legacy
 default = README.md
 
@@ -27,7 +34,7 @@ link "Vehicle Quick Reference" -> https://docs.google.com/spreadsheets/d/1pkKlGz
 
 dir "General" -> General recursive
 dir "Components" -> Components recursive
-dir "Tutorials" -> Tutorials recursive
+dir "Tutorials" -> Tutorials nonrecursive
 dir "Skeletal Mesh" -> Tutorials/Skeletal_Mesh recursive
 
 [asset "Traffic Control System"]
