@@ -55,6 +55,15 @@ Too light, and the wheels lose traction and the vehicle slides. Under about `100
 
 For raycast wheels, lower the Y value of **Tire Friction** on the rear wheels. The rear slides more in turns.
 
+For handbrake turns, lower the rear wheels' sideways grip only while the handbrake is held:
+
+1. Turn on **Is Handbrake Wheel** on the rear wheels only. Handbrake wheels lock completely.
+2. When the handbrake changes, set the Y value of **Tire Friction** in each rear wheel's **Wheel Config**: lower while `GetHandbrakeApplied` is true, and back to its original value when it is false.
+
+The handbrake state is replicated, so in multiplayer every machine can set the same friction from `GetHandbrakeApplied`. See [Changing Tire Grip at Runtime](https://overtorque-creations.com/Dev/Docs/#AVS/Components/Wheels_At_Runtime.md#changing-tire-grip-at-runtime).
+
+Physics mode wheels take their grip from the wheel's physical material. Swap it with `SetPhysMaterialOverride` the same way.
+
 
 
 ## Scaled Down Vehicles

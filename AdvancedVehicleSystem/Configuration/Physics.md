@@ -42,6 +42,30 @@ The [Center of Mass](https://overtorque-creations.com/Dev/Docs/#AVS/Components/C
 
 
 
+## How the Collision Shape Affects Handling
+
+AVS does not set the vehicle body's inertia. Unreal calculates it from the shapes in `VehicleMesh`'s collision and the vehicle's mass. Inertia decides how hard the body is to rotate, so it sets how quickly the vehicle rolls, pitches and turns.
+
+Two vehicles with the same mass and the same AVS settings, but different body collision, rotate differently. Without a Center of Mass component, their centers of mass differ too, because Unreal places the center of mass from the collision as well.
+
+Welded objects count. A mesh with collision attached directly to `VehicleMesh` adds its shape and mass to the body. See [Attaching Objects](https://overtorque-creations.com/Dev/Docs/#AVS/Components/Attaching_Objects.md).
+
+To change the inertia without changing the collision, use **Inertia Tensor Scale** in `VehicleMesh`'s advanced **Physics** settings. A higher value on an axis makes the body harder to rotate around it.
+
+
+
+## Using a Separate Collision Mesh
+
+Vehicles that should handle the same can share one collision mesh, with a different visible body on each.
+
+1. Set `VehicleMesh` to a mesh that only provides the collision. Use the same one on every vehicle that shares the handling.
+2. Turn on **Hidden in Game** on `VehicleMesh`, so it does not draw.
+3. Add a Static Mesh component under `VehicleMesh` with the visible body. Set its **Collision Presets** to `NoCollision`, so none of its collision welds into the vehicle's body.
+
+The shared collision then sets the inertia, and the center of mass when there is no Center of Mass component, the same way on every vehicle.
+
+
+
 ## Flipped Vehicles
 
 **Upside Down Angle Threshold** (`90` degrees) sets when the vehicle counts as upside down. `0` is upright and `180` is fully inverted. With the default, a vehicle counts as flipped once it tips past its side.

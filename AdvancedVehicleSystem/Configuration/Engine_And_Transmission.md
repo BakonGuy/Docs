@@ -99,6 +99,22 @@ Torque applies to every driving wheel, so an all wheel drive version of the exam
 
 
 
+## Gear Torque from a Real Car's Specifications
+
+**Max Torque** and **Min Torque** are real torque at each driving wheel, in hNm. A real car's torque at its wheels in a gear is:
+
+```
+engine torque × gear ratio × final drive ratio
+```
+
+Divide it by the number of driving wheels, then by `100` for hNm. Use the engine's torque at the RPM where the gear starts for **Max Torque**, and at the RPM where it ends for **Min Torque**.
+
+For example, a front wheel drive car with `200` Nm of engine torque, a first gear ratio of `3.5` and a final drive ratio of `4.0` has 200 × 3.5 × 4.0 = 2800 Nm at the wheels in first gear. Across two driving wheels that is 1400 Nm each, a **Max Torque** of `14`.
+
+The formula leaves out drivetrain losses, so the result is slightly high. How the car accelerates also depends on its mass, grip and drag. Use these numbers as a starting point and tune from there.
+
+
+
 ## Shifter Position and Current Gear
 
 The shifter is Park, Reverse, Neutral or Drive. The gear is the entry in **Gears** that is supplying torque.

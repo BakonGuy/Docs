@@ -16,7 +16,7 @@ Following this guide once is still the quickest way to learn how the parts fit t
 You need:
 
 - The Advanced Vehicle System plugin, enabled in your project. The [FAB listing](https://www.fab.com/listings/e1457ad1-297b-4a70-aecb-5c6716d9494f) lists the supported engine versions.
-- A static mesh for the car body and one for a wheel. The plugin includes a basic body and wheel you can use.
+- A static mesh for the car body and one for a wheel. The plugin includes a basic body and wheel you can use. For your own meshes, see [Preparing Vehicle Meshes](https://overtorque-creations.com/Dev/Docs/#AVS/Getting_Started/Preparing_Vehicle_Meshes.md).
 - A basic understanding of Unreal Engine. Some steps expect you to create Blueprints and input mappings without step-by-step help.
 
 To see the plugin's content in the content browser, turn on **Show Engine Content** if the plugin is installed to the engine, or **Show Plugin Content** if it is installed to the project.

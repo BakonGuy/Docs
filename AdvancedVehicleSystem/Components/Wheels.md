@@ -69,10 +69,10 @@ The measured radius is half the mesh's height. If you set **Wheel Radius** yours
 
 A new wheel rolls freely and slows when the brake is pressed. Four switches decide what else it does. **Is Driving Wheel** gives it torque from the engine, **Is Steerable Wheel** turns it with steering, **Is Braking Wheel** slows it with the brake, and **Is Handbrake Wheel** locks it with the handbrake. Only **Is Braking Wheel** is on by default.
 
-For the rear wheel drive car, turn on **Is Steerable Wheel** for the front two wheels, and **Is Driving Wheel** and **Is Handbrake Wheel** for the rear two. Leave **Is Braking Wheel** on for all four.
+For the rear wheel drive (RWD) car, turn on **Is Steerable Wheel** for the front two wheels, and **Is Driving Wheel** and **Is Handbrake Wheel** for the rear two. Leave **Is Braking Wheel** on for all four.
 
 <!-- side-by-side:57 -->
-Front wheel drive moves **Is Driving Wheel** to the front pair instead. All wheel drive turns it on for all four.
+Front wheel drive (FWD) moves **Is Driving Wheel** to the front pair instead. All wheel drive (AWD) turns it on for all four.
 
 If you rotated a wheel component to face the opposite direction, so its wheel mesh faces outward, turn on **Invert Torque** for that wheel. Without it, the wheel drives the vehicle backwards.
 
@@ -122,6 +122,24 @@ To make the example car drift, lower **Y** on the rear wheels and leave **X** al
 > **Tire Friction** only affects raycast wheels. Physics wheels get their grip from their **Physics Material**.
 
 **Wheel Spin Enabled** (on by default) lets a wheel spin when it gets more torque than it has grip for. Burnouts depend on it. Turn it off and the wheel stays planted no matter how much torque it gets.
+
+
+
+## Wheel Trace Channel
+
+A wheel's suspension trace hits anything that blocks the wheel's **Trace Channel**, in both wheel modes. It never hits the vehicle it belongs to. The default is the Visibility channel.
+
+To make wheels drive through something, such as characters or invisible walls, give the wheels a channel of their own:
+
+1. In **Project Settings → Engine → Collision**, add a new **Trace Channel**, for example `VehicleWheel`, with **Default Response** set to `Block`. Surfaces keep blocking it, so the vehicle can still drive on them.
+2. On each wheel, set **Trace Channel** to the new channel.
+3. On the objects the wheels should pass through, set the collision response to the new channel to `Ignore`. Change it on every component of the object that would block it, such as a character's capsule and mesh.
+
+A physics mode wheel is also a physics body, and its wheel mesh collides through its own collision settings. Change the wheel mesh's collision responses as well, or it still pushes against those objects.
+
+To skip single actors without a new channel, add them with `AddWheelTraceIgnoreActor`. 
+
+> Before AVS 1.5.2, **AddWheelTraceIgnoreActor** and **Trace Ignore Actors** had no effect.
 
 
 

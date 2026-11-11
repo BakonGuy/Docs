@@ -14,6 +14,8 @@ With **Connect to Bone** on, a wheel sets its bone to simulate physics and joins
 
 With **Wheel Reprojection** on, the bone is joined to the projected wheel mesh, since that is the one being shown.
 
+> Before AVS 1.5.2, **Connect to Bone** did not create the correct bone constraints. Before AVS 1.5.3, with **Wheel Reprojection** on, it joined the bone to the hidden wheel mesh instead of the projected one.
+
 
 
 ## Step 1: Prepare the Physics Asset

@@ -47,13 +47,19 @@ For collision that should affect the vehicle, see [Attaching Objects](https://ov
 ## Keep Physics Constraints Out of Physics Assets
 
 <!-- side-by-side:48 -->
-Physics constraints for a skeletal mesh's parts, such as doors or a hood, go in the vehicle Blueprint, connected to `VehicleMesh`. Do not put them in the skeletal mesh's Physics Asset.
+If a skeletal mesh is part of your vehicle and its parts need physics constraints, do not put the constraints in the skeletal mesh's Physics Asset. This matters most for constraints that rely on the skeletal mesh's root body.
 
-Constraints inside the Physics Asset can receive out-of-date positions, because the skeletal mesh is not welded to the vehicle's body. The constrained parts then jitter violently.
-
-[Video: constraint jitter caused by constraints in the Physics Asset](https://drive.google.com/file/d/1qQbSTNSwgUVjdT_krVEZ9wILCqH5RnGQ/preview)
+Create the constraints in the vehicle Blueprint and connect them to `VehicleMesh`, the AVS root component. From there they reference the true root of the simulation.
 <!-- split -->
 ![Constraint component in a vehicle Blueprint with Component Name 1 set to SK_Mesh and Component Name 2 set to VehicleMesh](../Assets/Images/Getting_Started/Important_Information/general-important-information-05.png "The constraint is in the vehicle Blueprint and references VehicleMesh directly")
+<!-- /side-by-side -->
+
+<!-- side-by-side:52 -->
+![Constrained parts of a vehicle skeletal mesh jittering violently](../Assets/Images/Getting_Started/Important_Information/general-important-information-constraint-jitter.webp "Constraints in the Physics Asset cause this jitter")
+<!-- split -->
+Constraints in a skeletal mesh's Physics Asset can receive out-of-date transforms. The cause is how Unreal updates transforms for components that are not welded to the root, and the skeletal mesh is not welded to `VehicleMesh`. It is worst when simulated and non-simulated bodies are mixed.
+
+The physics becomes unstable, and the constrained parts stutter or jitter violently. The clip shows the result.
 <!-- /side-by-side -->
 
 

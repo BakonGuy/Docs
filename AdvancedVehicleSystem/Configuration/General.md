@@ -8,7 +8,7 @@ Every vehicle setting is listed in [Vehicle Settings](https://overtorque-creatio
 
 ## Speed Units
 
-**Speed Units** (`MPH`) is the unit for every speed AVS takes or returns. That includes `GetAirSpeed`, the steering falloff curve and every speed in the gear table.
+**Speed Units** (`Default MPH`) is the unit for every speed AVS takes or returns. That includes `GetAirSpeed`, the steering falloff curve and every speed in the gear table.
 
 Set it before building the gear table. Changing it later does not convert the numbers already entered. A vehicle with a top gear ending at `75` mph would end at `75` km/h after switching to km/h.
 
@@ -32,7 +32,7 @@ Turn on **Cinematic Playback** after recording a vehicle for a cinematic.
 
 While it is on and no player controls the vehicle, AVS releases every wheel lock (handbrake, Park and **Brake Lock Speed**), so the recorded wheel motion plays back. `IsCinematic` returns this state. A vehicle a player takes over behaves normally.
 
-To record a vehicle with Take Recorder, first add the wheel meshes yourself as children of the wheel components, then record as normal.
+To record a vehicle, see [Recording a Vehicle with Take Recorder](https://overtorque-creations.com/Dev/Docs/#AVS/Guides/Recording_With_Take_Recorder.md).
 
 
 

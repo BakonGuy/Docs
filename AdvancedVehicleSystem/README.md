@@ -57,12 +57,12 @@ Most pages teach one feature by setting it up on an example vehicle, then cover 
 
 The Reference section lists every setting and function, with defaults and units, in the order the details panel shows them. Each teaching page links to its reference page.
 
-- Getting Started: the Quick Start, and the two pages to read before going far into a project.
+- Getting Started: the Quick Start, preparing your own vehicle meshes, and the two pages to read before going far into a project.
 - Configuration: settings for the vehicle as a whole: general settings, engine and transmission, steering, and physics.
 - Components: everything you add to a vehicle: wheels, the camera pivot, center of mass, the hitch and trailers, lights, engine audio and exhaust. Also attaching your own objects to a vehicle.
 - Wheel Effects: tire smoke, skid marks and other wheel sounds and particles, and writing your own effects.
 - Skeletal Mesh: using a skeletal mesh for the vehicle's visuals.
-- Guides: arcade handling, and dividing gear torque across driving wheels.
+- Guides: arcade handling, dividing gear torque across driving wheels, animating a steering wheel and gauges, driving a vehicle with AI, and recording a vehicle with Take Recorder.
 - Advanced: networking, tick and performance, debugging, and C++ overrides for the drivetrain and physics forces.
 - Reference: [Vehicle Settings](https://overtorque-creations.com/Dev/Docs/#AVS/Reference/Vehicle_Settings.md), [Wheel Settings](https://overtorque-creations.com/Dev/Docs/#AVS/Reference/Wheel_Settings.md), [Wheel Effect Settings](https://overtorque-creations.com/Dev/Docs/#AVS/Reference/Wheel_Effect_Settings.md), [Camera Pivot Settings](https://overtorque-creations.com/Dev/Docs/#AVS/Reference/Camera_Pivot_Settings.md), [Component Settings](https://overtorque-creations.com/Dev/Docs/#AVS/Reference/Component_Settings.md) and [Common Functions](https://overtorque-creations.com/Dev/Docs/#AVS/Reference/Common_Functions.md).
 

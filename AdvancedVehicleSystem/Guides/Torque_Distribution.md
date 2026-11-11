@@ -1,6 +1,6 @@
 # Distributing Gear Torque Across Driving Wheels
 
-The gear table's **Max Torque** and **Min Torque** are applied at each driving wheel. Two driving wheels produce twice the torque of one from the same table.
+The gear table's **Max Torque** and **Min Torque** are applied at each driving wheel. Two driving wheels produce twice the torque of one from the same table. All wheel drive (AWD) has twice the torque of rear wheel drive (RWD) or front wheel drive (FWD) with the same gears.
 
 This page divides that torque across the driving wheels, so the gear table describes the whole drivetrain. A vehicle with a fixed number of driving wheels can be tuned without it.
 
@@ -16,7 +16,7 @@ This page divides that torque across the driving wheels, so the gear table descr
 
 ## Dividing the Gear Table by the Driving Wheel Count
 
-1. Keep an untouched copy of your gear array, with the values as you authored them. The division runs against this copy each time. Dividing the live table again would divide it twice.
+1. Keep an untouched copy of your gear array, with the values as you authored them. The division runs against this copy each time.
 2. Write a function that loops the copy, divides each gear's **Max Torque** and **Min Torque** by the current number of driving wheels, and writes the result to the vehicle with `SetGearItem` or `SetGearArray`.
 3. Call it at startup and whenever the number of driving wheels changes.
 
